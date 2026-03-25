@@ -9,7 +9,7 @@ function PropertyCard({ property }) {
   const image = property.imagenes?.[0] || 'https://via.placeholder.com/800x600?text=Propiedad';
 
   return (
-    <motion.article whileHover={{ y: -6 }} className={`overflow-hidden rounded-2xl bg-white shadow-premium transition dark:bg-slate-900 ${property.premium ? 'ring-1 ring-brand-500/30' : ''}`}>
+    <motion.article whileHover={{ y: -6 }} className={`overflow-hidden rounded-2xl bg-white shadow-premium transition dark:bg-slate-900 ${property.premium ? 'ring-1 ring-brand-500/40 shadow-[0_12px_36px_rgba(225,29,72,0.2)]' : ''}`}>
       <img src={image} alt={property.titulo} className="h-56 w-full object-cover" loading="lazy" />
       <div className="space-y-4 p-5">
         {property.premium && <span className="inline-flex rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-100">Premium</span>}

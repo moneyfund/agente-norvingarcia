@@ -22,6 +22,7 @@ function HomePage() {
         <div className="section-container py-28">
           <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl font-display text-4xl font-bold sm:text-6xl">Norvin García - Agente de DIAMANTES REALTY GROUP</motion.h1>
           <p className="mt-6 max-w-2xl text-lg text-slate-200">Operando en Nicaragua, conectando personas con inversiones extraordinarias en el mercado inmobiliario premium.</p>
+          <span className="mt-5 inline-flex rounded-full border border-brand-100/50 bg-brand-500/20 px-4 py-1 text-sm font-semibold text-brand-50">Asesoría de alto impacto con identidad premium</span>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/propiedades"><Button>Ver Propiedades</Button></Link>
             <a href="https://wa.me/18095551234" target="_blank" rel="noreferrer"><Button variant="secondary">Contactar por WhatsApp</Button></a>
@@ -39,7 +40,7 @@ function HomePage() {
 
       <section className="section-container grid gap-6 md:grid-cols-3">
         {['Atención personalizada', 'Marketing premium', 'Negociación estratégica'].map((item) => (
-          <div key={item} className="rounded-2xl bg-white p-6 shadow-premium dark:bg-slate-900">
+          <div key={item} className="rounded-2xl border border-brand-100/60 bg-white p-6 shadow-premium dark:border-brand-900/70 dark:bg-slate-900">
             <h3 className="text-xl font-semibold">{item}</h3>
             <p className="mt-2 text-slate-500">Estrategias enfocadas en maximizar el valor de tu inversión inmobiliaria.</p>
           </div>
@@ -50,8 +51,8 @@ function HomePage() {
         <h2 className="font-display text-3xl font-semibold">Testimonios</h2>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {testimonials.map((testimonial) => (
-            <article key={testimonial.name} className="rounded-2xl bg-white p-6 shadow-premium dark:bg-slate-900">
-              <Star className="text-amber-400" fill="currentColor" />
+            <article key={testimonial.name} className="rounded-2xl border border-brand-100/70 bg-white p-6 shadow-premium dark:border-brand-900/70 dark:bg-slate-900">
+              <Star className="text-brand-500" fill="currentColor" />
               <p className="mt-4 text-slate-600 dark:text-slate-300">“{testimonial.text}”</p>
               <p className="mt-3 font-semibold">{testimonial.name}</p>
             </article>
