@@ -12,17 +12,29 @@ service cloud.firestore {
     function isValidBaseUserFields() {
       return request.resource.data.uid == request.auth.uid
         && request.resource.data.userName is string
-        && request.resource.data.userEmail is string;
+        && request.resource.data.userName.size() > 0
+        && request.resource.data.userEmail is string
+        && request.resource.data.userEmail.size() > 0;
+    }
+
+    function hasValidOptionalPhoto() {
+      return !('userPhotoURL' in request.resource.data)
+        || request.resource.data.userPhotoURL is string
+        || request.resource.data.userPhotoURL == null;
     }
 
     function isValidComment(propertyId) {
       return request.resource.data.keys().hasOnly([
           'uid', 'userName', 'userEmail', 'userPhotoURL', 'content', 'propertyId', 'createdAt', 'updatedAt'
         ])
+        && request.resource.data.keys().hasAll([
+          'uid', 'userName', 'userEmail', 'content', 'propertyId', 'createdAt', 'updatedAt'
+        ])
         && isValidBaseUserFields()
-        && request.resource.data.userPhotoURL is string
+        && hasValidOptionalPhoto()
         && request.resource.data.content is string
         && request.resource.data.content.size() > 0
+        && request.resource.data.propertyId is string
         && request.resource.data.propertyId == propertyId;
     }
 
@@ -30,18 +42,25 @@ service cloud.firestore {
       return request.resource.data.keys().hasOnly([
           'uid', 'userName', 'userEmail', 'userPhotoURL', 'rating', 'content', 'propertyId', 'createdAt', 'updatedAt'
         ])
+        && request.resource.data.keys().hasAll([
+          'uid', 'userName', 'userEmail', 'rating', 'content', 'propertyId', 'createdAt', 'updatedAt'
+        ])
         && isValidBaseUserFields()
-        && request.resource.data.userPhotoURL is string
+        && hasValidOptionalPhoto()
         && request.resource.data.rating is number
         && request.resource.data.rating >= 1
         && request.resource.data.rating <= 5
         && request.resource.data.content is string
         && request.resource.data.content.size() > 0
+        && request.resource.data.propertyId is string
         && request.resource.data.propertyId == propertyId;
     }
 
     function isValidPropertyForm(propertyId) {
       return request.resource.data.keys().hasOnly([
+          'uid', 'userName', 'userEmail', 'phone', 'message', 'propertyId', 'createdAt', 'status'
+        ])
+        && request.resource.data.keys().hasAll([
           'uid', 'userName', 'userEmail', 'phone', 'message', 'propertyId', 'createdAt', 'status'
         ])
         && isValidBaseUserFields()
@@ -50,11 +69,15 @@ service cloud.firestore {
         && request.resource.data.message is string
         && request.resource.data.message.size() > 0
         && request.resource.data.status is string
+        && request.resource.data.propertyId is string
         && request.resource.data.propertyId == propertyId;
     }
 
     function isValidGeneralForm() {
       return request.resource.data.keys().hasOnly([
+          'uid', 'userName', 'userEmail', 'phone', 'message', 'createdAt', 'status'
+        ])
+        && request.resource.data.keys().hasAll([
           'uid', 'userName', 'userEmail', 'phone', 'message', 'createdAt', 'status'
         ])
         && isValidBaseUserFields()
