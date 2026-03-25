@@ -8,7 +8,7 @@ import { usePropiedades } from '../hooks/usePropiedades';
 
 const testimonials = [
   { name: 'Laura Méndez', text: 'Norvin vendió mi propiedad en tiempo récord con una estrategia impecable.' },
-  { name: 'Carlos Peña', text: 'Experiencia premium y acompañamiento profesional en cada etapa.' },
+  { name: 'Carlos Peña', text: 'Experiencia y acompañamiento profesional en cada etapa.' },
 ];
 
 function HomePage() {
@@ -25,7 +25,7 @@ function HomePage() {
           <span className="mt-5 inline-flex rounded-full border border-brand-100/50 bg-brand-500/20 px-4 py-1 text-sm font-semibold text-brand-50">Asesoría de alto impacto con identidad premium</span>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/propiedades"><Button>Ver Propiedades</Button></Link>
-            <a href="https://wa.me/18095551234" target="_blank" rel="noreferrer"><Button variant="secondary">Contactar por WhatsApp</Button></a>
+            <a href="https://wa.me/+50558520409" target="_blank" rel="noreferrer"><Button variant="secondary">Contactar por WhatsApp</Button></a>
           </div>
         </div>
       </section>
