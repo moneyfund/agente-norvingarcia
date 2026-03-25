@@ -27,16 +27,16 @@ function Navbar({ theme, toggleTheme }) {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
         <Link
           to="/"
-          className="flex min-w-0 items-center gap-3 font-display text-xl font-bold tracking-wide sm:text-2xl"
+          className="flex items-center gap-3 font-display text-2xl font-bold tracking-wide"
         >
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white p-1.5 shadow-sm ring-1 ring-slate-200/70">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white p-1 shadow-sm">
             <img
               src="/logo.png"
-              alt="Logo de Norvin García"
-              className="h-full w-full object-contain"
+              alt=""
+              className="block h-10 w-10 shrink-0 object-contain"
             />
           </div>
-          <span className="truncate">Norvin García</span>
+          <span>Norvin García</span>
         </Link>
 
         <nav className="hidden items-center gap-4 md:flex">
@@ -64,11 +64,7 @@ function Navbar({ theme, toggleTheme }) {
               <span className="max-w-32 truncate text-xs font-semibold">
                 {user.displayName || user.email}
               </span>
-              <Button
-                variant="outline"
-                className="px-3 py-2 text-xs"
-                onClick={logout}
-              >
+              <Button variant="outline" className="px-3 py-2 text-xs" onClick={logout}>
                 Salir
               </Button>
             </div>
