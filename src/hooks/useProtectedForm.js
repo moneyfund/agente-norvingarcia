@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { createGeneralForm, createProtectedForm } from '../services/formulariosService';
+import { createGeneralForm, createProtectedPropertyForm } from '../services/forms.service';
 
 export function useProtectedForm(user) {
   const [saving, setSaving] = useState(false);
@@ -10,7 +10,7 @@ export function useProtectedForm(user) {
       setSaving(true);
       setError('');
       try {
-        await createProtectedForm(propertyId, payload, user);
+        await createProtectedPropertyForm(propertyId, user, payload);
       } catch (err) {
         setError(err.message || 'No se pudo enviar el formulario de la propiedad.');
         throw err;
@@ -26,7 +26,7 @@ export function useProtectedForm(user) {
       setSaving(true);
       setError('');
       try {
-        await createGeneralForm(payload, user);
+        await createGeneralForm(user, payload);
       } catch (err) {
         setError(err.message || 'No se pudo enviar el formulario general.');
         throw err;

@@ -33,12 +33,8 @@ function SellPage() {
 
     try {
       await submitGeneralForm({
-        tipo: 'vender_propiedad',
-        name: form.name || user.displayName || '',
         phone: form.phone,
-        email: form.email || user.email || '',
-        propertyType: form.propertyType,
-        description: form.description,
+        message: `Solicitud de venta de ${form.name || user.displayName || ''} (${form.email || user.email || ''}) | Tipo: ${form.propertyType} | Descripción: ${form.description}` ,
       });
 
       setForm(INITIAL_FORM);

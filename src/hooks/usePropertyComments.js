@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { createComment, getCommentsByProperty } from '../services/commentsService';
+import { createComment, getCommentsByProperty } from '../services/comments.service';
 
 export function usePropertyComments(propertyId, user) {
   const [comments, setComments] = useState([]);
@@ -37,7 +37,7 @@ export function usePropertyComments(propertyId, user) {
       setSaving(true);
       setError('');
       try {
-        await createComment(propertyId, { message }, user);
+        await createComment(propertyId, user, message);
       } catch (err) {
         setError(err.message || 'No se pudo publicar el comentario.');
         throw err;
