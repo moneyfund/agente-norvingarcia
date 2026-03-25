@@ -1,8 +1,10 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
+import { getRedirectResult } from 'firebase/auth';
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './admin/components/ProtectedRoute';
 import AdminLayout from './admin/layouts/AdminLayout';
+import { auth } from './services/firebase';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const PropertiesPage = lazy(() => import('./pages/PropertiesPage'));
@@ -18,6 +20,18 @@ const AdminPropertiesPage = lazy(() => import('./admin/pages/AdminPropertiesPage
 const AdminProfilePage = lazy(() => import('./admin/pages/AdminProfilePage'));
 
 function App() {
+  useEffect(() => {
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          console.log('Login exitoso:', result.user);
+        }
+      })
+      .catch((error) => {
+        console.error('Error login:', error);
+      });
+  }, []);
+
   return (
     <Suspense fallback={<div className="flex min-h-screen items-center justify-center text-lg">Cargando...</div>}>
       <Routes>
