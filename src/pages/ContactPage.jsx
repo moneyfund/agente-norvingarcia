@@ -6,7 +6,7 @@ import Button from '../components/Button';
 import Input from '../components/Input';
 import Seo from '../components/Seo';
 import { useAuth } from '../hooks/useAuth';
-import { createProtectedFormSubmission } from '../services/contactService';
+import { createGeneralForm } from '../services/formulariosService';
 
 const INITIAL_FORM = {
   name: '',
@@ -31,18 +31,22 @@ function ContactPage() {
       return;
     }
 
-    await createProtectedFormSubmission({
-      type: 'contact_request',
-      payload: {
-        ...form,
-        name: form.name || user.displayName || '',
-        email: form.email || user.email || '',
-      },
-      user,
-    });
+    try {
+      await createGeneralForm({
+        tipoFormulario: 'contacto',
+        payload: {
+          ...form,
+          name: form.name || user.displayName || '',
+          email: form.email || user.email || '',
+        },
+        user,
+      });
 
-    setStatusMessage('Mensaje enviado correctamente. Te responderemos pronto.');
-    setForm(INITIAL_FORM);
+      setStatusMessage('Mensaje enviado correctamente. Te responderemos pronto.');
+      setForm(INITIAL_FORM);
+    } catch (error) {
+      setStatusMessage('No se pudo enviar el mensaje. Revisa la consola para más detalle.');
+    }
   };
 
   return (

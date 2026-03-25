@@ -4,7 +4,7 @@ import Button from '../components/Button';
 import Input from '../components/Input';
 import Seo from '../components/Seo';
 import { useAuth } from '../hooks/useAuth';
-import { createProtectedFormSubmission } from '../services/contactService';
+import { createGeneralForm } from '../services/formulariosService';
 
 const INITIAL_FORM = {
   name: '',
@@ -26,22 +26,26 @@ function SellPage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!isAuthenticated || !user) {
-      setStatusMessage('Debes iniciar sesión para enviar esta solicitud');
+      setStatusMessage('Debes iniciar sesión para enviar esta solicitud.');
       return;
     }
 
-    await createProtectedFormSubmission({
-      type: 'sell_request',
-      payload: {
-        ...form,
-        name: form.name || user.displayName || '',
-        email: form.email || user.email || '',
-      },
-      user,
-    });
+    try {
+      await createGeneralForm({
+        tipoFormulario: 'vender_propiedad',
+        payload: {
+          ...form,
+          name: form.name || user.displayName || '',
+          email: form.email || user.email || '',
+        },
+        user,
+      });
 
-    setForm(INITIAL_FORM);
-    setStatusMessage(`Solicitud enviada correctamente. Gracias, ${user?.displayName || 'usuario'}.`);
+      setForm(INITIAL_FORM);
+      setStatusMessage(`Solicitud enviada correctamente. Gracias, ${user?.displayName || 'usuario'}.`);
+    } catch (error) {
+      setStatusMessage('No se pudo enviar la solicitud. Revisa la consola para más detalle.');
+    }
   };
 
   return (
@@ -51,7 +55,7 @@ function SellPage() {
       <p className="mt-3 max-w-3xl text-slate-600 dark:text-slate-300">Déjame tus datos y prepararé una estrategia personalizada para vender tu propiedad al mejor precio.</p>
       {!isAuthenticated && (
         <div className="mt-6 rounded-2xl border border-brand-500/30 bg-brand-500/5 p-4">
-          <p className="text-sm font-medium text-brand-600 dark:text-brand-100">Debes iniciar sesión para enviar esta solicitud</p>
+          <p className="text-sm font-medium text-brand-600 dark:text-brand-100">Debes iniciar sesión para enviar esta solicitud.</p>
           <Button className="mt-3" type="button" onClick={loginWithGoogle}>Iniciar sesión con Google</Button>
         </div>
       )}

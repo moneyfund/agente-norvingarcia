@@ -1,25 +1,42 @@
-import { addDoc, collection, onSnapshot, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
+import { addDoc, collection, onSnapshot, orderBy, query, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
-export function subscribeToComments(propertyId, callback) {
-  const q = query(
-    collection(db, 'comments'),
-    where('propertyId', '==', propertyId),
-    orderBy('createdAt', 'desc'),
-  );
+function comentariosCollectionRef(propertyId) {
+  return collection(db, 'propiedades', propertyId, 'comentarios');
+}
 
-  return onSnapshot(q, (snapshot) => {
-    callback(snapshot.docs.map((item) => ({ id: item.id, ...item.data() })));
-  });
+export function subscribeToComments(propertyId, callback) {
+  try {
+    const q = query(comentariosCollectionRef(propertyId), orderBy('createdAt', 'desc'));
+
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const comentarios = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
+        callback(comentarios);
+      },
+      (error) => {
+        console.error('Error al escuchar comentarios de la propiedad', { propertyId, error });
+      },
+    );
+  } catch (error) {
+    console.error('Error al crear listener de comentarios', { propertyId, error });
+    return () => {};
+  }
 }
 
 export async function createComment({ propertyId, message, user }) {
-  await addDoc(collection(db, 'comments'), {
-    propertyId,
-    uid: user.uid,
-    displayName: user.displayName || user.email || 'Usuario',
-    photoURL: user.photoURL || '',
-    message,
-    createdAt: serverTimestamp(),
-  });
+  try {
+    await addDoc(comentariosCollectionRef(propertyId), {
+      uid: user.uid,
+      propertyId,
+      displayName: user.displayName || user.email || 'Usuario',
+      photoURL: user.photoURL || '',
+      message,
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error('Error al crear comentario', { propertyId, uid: user?.uid, error });
+    throw error;
+  }
 }
