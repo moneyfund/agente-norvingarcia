@@ -1,19 +1,12 @@
 import { useEffect, useMemo } from 'react';
-import L from 'leaflet';
 import { Link } from 'react-router-dom';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import Seo from '../components/Seo';
 import { usePropiedades } from '../hooks/usePropiedades';
+import { propertyMarkerIcon } from '../utils/mapMarkers';
 
 const DEFAULT_CENTER_NICARAGUA = [12.8654, -85.2072];
-
-const redMarkerIcon = new L.Icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -30],
-});
 
 const hasValidCoordinates = (property) => {
   const lat = Number(property?.lat);
@@ -64,7 +57,7 @@ function MapPage() {
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <FitBounds properties={propertiesWithCoordinates} />
           {propertiesWithCoordinates.map((property) => (
-            <Marker key={property.id} position={[Number(property.lat), Number(property.lng)]} icon={redMarkerIcon}>
+            <Marker key={property.id} position={[Number(property.lat), Number(property.lng)]} icon={propertyMarkerIcon}>
               <Popup>
                 <div className="space-y-2">
                   <strong>{property.titulo}</strong>

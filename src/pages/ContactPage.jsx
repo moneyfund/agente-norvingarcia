@@ -7,6 +7,7 @@ import Input from '../components/Input';
 import Seo from '../components/Seo';
 import { useAuth } from '../hooks/useAuth';
 import { useProtectedForm } from '../hooks/useProtectedForm';
+import { propertyMarkerIcon } from '../utils/mapMarkers';
 
 const INITIAL_FORM = {
   name: '',
@@ -80,7 +81,7 @@ function ContactPage() {
           <div className="overflow-hidden rounded-2xl">
             <MapContainer center={[12.8654, -85.2072]} zoom={12} style={{ height: '260px', width: '100%' }}>
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <Marker position={[18.4719, -69.9396]}>
+              <Marker position={[18.4719, -69.9396]} icon={propertyMarkerIcon}>
                 <Popup>Zona de cobertura de Norvin García</Popup>
               </Marker>
             </MapContainer>
