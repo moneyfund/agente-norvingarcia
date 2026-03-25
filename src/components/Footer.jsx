@@ -16,8 +16,8 @@ function Footer() {
           <p className="mt-3 text-sm text-slate-400">Agente de DIAMANTES REALTY GROUP, operando en Nicaragua con asesoría inmobiliaria premium y acompañamiento integral.</p>
         </div>
         <div className="space-y-3 text-sm text-slate-300">
-          <p className="flex items-center gap-2"><Phone size={15}/> +1 (809) 555-1234</p>
-          <p className="flex items-center gap-2"><Mail size={15}/> norvin@inmobiliario.com</p>
+          <p className="flex items-center gap-2"><Phone size={15}/> +505 5852 0409 </p>
+          <p className="flex items-center gap-2"><Mail size={15}/> norvingarcia220@gmail.com</p>
           <p className="flex items-center gap-2"><MapPin size={15}/> Nicaragua</p>
         </div>
         <div className="flex gap-3">
