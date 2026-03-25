@@ -1,10 +1,10 @@
 import { Facebook, Instagram, Mail, MapPin, MessageCircle, Phone, Music2 } from 'lucide-react';
 
 const social = [
-  { icon: MessageCircle, href: 'https://wa.me/18095551234', label: 'WhatsApp' },
-  { icon: Facebook, href: 'https://facebook.com', label: 'Facebook' },
-  { icon: Instagram, href: 'https://instagram.com', label: 'Instagram' },
-  { icon: Music2, href: 'https://tiktok.com', label: 'TikTok' },
+  { icon: MessageCircle, href: 'https://wa.me/+50558520409', label: 'WhatsApp' },
+  { icon: Facebook, href: 'https://www.facebook.com/profile.php?id=100092228811002', label: 'Facebook' },
+  { icon: Instagram, href: 'https://www.instagram.com/norgarciabr?igsh=cWZobXN6eWtuaWJq', label: 'Instagram' },
+  { icon: Music2, href: 'https://www.tiktok.com/@norvin.garca.br?_r=1&_t=ZS-94ydmdWwrxd', label: 'TikTok' },
 ];
 
 function Footer() {
