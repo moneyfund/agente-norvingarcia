@@ -4,7 +4,7 @@ import { Star } from 'lucide-react';
 import Button from '../components/Button';
 import PropertyCard from '../components/PropertyCard';
 import Seo from '../components/Seo';
-import { properties } from '../data/properties';
+import { usePropiedades } from '../hooks/usePropiedades';
 
 const testimonials = [
   { name: 'Laura Méndez', text: 'Norvin vendió mi propiedad en tiempo récord con una estrategia impecable.' },
@@ -12,7 +12,9 @@ const testimonials = [
 ];
 
 function HomePage() {
-  const featured = properties.filter((property) => property.featured);
+  const { propiedades, loading } = usePropiedades();
+  const featured = propiedades.filter((property) => property.premium).slice(0, 3);
+
   return (
     <>
       <Seo title="Norvin García | Asesor Inmobiliario" description="Portal inmobiliario premium con propiedades exclusivas y asesoría de alto nivel." />
@@ -29,6 +31,7 @@ function HomePage() {
 
       <section className="section-container">
         <h2 className="font-display text-3xl font-semibold">Propiedades destacadas</h2>
+        {loading && <p className="mt-4 text-slate-500">Cargando propiedades...</p>}
         <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {featured.map((property) => <PropertyCard key={property.id} property={property} />)}
         </div>

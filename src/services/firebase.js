@@ -1,8 +1,7 @@
-// Preparado para integración futura con Firebase.
-// Copia tus credenciales en variables de entorno VITE_FIREBASE_*
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -13,8 +12,16 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-const isConfigured = Boolean(firebaseConfig.apiKey && firebaseConfig.projectId);
+export const firebaseEnabled = Object.values(firebaseConfig).every(Boolean);
 
-export const app = isConfigured ? initializeApp(firebaseConfig) : null;
+const app = firebaseEnabled ? initializeApp(firebaseConfig) : null;
+
 export const auth = app ? getAuth(app) : null;
 export const db = app ? getFirestore(app) : null;
+export const storage = app ? getStorage(app) : null;
+
+export function assertFirebaseEnabled() {
+  if (!firebaseEnabled) {
+    throw new Error('Firebase no está configurado. Completa las variables VITE_FIREBASE_* en tu .env.');
+  }
+}
