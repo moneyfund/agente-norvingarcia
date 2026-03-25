@@ -27,15 +27,16 @@ function Navbar({ theme, toggleTheme }) {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
         <Link
           to="/"
-          className="flex items-center gap-2 font-display text-2xl font-bold tracking-wide"
+          className="flex min-w-0 items-center gap-3 font-display text-xl font-bold tracking-wide sm:text-2xl"
         >
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-visible rounded-full bg-white p-1 shadow-sm">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white p-1.5 shadow-sm ring-1 ring-slate-200/70">
             <img
-              src="/LOGO DIAMANTES.png"
-              className="block h-9 w-9 shrink-0 object-contain"
+              src="/logo.png"
+              alt="Logo de Norvin García"
+              className="h-full w-full object-contain"
             />
           </div>
-          <span>Norvin García</span>
+          <span className="truncate">Norvin García</span>
         </Link>
 
         <nav className="hidden items-center gap-4 md:flex">

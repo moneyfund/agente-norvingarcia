@@ -12,10 +12,11 @@ function Footer() {
     <footer className="mt-16 bg-slate-900 text-slate-200">
       <div className="section-container grid gap-10 md:grid-cols-3">
         <div>
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-visible rounded-full border border-slate-600 bg-white p-1 shadow-sm">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white p-1 shadow-sm ring-1 ring-slate-300/70">
             <img
-              src="/LOGO DIAMANTES.png"
-              className="block h-9 w-9 shrink-0 object-contain"
+              src="/logo.png"
+              alt="Logo de Norvin García"
+              className="h-full w-full object-contain"
             />
           </div>
         </div>
