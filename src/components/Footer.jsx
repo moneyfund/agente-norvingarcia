@@ -15,7 +15,7 @@ function Footer() {
       <div className="section-container grid gap-10 md:grid-cols-3">
         <div>
           <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-visible rounded-full border border-slate-600 bg-white p-1 shadow-sm">
-            <img src={logoSrc} alt="Logo DIAMANTES REALTY GROUP" className="block h-9 w-9 min-h-9 min-w-9 shrink-0 object-contain opacity-100" />
+           <link rel="icon" type="image/png" href="/LOGO DIAMANTES.png" /> className="block h-9 w-9 min-h-9 min-w-9 shrink-0 object-contain opacity-100" />
           </div>
         </div>
         <div className="space-y-3 text-sm text-slate-300">
