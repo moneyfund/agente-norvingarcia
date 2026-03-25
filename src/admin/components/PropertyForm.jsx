@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import Button from '../../components/Button';
+import { propertyMarkerIcon } from '../../utils/mapMarkers';
 
 const propertyTypes = ['casa', 'apartamento', 'terreno', 'bodega'];
 const operationTypes = [
@@ -46,6 +47,7 @@ function LocationPicker({ position, onSelect }) {
   return (
     <Marker
       position={position}
+      icon={propertyMarkerIcon}
       draggable
       eventHandlers={{
         dragend: (event) => {

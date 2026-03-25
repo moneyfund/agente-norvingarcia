@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Heart, MapPin, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Heart, MapPin, Star } from 'lucide-react';
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import Button from '../components/Button';
@@ -13,6 +13,7 @@ import { subscribeToLikes, togglePropertyLike } from '../services/likesService';
 import { usePropertyReviews } from '../hooks/usePropertyReviews';
 import { useProtectedForm } from '../hooks/useProtectedForm';
 import { getPropiedadById } from '../services/propiedadesService';
+import { propertyMarkerIcon } from '../utils/mapMarkers';
 
 const money = new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 const placeholderImage = 'https://via.placeholder.com/1200x900?text=Propiedad';
@@ -27,7 +28,7 @@ function PropertyDetailPage() {
   const { id } = useParams();
   const { isAuthenticated, loginWithGoogle, user, loading: authLoading } = useAuth();
   const [property, setProperty] = useState(null);
-  const [activeImage, setActiveImage] = useState('');
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [likes, setLikes] = useState([]);
@@ -47,7 +48,7 @@ function PropertyDetailPage() {
         setLoading(true);
         const data = await getPropiedadById(id);
         setProperty(data);
-        setActiveImage(data?.imagenes?.[0] || '');
+        setCurrentImageIndex(0);
       } catch (error) {
         console.error('Error al cargar la propiedad', { propertyId: id, error });
       } finally {
@@ -162,21 +163,59 @@ function PropertyDetailPage() {
   if (!property) return <section className="section-container">No se encontró esta propiedad.</section>;
 
   const gallery = property.imagenes?.length ? property.imagenes : [placeholderImage];
+  const hasMultipleImages = gallery.length > 1;
+  const activeImage = gallery[currentImageIndex] || gallery[0];
   const operationLabel = property.tipoOperacion === 'alquiler' ? 'En Alquiler' : 'En Venta';
+  const showGalleryFallback = !property.imagenes?.length;
+
+  const goToPreviousImage = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex - 1 + gallery.length) % gallery.length);
+  };
+
+  const goToNextImage = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % gallery.length);
+  };
+
+  const handleGalleryKeyDown = (event) => {
+    if (!hasMultipleImages) return;
+    if (event.key === 'ArrowLeft') goToPreviousImage();
+    if (event.key === 'ArrowRight') goToNextImage();
+  };
 
   return (
     <section className="section-container">
       <Seo title={`${property.titulo} | Norvin García`} description={property.descripcion} />
       <div className="grid gap-8 lg:grid-cols-2">
         <div>
-          <img src={activeImage || gallery[0]} alt={property.titulo} className="h-96 w-full rounded-2xl object-cover shadow-premium" />
-          <div className="mt-4 grid grid-cols-3 gap-3">
-            {gallery.map((image) => (
-              <button key={image} onClick={() => setActiveImage(image)}>
-                <img src={image} alt={property.titulo} className="h-24 w-full rounded-xl object-cover" />
-              </button>
-            ))}
+          <div
+            className="relative"
+            onKeyDown={handleGalleryKeyDown}
+            tabIndex={hasMultipleImages ? 0 : -1}
+            aria-label="Galería de imágenes de la propiedad"
+          >
+            <img src={activeImage} alt={property.titulo} className="h-96 w-full rounded-2xl object-cover shadow-premium" />
+            {hasMultipleImages && (
+              <>
+                <button
+                  type="button"
+                  onClick={goToPreviousImage}
+                  aria-label="Imagen anterior"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/45 p-2 text-white transition hover:bg-black/65 focus:outline-none focus:ring-2 focus:ring-white/80"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <button
+                  type="button"
+                  onClick={goToNextImage}
+                  aria-label="Imagen siguiente"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/45 p-2 text-white transition hover:bg-black/65 focus:outline-none focus:ring-2 focus:ring-white/80"
+                >
+                  <ChevronRight size={24} />
+                </button>
+              </>
+            )}
           </div>
+          {showGalleryFallback && <p className="mt-3 text-sm text-slate-500">Esta propiedad no tiene imágenes disponibles aún.</p>}
         </div>
         <div className="space-y-5">
           <p className="text-4xl font-bold text-brand-500">{money.format(property.precio)}</p>
@@ -210,7 +249,7 @@ function PropertyDetailPage() {
       <div className="mt-10 overflow-hidden rounded-2xl shadow-premium">
         <MapContainer center={[property.lat, property.lng]} zoom={13} style={{ height: '360px', width: '100%' }}>
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          <Marker position={[property.lat, property.lng]}>
+          <Marker position={[property.lat, property.lng]} icon={propertyMarkerIcon}>
             <Popup>{property.titulo}</Popup>
           </Marker>
         </MapContainer>
