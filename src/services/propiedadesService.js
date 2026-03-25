@@ -21,21 +21,18 @@ const normalizeProperty = (snapshot) => ({
 });
 
 export async function getPropiedades() {
-  assertFirebaseEnabled();
   const q = query(collection(db, propiedadesCollection), orderBy('createdAt', 'desc'));
   const snap = await getDocs(q);
   return snap.docs.map(normalizeProperty);
 }
 
 export async function getPropiedadById(id) {
-  assertFirebaseEnabled();
   const snap = await getDoc(doc(db, propiedadesCollection, id));
   if (!snap.exists()) return null;
   return normalizeProperty(snap);
 }
 
 export async function uploadPropertyImages(files = []) {
-  assertFirebaseEnabled();
   if (!files.length) return [];
 
   const uploads = files.map(async (file) => {
@@ -49,7 +46,6 @@ export async function uploadPropertyImages(files = []) {
 }
 
 export async function createPropiedad(payload) {
-  assertFirebaseEnabled();
   const data = {
     ...payload,
     createdAt: serverTimestamp(),
@@ -60,11 +56,9 @@ export async function createPropiedad(payload) {
 }
 
 export async function updatePropiedad(id, payload) {
-  assertFirebaseEnabled();
   await updateDoc(doc(db, propiedadesCollection, id), payload);
 }
 
 export async function deletePropiedad(id) {
-  assertFirebaseEnabled();
   await deleteDoc(doc(db, propiedadesCollection, id));
 }
