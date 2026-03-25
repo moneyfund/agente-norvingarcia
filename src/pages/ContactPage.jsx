@@ -13,7 +13,7 @@ function ContactPage() {
       <div className="mt-8 grid gap-8 lg:grid-cols-2">
         <form className="space-y-4 rounded-2xl bg-white p-6 shadow-premium dark:bg-slate-900">
           <Input label="Nombre" placeholder="Tu nombre" />
-          <Input label="Email" placeholder="correo@ejemplo.com" type="email" />
+          <Input label="Email" placeholder="norvingarcia220@gmail.com" type="email" />
           <Input label="Teléfono" placeholder="Tu teléfono" />
           <label>
             <span className="mb-2 block text-sm font-medium">Mensaje</span>
@@ -22,8 +22,8 @@ function ContactPage() {
           <Button type="button">Enviar mensaje</Button>
         </form>
         <div className="space-y-4 rounded-2xl bg-white p-6 shadow-premium dark:bg-slate-900">
-          <p className="flex items-center gap-2"><Phone size={16}/> +1 (809) 555-1234</p>
-          <p className="flex items-center gap-2"><Mail size={16}/> norvin@inmobiliario.com</p>
+          <p className="flex items-center gap-2"><Phone size={16}/> +505 8744-6657</p>
+          <p className="flex items-center gap-2"><Mail size={16}/> norvingarcia220@gmail.com</p>
           <div className="flex gap-3">
             {[MessageCircle, Facebook, Instagram, Music2].map((Icon, index) => <button key={index} className="rounded-full bg-slate-100 p-3 dark:bg-slate-800"><Icon size={16} /></button>)}
           </div>
