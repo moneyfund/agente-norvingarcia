@@ -1,6 +1,8 @@
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import { useAuth } from '../context/authContext';
+import Button from './Button';
 import ThemeToggle from './ThemeToggle';
 
 const navItems = [
@@ -14,16 +16,31 @@ const navItems = [
 
 function Navbar({ theme, toggleTheme }) {
   const [open, setOpen] = useState(false);
+  const { user, loginWithGoogle, logout } = useAuth();
+
+  const handleGoogleLogin = async () => {
+    await loginWithGoogle();
+  };
+
   return (
     <header className="sticky top-0 z-40 border-b border-white/20 bg-white/60 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/70">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
         <Link to="/" className="font-display text-2xl font-bold">Norvin García</Link>
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav className="hidden items-center gap-4 md:flex">
           {navItems.map((item) => (
             <NavLink key={item.to} to={item.to} className={({ isActive }) => `text-sm font-medium transition hover:text-brand-500 ${isActive ? 'text-brand-500' : ''}`}>
               {item.label}
             </NavLink>
           ))}
+          {user ? (
+            <div className="flex items-center gap-2">
+              <img src={user.photoURL || 'https://via.placeholder.com/40'} alt={user.displayName || 'Usuario'} className="h-9 w-9 rounded-full border border-brand-500/40 object-cover" />
+              <span className="max-w-32 truncate text-xs font-semibold">{user.displayName}</span>
+              <Button variant="outline" className="px-3 py-2 text-xs" onClick={logout}>Salir</Button>
+            </div>
+          ) : (
+            <Button variant="outline" className="px-3 py-2 text-xs" onClick={handleGoogleLogin}>Google Login</Button>
+          )}
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
         </nav>
         <div className="flex items-center gap-2 md:hidden">
@@ -38,6 +55,11 @@ function Navbar({ theme, toggleTheme }) {
               {item.label}
             </NavLink>
           ))}
+          {user ? (
+            <button onClick={logout} className="w-full rounded-xl bg-brand-500 px-3 py-2 text-left font-medium text-white">Cerrar sesión ({user.displayName})</button>
+          ) : (
+            <button onClick={handleGoogleLogin} className="w-full rounded-xl bg-brand-500 px-3 py-2 text-left font-medium text-white">Entrar con Google</button>
+          )}
         </div>
       )}
     </header>
