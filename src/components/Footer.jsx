@@ -1,7 +1,7 @@
 import { Facebook, Instagram, Mail, MapPin, MessageCircle, Phone, Music2 } from 'lucide-react';
 
 const social = [
-  { icon: MessageCircle, href: 'https://wa.me/+50558520409', label: 'WhatsApp' },
+  { icon: MessageCircle, href: 'https://wa.me/50587446657', label: 'WhatsApp' },
   { icon: Facebook, href: 'https://www.facebook.com/profile.php?id=100092228811002', label: 'Facebook' },
   { icon: Instagram, href: 'https://www.instagram.com/norgarciabr?igsh=cWZobXN6eWtuaWJq', label: 'Instagram' },
   { icon: Music2, href: 'https://www.tiktok.com/@norvin.garca.br?_r=1&_t=ZS-94ydmdWwrxd', label: 'TikTok' },
@@ -17,7 +17,7 @@ function Footer() {
           <p className="mt-3 text-sm text-slate-400">Agente de DIAMANTES REALTY GROUP, operando en Nicaragua con asesoría inmobiliaria y acompañamiento integral.</p>
         </div>
         <div className="space-y-3 text-sm text-slate-300">
-          <p className="flex items-center gap-2"><Phone size={15}/> +505 5852 0409 </p>
+          <p className="flex items-center gap-2"><Phone size={15}/> +505 8744 6657 </p>
           <p className="flex items-center gap-2"><Mail size={15}/> norvingarcia220@gmail.com</p>
           <p className="flex items-center gap-2"><MapPin size={15}/> Nicaragua</p>
         </div>
