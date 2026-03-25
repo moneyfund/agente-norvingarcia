@@ -1,6 +1,6 @@
 import { Link, Navigate } from 'react-router-dom';
 import Button from '../../components/Button';
-import { useAuth } from '../../context/authContext';
+import { useAuth } from '../../hooks/useAuth';
 
 function AdminLoginPage() {
   const {
