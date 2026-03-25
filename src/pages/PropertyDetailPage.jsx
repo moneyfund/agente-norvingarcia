@@ -6,15 +6,10 @@ import 'leaflet/dist/leaflet.css';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
 import Seo from '../components/Seo';
-import { useAuth } from '../context/authContext';
-import {
-  addComment,
-  addReview,
-  subscribeToComments,
-  subscribeToProperty,
-  subscribeToReviews,
-  togglePropertyLike,
-} from '../services/interaccionesService';
+import { useAuth } from '../hooks/useAuth';
+import { subscribeToComments, createComment } from '../services/commentsService';
+import { subscribeToLikes, togglePropertyLike } from '../services/likesService';
+import { subscribeToReviews, upsertReview } from '../services/reviewsService';
 import { getPropiedadById } from '../services/propiedadesService';
 
 const money = new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
@@ -22,13 +17,14 @@ const placeholderImage = 'https://via.placeholder.com/1200x900?text=Propiedad';
 
 function PropertyDetailPage() {
   const { id } = useParams();
-  const { isAuthenticated, loginWithGoogle, user } = useAuth();
+  const { isAuthenticated, loginWithGoogle, user, loading: authLoading } = useAuth();
   const [property, setProperty] = useState(null);
   const [activeImage, setActiveImage] = useState('');
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const [likes, setLikes] = useState([]);
   const [commentText, setCommentText] = useState('');
   const [reviewText, setReviewText] = useState('');
   const [reviewRating, setReviewRating] = useState(5);
@@ -50,25 +46,18 @@ function PropertyDetailPage() {
   }, [id]);
 
   useEffect(() => {
-    const unsubscribeProperty = subscribeToProperty(id, (updatedProperty) => {
-      if (!updatedProperty) return;
-      setProperty((prev) => ({ ...prev, ...updatedProperty }));
-    });
-
+    const unsubscribeLikes = subscribeToLikes(id, setLikes);
     const unsubscribeComments = subscribeToComments(id, setComments);
     const unsubscribeReviews = subscribeToReviews(id, setReviews);
 
     return () => {
-      unsubscribeProperty();
+      unsubscribeLikes();
       unsubscribeComments();
       unsubscribeReviews();
     };
   }, [id]);
 
-  const hasLiked = useMemo(
-    () => Boolean(user?.uid && property?.likes?.includes(user.uid)),
-    [property?.likes, user?.uid],
-  );
+  const hasLiked = useMemo(() => Boolean(user?.uid && likes.some((like) => like.uid === user.uid)), [likes, user?.uid]);
 
   const averageRating = useMemo(() => {
     if (!reviews.length) return 0;
@@ -84,7 +73,7 @@ function PropertyDetailPage() {
       return;
     }
 
-    await togglePropertyLike(id, user.uid, hasLiked);
+    await togglePropertyLike({ propertyId: id, uid: user.uid, hasLiked });
   };
 
   const handleCommentSubmit = async (event) => {
@@ -96,11 +85,10 @@ function PropertyDetailPage() {
 
     if (!commentText.trim()) return;
 
-    await addComment({
-      propiedadId: id,
-      userId: user.uid,
-      nombre: user.displayName || user.email || 'Usuario',
-      comentario: commentText.trim(),
+    await createComment({
+      propertyId: id,
+      message: commentText.trim(),
+      user,
     });
     setCommentText('');
   };
@@ -114,18 +102,17 @@ function PropertyDetailPage() {
 
     if (!reviewText.trim()) return;
 
-    await addReview({
-      propiedadId: id,
-      userId: user.uid,
-      nombre: user.displayName || user.email || 'Usuario',
-      comentario: reviewText.trim(),
+    await upsertReview({
+      propertyId: id,
       rating: Number(reviewRating),
+      message: reviewText.trim(),
+      user,
     });
     setReviewText('');
     setReviewRating(5);
   };
 
-  if (loading) return <section className="section-container">Cargando propiedad...</section>;
+  if (loading || authLoading) return <section className="section-container">Cargando propiedad...</section>;
   if (!property) return <section className="section-container">No se encontró esta propiedad.</section>;
 
   const gallery = property.imagenes?.length ? property.imagenes : [placeholderImage];
@@ -161,7 +148,7 @@ function PropertyDetailPage() {
             <a href="https://wa.me/18095551234" target="_blank" rel="noreferrer"><Button>Contactar por WhatsApp</Button></a>
             <Button variant="outline" onClick={() => setOpen(true)}>Solicitar visita</Button>
             <Button type="button" variant={hasLiked ? 'primary' : 'outline'} onClick={handleLike} className="inline-flex items-center gap-2">
-              <Heart size={16} /> {hasLiked ? 'Te gusta' : 'Me gusta'} ({property.likes?.length || 0})
+              <Heart size={16} /> {hasLiked ? 'Te gusta' : 'Me gusta'} ({likes.length})
             </Button>
           </div>
           {!isAuthenticated && (
@@ -194,13 +181,16 @@ function PropertyDetailPage() {
               placeholder="Comparte tu opinión sobre esta propiedad"
               className="w-full rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900"
             />
-            <Button type="submit">Publicar comentario</Button>
+            <Button type="submit" disabled={!isAuthenticated}>Publicar comentario</Button>
           </form>
           <div className="mt-4 space-y-3">
             {comments.map((comment) => (
               <article key={comment.id} className="rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800">
-                <p className="font-semibold">{comment.nombre}</p>
-                <p className="mt-1 text-slate-600 dark:text-slate-300">{comment.comentario}</p>
+                <div className="flex items-center gap-2">
+                  {comment.photoURL && <img src={comment.photoURL} alt={comment.displayName} className="h-7 w-7 rounded-full" />}
+                  <p className="font-semibold">{comment.displayName}</p>
+                </div>
+                <p className="mt-1 text-slate-600 dark:text-slate-300">{comment.message}</p>
               </article>
             ))}
             {!comments.length && <p className="text-sm text-slate-500">Aún no hay comentarios.</p>}
@@ -225,13 +215,16 @@ function PropertyDetailPage() {
               placeholder="¿Cómo calificas esta propiedad?"
               className="w-full rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900"
             />
-            <Button type="submit">Publicar reseña</Button>
+            <Button type="submit" disabled={!isAuthenticated}>Publicar reseña</Button>
           </form>
           <div className="mt-4 space-y-3">
             {reviews.map((review) => (
               <article key={review.id} className="rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800">
-                <p className="font-semibold">{review.nombre} · {review.rating}/5</p>
-                <p className="mt-1 text-slate-600 dark:text-slate-300">{review.comentario}</p>
+                <div className="flex items-center gap-2">
+                  {review.photoURL && <img src={review.photoURL} alt={review.displayName} className="h-7 w-7 rounded-full" />}
+                  <p className="font-semibold">{review.displayName} · {review.rating}/5</p>
+                </div>
+                <p className="mt-1 text-slate-600 dark:text-slate-300">{review.message}</p>
               </article>
             ))}
             {!reviews.length && <p className="text-sm text-slate-500">Aún no hay reseñas.</p>}

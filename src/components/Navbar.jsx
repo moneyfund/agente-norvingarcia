@@ -1,7 +1,7 @@
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { useAuth } from '../context/authContext';
+import { useAuth } from '../hooks/useAuth';
 import Button from './Button';
 import ThemeToggle from './ThemeToggle';
 
@@ -16,7 +16,7 @@ const navItems = [
 
 function Navbar({ theme, toggleTheme }) {
   const [open, setOpen] = useState(false);
-  const { user, loginWithGoogle, logout } = useAuth();
+  const { user, loading, loginWithGoogle, logout } = useAuth();
 
   const handleGoogleLogin = async () => {
     await loginWithGoogle();
@@ -32,7 +32,9 @@ function Navbar({ theme, toggleTheme }) {
               {item.label}
             </NavLink>
           ))}
-          {user ? (
+          {loading ? (
+            <span className="text-xs text-slate-500">Cargando sesión...</span>
+          ) : user ? (
             <div className="flex items-center gap-2">
               <img src={user.photoURL || 'https://via.placeholder.com/40'} alt={user.displayName || 'Usuario'} className="h-9 w-9 rounded-full border border-brand-500/40 object-cover" />
               <span className="max-w-32 truncate text-xs font-semibold">{user.displayName || user.email}</span>
@@ -55,7 +57,9 @@ function Navbar({ theme, toggleTheme }) {
               {item.label}
             </NavLink>
           ))}
-          {user ? (
+          {loading ? (
+            <span className="text-xs text-slate-500">Cargando sesión...</span>
+          ) : user ? (
             <button onClick={logout} className="w-full rounded-xl bg-brand-500 px-3 py-2 text-left font-medium text-white">Cerrar sesión ({user.displayName})</button>
           ) : (
             <button onClick={handleGoogleLogin} className="w-full rounded-xl bg-brand-500 px-3 py-2 text-left font-medium text-white">Entrar con Google</button>

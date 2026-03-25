@@ -1,6 +1,6 @@
 import { collection, doc, getDoc, getDocs, query, setDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { db, storage } from './firebase';
+import { db, storage } from '../firebase/config';
 
 const agentesCollection = 'agentes';
 const defaultAgentId = 'norvin-garcia';

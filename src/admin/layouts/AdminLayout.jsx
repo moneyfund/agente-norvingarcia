@@ -1,6 +1,6 @@
 import { Building2, LayoutDashboard, LogOut, UserCircle } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { useAuth } from '../../context/authContext';
+import { useAuth } from '../../hooks/useAuth';
 
 const links = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },

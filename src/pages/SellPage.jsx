@@ -3,19 +3,44 @@ import { MessageCircle } from 'lucide-react';
 import Button from '../components/Button';
 import Input from '../components/Input';
 import Seo from '../components/Seo';
-import { useAuth } from '../context/authContext';
+import { useAuth } from '../hooks/useAuth';
+import { createProtectedFormSubmission } from '../services/contactService';
+
+const INITIAL_FORM = {
+  name: '',
+  phone: '',
+  email: '',
+  propertyType: '',
+  description: '',
+};
 
 function SellPage() {
   const { isAuthenticated, user, loginWithGoogle } = useAuth();
   const [statusMessage, setStatusMessage] = useState('');
+  const [form, setForm] = useState(INITIAL_FORM);
 
-  const handleSubmit = (event) => {
+  const handleChange = (field) => (event) => {
+    setForm((prev) => ({ ...prev, [field]: event.target.value }));
+  };
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !user) {
       setStatusMessage('Debes iniciar sesión para enviar esta solicitud');
       return;
     }
 
+    await createProtectedFormSubmission({
+      type: 'sell_request',
+      payload: {
+        ...form,
+        name: form.name || user.displayName || '',
+        email: form.email || user.email || '',
+      },
+      user,
+    });
+
+    setForm(INITIAL_FORM);
     setStatusMessage(`Solicitud enviada correctamente. Gracias, ${user?.displayName || 'usuario'}.`);
   };
 
@@ -32,20 +57,20 @@ function SellPage() {
       )}
       <form onSubmit={handleSubmit} className="mt-8 grid gap-4 rounded-2xl bg-white p-6 shadow-premium dark:bg-slate-900">
         <div className="grid gap-4 md:grid-cols-2">
-          <Input label="Nombre" placeholder="Tu nombre" defaultValue={user?.displayName || ''} />
-          <Input label="Teléfono" placeholder="Tu teléfono" />
+          <Input label="Nombre" placeholder="Tu nombre" value={form.name || user?.displayName || ''} onChange={handleChange('name')} />
+          <Input label="Teléfono" placeholder="Tu teléfono" value={form.phone} onChange={handleChange('phone')} />
         </div>
         <div className="grid gap-4 md:grid-cols-2">
-          <Input label="Email" type="email" placeholder="correo@ejemplo.com" defaultValue={user?.email || ''} />
-          <Input label="Tipo de propiedad" placeholder="Casa, apartamento, terreno..." />
+          <Input label="Email" type="email" placeholder="correo@ejemplo.com" value={form.email || user?.email || ''} onChange={handleChange('email')} />
+          <Input label="Tipo de propiedad" placeholder="Casa, apartamento, terreno..." value={form.propertyType} onChange={handleChange('propertyType')} />
         </div>
         <label>
           <span className="mb-2 block text-sm font-medium">Descripción</span>
-          <textarea rows="5" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900" placeholder="Cuéntame más sobre tu propiedad"></textarea>
+          <textarea rows="5" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900" placeholder="Cuéntame más sobre tu propiedad" value={form.description} onChange={handleChange('description')}></textarea>
         </label>
         {statusMessage && <p className="rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800">{statusMessage}</p>}
         <div className="flex flex-wrap gap-3">
-          <Button type="submit">Enviar solicitud</Button>
+          <Button type="submit" disabled={!isAuthenticated}>Enviar solicitud</Button>
           <a href="https://wa.me/18095551234" target="_blank" rel="noreferrer"><Button type="button" variant="secondary" className="inline-flex items-center gap-2"><MessageCircle size={16} /> Contacto directo</Button></a>
         </div>
       </form>
