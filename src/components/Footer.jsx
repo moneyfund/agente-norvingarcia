@@ -1,15 +1,10 @@
 function Footer() {
-  const logoSrc = '/LOGO DIAMANTES.png';
-
   return (
     <footer className="mt-16 bg-slate-900 text-slate-200">
       <div className="section-container grid gap-10 md:grid-cols-3">
         <div>
           <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-visible rounded-full border border-slate-600 bg-white p-1 shadow-sm">
-            <img
-              src={logoSrc}
-              className="block h-9 w-9 min-h-9 min-w-9 shrink-0 object-contain opacity-100"
-            />
+            <img src="/LOGO DIAMANTES.png" className="block h-9 w-9 min-h-9 min-w-9 shrink-0 object-contain opacity-100" />
           </div>
         </div>
 
@@ -30,3 +25,5 @@ function Footer() {
     </footer>
   );
 }
+
+export default Footer;
