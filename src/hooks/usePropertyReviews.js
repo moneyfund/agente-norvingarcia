@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { createReview, getReviewsByProperty } from '../services/reviewsService';
+import { createReview, getReviewsByProperty } from '../services/reviews.service';
 
 export function usePropertyReviews(propertyId, user) {
   const [reviews, setReviews] = useState([]);
@@ -37,7 +37,7 @@ export function usePropertyReviews(propertyId, user) {
       setSaving(true);
       setError('');
       try {
-        await createReview(propertyId, { rating, message }, user);
+        await createReview(propertyId, user, rating, message);
       } catch (err) {
         setError(err.message || 'No se pudo publicar la reseña.');
         throw err;

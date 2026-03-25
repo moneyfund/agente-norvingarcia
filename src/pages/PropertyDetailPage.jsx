@@ -9,7 +9,7 @@ import Input from '../components/Input';
 import Seo from '../components/Seo';
 import { useAuth } from '../hooks/useAuth';
 import { usePropertyComments } from '../hooks/usePropertyComments';
-import { subscribeToLikes, togglePropertyLike } from '../services/likesService';
+import { subscribeToLikes, toggleLike } from '../services/likes.service';
 import { usePropertyReviews } from '../hooks/usePropertyReviews';
 import { useProtectedForm } from '../hooks/useProtectedForm';
 import { getPropiedadById } from '../services/propiedadesService';
@@ -61,6 +61,8 @@ function PropertyDetailPage() {
 
 
   useEffect(() => {
+    if (!id) return () => {};
+
     const unsubscribeLikes = subscribeToLikes(id, setLikes);
 
     return () => {
@@ -78,21 +80,31 @@ function PropertyDetailPage() {
   const requireAuthMessage = 'Debes iniciar sesión para realizar esta acción.';
 
   const handleLike = async () => {
+    if (!id) {
+      setFeedbackMessage('No se pudo identificar la propiedad.');
+      return;
+    }
+
     if (!isAuthenticated || !user) {
       setFeedbackMessage(requireAuthMessage);
       return;
     }
 
     try {
-      await togglePropertyLike({ propertyId: id, user });
+      await toggleLike(id, user);
       setFeedbackMessage('Like actualizado correctamente.');
     } catch (error) {
-      setFeedbackMessage('No se pudo actualizar el like. Revisa la consola.');
+      setFeedbackMessage(error.message || 'No se pudo actualizar el like.');
     }
   };
 
   const handleCommentSubmit = async (event) => {
     event.preventDefault();
+    if (!id) {
+      setFeedbackMessage('No se pudo identificar la propiedad.');
+      return;
+    }
+
     if (!isAuthenticated || !user) {
       setFeedbackMessage(requireAuthMessage);
       return;
@@ -111,6 +123,11 @@ function PropertyDetailPage() {
 
   const handleReviewSubmit = async (event) => {
     event.preventDefault();
+    if (!id) {
+      setFeedbackMessage('No se pudo identificar la propiedad.');
+      return;
+    }
+
     if (!isAuthenticated || !user) {
       setFeedbackMessage(requireAuthMessage);
       return;
@@ -138,6 +155,11 @@ function PropertyDetailPage() {
   const handleVisitFormSubmit = async (event) => {
     event.preventDefault();
 
+    if (!id) {
+      setFeedbackMessage('No se pudo identificar la propiedad.');
+      return;
+    }
+
     if (!isAuthenticated || !user) {
       setFeedbackMessage(requireAuthMessage);
       return;
@@ -148,8 +170,7 @@ function PropertyDetailPage() {
         tipo: 'solicitud_visita',
         phone: visitForm.phone,
         preferredDate: visitForm.preferredDate,
-        notes: visitForm.notes,
-        propertyTitle: property?.titulo || '',
+        message: [visitForm.preferredDate ? `Fecha preferida: ${visitForm.preferredDate}` : '', visitForm.notes].filter(Boolean).join(' | '),
       });
       setVisitForm(INITIAL_VISIT_FORM);
       setOpen(false);
@@ -276,7 +297,7 @@ function PropertyDetailPage() {
                   {comment.userPhotoURL && <img src={comment.userPhotoURL} alt={comment.userName} className="h-7 w-7 rounded-full" />}
                   <p className="font-semibold">{comment.userName}</p>
                 </div>
-                <p className="mt-1 text-slate-600 dark:text-slate-300">{comment.message}</p>
+                <p className="mt-1 text-slate-600 dark:text-slate-300">{comment.content}</p>
               </article>
             ))}
             {commentsLoading && <p className="text-sm text-slate-500">Cargando comentarios...</p>}
@@ -312,7 +333,7 @@ function PropertyDetailPage() {
                   {review.userPhotoURL && <img src={review.userPhotoURL} alt={review.userName} className="h-7 w-7 rounded-full" />}
                   <p className="font-semibold">{review.userName} · {review.rating}/5</p>
                 </div>
-                <p className="mt-1 text-slate-600 dark:text-slate-300">{review.message}</p>
+                <p className="mt-1 text-slate-600 dark:text-slate-300">{review.content}</p>
               </article>
             ))}
             {reviewsLoading && <p className="text-sm text-slate-500">Cargando reseñas...</p>}

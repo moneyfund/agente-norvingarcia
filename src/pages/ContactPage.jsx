@@ -35,11 +35,8 @@ function ContactPage() {
 
     try {
       await submitGeneralForm({
-        tipo: 'contacto',
-        name: form.name || user.displayName || '',
-        email: form.email || user.email || '',
         phone: form.phone,
-        message: form.message,
+        message: `Contacto de ${form.name || user.displayName || ''} (${form.email || user.email || ''}): ${form.message}` ,
       });
 
       setStatusMessage('Mensaje enviado correctamente. Te responderemos pronto.');
