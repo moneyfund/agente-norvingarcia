@@ -28,7 +28,7 @@ function ContactPage() {
             {[MessageCircle, Facebook, Instagram, Music2].map((Icon, index) => <button key={index} className="rounded-full bg-slate-100 p-3 dark:bg-slate-800"><Icon size={16} /></button>)}
           </div>
           <div className="overflow-hidden rounded-2xl">
-            <MapContainer center={[18.4719, -69.9396]} zoom={12} style={{ height: '260px', width: '100%' }}>
+            <MapContainer center={[12.8654, -85.2072]} zoom={12} style={{ height: '260px', width: '100%' }}>
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               <Marker position={[18.4719, -69.9396]}>
                 <Popup>Zona de cobertura de Norvin García</Popup>
