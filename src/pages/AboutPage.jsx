@@ -14,7 +14,7 @@ function AboutPage() {
     <section className="section-container">
       <Seo title="Sobre mí | Norvin García" description="Agente de DIAMANTES REALTY GROUP operando en Nicaragua, especializado en propiedades premium." />
       <div className="grid items-center gap-10 md:grid-cols-2">
-        <img src={agent?.foto || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=1000&q=80'} alt="Norvin García" className="w-full rounded-2xl shadow-premium" />
+        <img src={agent?.foto || 'https://imgur.com/gallery/8tPCmSX'} alt="Norvin García" className="w-full rounded-2xl shadow-premium" />
         <div>
           <h1 className="font-display text-4xl font-semibold">{agent?.nombre || 'Norvin García'}</h1>
           <p className="mt-2 inline-block rounded-full bg-brand-500/10 px-3 py-1 text-sm font-semibold text-brand-600 dark:text-brand-100">Agente de DIAMANTES REALTY GROUP · Operando en Nicaragua</p>
