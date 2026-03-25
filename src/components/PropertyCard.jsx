@@ -7,12 +7,16 @@ const currency = new Intl.NumberFormat('es-DO', { style: 'currency', currency: '
 
 function PropertyCard({ property }) {
   const image = property.imagenes?.[0] || 'https://via.placeholder.com/800x600?text=Propiedad';
+  const operationLabel = property.tipoOperacion === 'alquiler' ? 'En Alquiler' : 'En Venta';
 
   return (
     <motion.article whileHover={{ y: -6 }} className={`overflow-hidden rounded-2xl bg-white shadow-premium transition dark:bg-slate-900 ${property.premium ? 'ring-1 ring-brand-500/40 shadow-[0_12px_36px_rgba(225,29,72,0.2)]' : ''}`}>
       <img src={image} alt={property.titulo} className="h-56 w-full object-cover" loading="lazy" />
       <div className="space-y-4 p-5">
-        {property.premium && <span className="inline-flex rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-100">Premium</span>}
+        <div className="flex flex-wrap gap-2">
+          {property.premium && <span className="inline-flex rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-100">Premium</span>}
+          <span className="inline-flex rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700">{operationLabel}</span>
+        </div>
         <div>
           <p className="text-2xl font-bold text-brand-500">{currency.format(property.precio || 0)}</p>
           <h3 className="mt-1 text-lg font-semibold">{property.titulo}</h3>
