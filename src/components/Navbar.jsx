@@ -1,6 +1,6 @@
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import Button from './Button';
 import ThemeToggle from './ThemeToggle';
@@ -25,9 +25,9 @@ function Navbar({ theme, toggleTheme }) {
   return (
     <header className="sticky top-0 z-40 border-b border-white/20 bg-white/60 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/70">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
-        <Link to="/" className="flex items-center">
+        <div className="flex items-center">
           <img src="/LOGO DIAMANTES.png" className="h-8 w-auto object-contain" />
-        </Link>
+        </div>
         <nav className="hidden items-center gap-4 md:flex">
           {navItems.map((item) => (
             <NavLink key={item.to} to={item.to} className={({ isActive }) => `text-sm font-medium transition-colors hover:text-brand-500 ${isActive ? 'text-brand-500' : ''}`}>
