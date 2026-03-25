@@ -11,7 +11,7 @@ import {
   updateDoc,
 } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { assertFirebaseEnabled, db, storage } from './firebase';
+import { db, storage } from './firebase';
 
 const propiedadesCollection = 'propiedades';
 
