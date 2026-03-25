@@ -1,5 +1,14 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { GoogleAuthProvider, getRedirectResult, onAuthStateChanged, signInWithEmailAndPassword, signInWithRedirect, signOut } from 'firebase/auth';
+import {
+  GoogleAuthProvider,
+  browserLocalPersistence,
+  getRedirectResult,
+  onAuthStateChanged,
+  setPersistence,
+  signInWithEmailAndPassword,
+  signInWithRedirect,
+  signOut,
+} from 'firebase/auth';
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { auth, db } from '../services/firebase';
 
@@ -37,10 +46,13 @@ export function AuthProvider({ children }) {
       return undefined;
     }
 
+    setPersistence(auth, browserLocalPersistence).catch((error) => {
+      console.error('Error configurando persistencia:', error);
+    });
+
     getRedirectResult(auth)
-      .then(async (result) => {
+      .then((result) => {
         if (result?.user) {
-          await ensureUserDocument(result.user);
           console.log('Usuario logueado:', result.user);
         }
       })
