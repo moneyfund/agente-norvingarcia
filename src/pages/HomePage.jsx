@@ -21,7 +21,7 @@ function HomePage() {
       <section className="bg-hero bg-cover bg-center text-white">
         <div className="section-container py-28">
           <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl font-display text-4xl font-bold sm:text-6xl">Norvin García - Agente de DIAMANTES REALTY GROUP</motion.h1>
-          <p className="mt-6 max-w-2xl text-lg text-slate-200">Operando en Nicaragua, conectando personas con inversiones extraordinarias en el mercado inmobiliario premium.</p>
+          <p className="mt-6 max-w-2xl text-lg text-slate-200">Operando en Nicaragua, conectando personas con inversiones extraordinarias en el mercado inmobiliario.</p>
           <span className="mt-5 inline-flex rounded-full border border-brand-100/50 bg-brand-500/20 px-4 py-1 text-sm font-semibold text-brand-50">Asesoría de alto impacto con identidad premium</span>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/propiedades"><Button>Ver Propiedades</Button></Link>
