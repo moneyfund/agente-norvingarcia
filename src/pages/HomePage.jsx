@@ -17,11 +17,11 @@ function HomePage() {
 
   return (
     <>
-      <Seo title="Norvin García | Asesor Inmobiliario" description="Portal inmobiliario premium con propiedades exclusivas y asesoría de alto nivel." />
+      <Seo title="Norvin García | Agente de DIAMANTES REALTY GROUP" description="Agente de DIAMANTES REALTY GROUP operando en Nicaragua con propiedades exclusivas y asesoría premium." />
       <section className="bg-hero bg-cover bg-center text-white">
         <div className="section-container py-28">
-          <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl font-display text-4xl font-bold sm:text-6xl">Norvin García - Asesor Inmobiliario</motion.h1>
-          <p className="mt-6 max-w-2xl text-lg text-slate-200">Conectando personas con inversiones extraordinarias en el mercado inmobiliario premium.</p>
+          <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl font-display text-4xl font-bold sm:text-6xl">Norvin García - Agente de DIAMANTES REALTY GROUP</motion.h1>
+          <p className="mt-6 max-w-2xl text-lg text-slate-200">Operando en Nicaragua, conectando personas con inversiones extraordinarias en el mercado inmobiliario premium.</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/propiedades"><Button>Ver Propiedades</Button></Link>
             <a href="https://wa.me/18095551234" target="_blank" rel="noreferrer"><Button variant="secondary">Contactar por WhatsApp</Button></a>
