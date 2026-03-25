@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import Button from '../../components/Button';
 import { useAuth } from '../../context/authContext';
-import { firebaseEnabled } from '../../services/firebase';
 
 function AdminLoginPage() {
   const { login, isAuthenticated } = useAuth();
@@ -36,11 +35,10 @@ function AdminLoginPage() {
       <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4 rounded-2xl bg-white p-8 shadow-premium">
         <h1 className="text-3xl font-bold">Acceso Admin</h1>
         <p className="text-sm text-slate-500">Ingresa con tu cuenta Firebase Auth.</p>
-        {!firebaseEnabled && <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-700">Configura VITE_FIREBASE_* en .env para habilitar el acceso.</p>}
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className="w-full rounded-xl border p-3" required />
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" className="w-full rounded-xl border p-3" required />
         {error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-600">{error}</p>}
-        <Button type="submit" className="w-full" disabled={loading || !firebaseEnabled}>{loading ? 'Entrando...' : 'Iniciar sesión'}</Button>
+        <Button type="submit" className="w-full" disabled={loading}>{loading ? 'Entrando...' : 'Iniciar sesión'}</Button>
       </form>
     </div>
   );
