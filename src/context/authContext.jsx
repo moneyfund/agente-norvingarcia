@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import {
   GoogleAuthProvider,
   browserLocalPersistence,
+  getRedirectResult,
   onAuthStateChanged,
   setPersistence,
   signInWithRedirect,
@@ -47,24 +48,43 @@ export function AuthProvider({ children }) {
       return undefined;
     }
 
-    setPersistence(auth, browserLocalPersistence).catch((error) => {
-      console.error('Error configurando persistencia:', error);
-    });
+    let unsubscribe = () => {};
+    let isMounted = true;
 
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const bootstrapAuth = async () => {
       try {
-        if (firebaseUser) {
-          await ensureUserDocument(firebaseUser);
+        await setPersistence(auth, browserLocalPersistence);
+
+        const redirectResult = await getRedirectResult(auth);
+        if (redirectResult?.user) {
+          await ensureUserDocument(redirectResult.user);
         }
       } catch (error) {
-        console.error('Error guardando usuario:', error);
-      } finally {
-        setUser(firebaseUser);
-        setLoading(false);
+        console.error('Error inicializando autenticación:', error);
       }
-    });
 
-    return unsubscribe;
+      unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        try {
+          if (firebaseUser) {
+            await ensureUserDocument(firebaseUser);
+          }
+        } catch (error) {
+          console.error('Error guardando usuario:', error);
+        } finally {
+          if (isMounted) {
+            setUser(firebaseUser);
+            setLoading(false);
+          }
+        }
+      });
+    };
+
+    bootstrapAuth();
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
   }, [ensureUserDocument]);
 
   const value = useMemo(() => ({
