@@ -10,15 +10,28 @@ import {
   serverTimestamp,
   updateDoc,
 } from 'firebase/firestore';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { db, storage } from './firebase';
+import { db } from './firebase';
 
 const propiedadesCollection = 'propiedades';
 
-const normalizeProperty = (snapshot) => ({
-  id: snapshot.id,
-  ...snapshot.data(),
-});
+const normalizeImages = (data = {}) => {
+  if (Array.isArray(data.imagenes) && data.imagenes.length) return data.imagenes;
+  if (typeof data.imagen === 'string' && data.imagen.trim()) return [data.imagen.trim()];
+  return [];
+};
+
+const normalizeProperty = (snapshot) => {
+  const data = snapshot.data();
+
+  return {
+    id: snapshot.id,
+    ...data,
+    tipoOperacion: data.tipoOperacion || 'venta',
+    imagenes: normalizeImages(data),
+    lat: Number(data.lat ?? 0),
+    lng: Number(data.lng ?? 0),
+  };
+};
 
 export async function getPropiedades() {
   const q = query(collection(db, propiedadesCollection), orderBy('createdAt', 'desc'));
@@ -30,19 +43,6 @@ export async function getPropiedadById(id) {
   const snap = await getDoc(doc(db, propiedadesCollection, id));
   if (!snap.exists()) return null;
   return normalizeProperty(snap);
-}
-
-export async function uploadPropertyImages(files = []) {
-  if (!files.length) return [];
-
-  const uploads = files.map(async (file) => {
-    const safeName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
-    const fileRef = ref(storage, `propiedades/${safeName}`);
-    await uploadBytes(fileRef, file);
-    return getDownloadURL(fileRef);
-  });
-
-  return Promise.all(uploads);
 }
 
 export async function createPropiedad(payload) {

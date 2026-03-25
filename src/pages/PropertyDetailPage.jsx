@@ -18,6 +18,7 @@ import {
 import { getPropiedadById } from '../services/propiedadesService';
 
 const money = new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+const placeholderImage = 'https://via.placeholder.com/1200x900?text=Propiedad';
 
 function PropertyDetailPage() {
   const { id } = useParams();
@@ -127,14 +128,17 @@ function PropertyDetailPage() {
   if (loading) return <section className="section-container">Cargando propiedad...</section>;
   if (!property) return <section className="section-container">No se encontró esta propiedad.</section>;
 
+  const gallery = property.imagenes?.length ? property.imagenes : [placeholderImage];
+  const operationLabel = property.tipoOperacion === 'alquiler' ? 'En Alquiler' : 'En Venta';
+
   return (
     <section className="section-container">
       <Seo title={`${property.titulo} | Norvin García`} description={property.descripcion} />
       <div className="grid gap-8 lg:grid-cols-2">
         <div>
-          <img src={activeImage} alt={property.titulo} className="h-96 w-full rounded-2xl object-cover shadow-premium" />
+          <img src={activeImage || gallery[0]} alt={property.titulo} className="h-96 w-full rounded-2xl object-cover shadow-premium" />
           <div className="mt-4 grid grid-cols-3 gap-3">
-            {property.imagenes.map((image) => (
+            {gallery.map((image) => (
               <button key={image} onClick={() => setActiveImage(image)}>
                 <img src={image} alt={property.titulo} className="h-24 w-full rounded-xl object-cover" />
               </button>
@@ -150,6 +154,7 @@ function PropertyDetailPage() {
             <li className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">Habitaciones: {property.habitaciones}</li>
             <li className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">Baños: {property.banos}</li>
             <li className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">Tipo: {property.tipo}</li>
+            <li className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">Operación: {operationLabel}</li>
             <li className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">Premium: {property.premium ? 'Sí' : 'No'}</li>
           </ul>
           <div className="flex flex-wrap gap-3">

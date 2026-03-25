@@ -61,6 +61,7 @@ function AdminPropertiesPage() {
             <tr>
               <th className="px-4 py-3">Título</th>
               <th className="px-4 py-3">Tipo</th>
+              <th className="px-4 py-3">Operación</th>
               <th className="px-4 py-3">Precio</th>
               <th className="px-4 py-3">Premium</th>
               <th className="px-4 py-3">Acciones</th>
@@ -71,6 +72,7 @@ function AdminPropertiesPage() {
               <tr key={property.id} className="border-t">
                 <td className="px-4 py-3">{property.titulo}</td>
                 <td className="px-4 py-3 capitalize">{property.tipo}</td>
+                <td className="px-4 py-3 capitalize">{property.tipoOperacion || 'venta'}</td>
                 <td className="px-4 py-3">US$ {Number(property.precio || 0).toLocaleString('es-DO')}</td>
                 <td className="px-4 py-3">{property.premium ? 'Sí' : 'No'}</td>
                 <td className="px-4 py-3">
