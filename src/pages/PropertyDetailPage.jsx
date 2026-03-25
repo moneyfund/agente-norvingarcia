@@ -5,15 +5,23 @@ import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
+import Input from '../components/Input';
 import Seo from '../components/Seo';
 import { useAuth } from '../hooks/useAuth';
 import { subscribeToComments, createComment } from '../services/commentsService';
 import { subscribeToLikes, togglePropertyLike } from '../services/likesService';
 import { subscribeToReviews, upsertReview } from '../services/reviewsService';
+import { createPropertyForm } from '../services/formulariosService';
 import { getPropiedadById } from '../services/propiedadesService';
 
 const money = new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 const placeholderImage = 'https://via.placeholder.com/1200x900?text=Propiedad';
+
+const INITIAL_VISIT_FORM = {
+  phone: '',
+  preferredDate: '',
+  notes: '',
+};
 
 function PropertyDetailPage() {
   const { id } = useParams();
@@ -29,6 +37,7 @@ function PropertyDetailPage() {
   const [reviewText, setReviewText] = useState('');
   const [reviewRating, setReviewRating] = useState(5);
   const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [visitForm, setVisitForm] = useState(INITIAL_VISIT_FORM);
 
   useEffect(() => {
     const load = async () => {
@@ -37,6 +46,8 @@ function PropertyDetailPage() {
         const data = await getPropiedadById(id);
         setProperty(data);
         setActiveImage(data?.imagenes?.[0] || '');
+      } catch (error) {
+        console.error('Error al cargar la propiedad', { propertyId: id, error });
       } finally {
         setLoading(false);
       }
@@ -60,12 +71,12 @@ function PropertyDetailPage() {
   const hasLiked = useMemo(() => Boolean(user?.uid && likes.some((like) => like.uid === user.uid)), [likes, user?.uid]);
 
   const averageRating = useMemo(() => {
-    if (!reviews.length) return 0;
+    if (!reviews.length) return '0.0';
     const total = reviews.reduce((sum, item) => sum + Number(item.rating || 0), 0);
     return (total / reviews.length).toFixed(1);
   }, [reviews]);
 
-  const requireAuthMessage = 'Debes iniciar sesión para realizar esta acción';
+  const requireAuthMessage = 'Debes iniciar sesión para realizar esta acción.';
 
   const handleLike = async () => {
     if (!isAuthenticated || !user) {
@@ -73,7 +84,12 @@ function PropertyDetailPage() {
       return;
     }
 
-    await togglePropertyLike({ propertyId: id, uid: user.uid, hasLiked });
+    try {
+      await togglePropertyLike({ propertyId: id, user });
+      setFeedbackMessage('Like actualizado correctamente.');
+    } catch (error) {
+      setFeedbackMessage('No se pudo actualizar el like. Revisa la consola.');
+    }
   };
 
   const handleCommentSubmit = async (event) => {
@@ -85,12 +101,17 @@ function PropertyDetailPage() {
 
     if (!commentText.trim()) return;
 
-    await createComment({
-      propertyId: id,
-      message: commentText.trim(),
-      user,
-    });
-    setCommentText('');
+    try {
+      await createComment({
+        propertyId: id,
+        message: commentText.trim(),
+        user,
+      });
+      setCommentText('');
+      setFeedbackMessage('Comentario publicado correctamente.');
+    } catch (error) {
+      setFeedbackMessage('No se pudo publicar el comentario. Revisa la consola.');
+    }
   };
 
   const handleReviewSubmit = async (event) => {
@@ -102,14 +123,49 @@ function PropertyDetailPage() {
 
     if (!reviewText.trim()) return;
 
-    await upsertReview({
-      propertyId: id,
-      rating: Number(reviewRating),
-      message: reviewText.trim(),
-      user,
-    });
-    setReviewText('');
-    setReviewRating(5);
+    try {
+      await upsertReview({
+        propertyId: id,
+        rating: Number(reviewRating),
+        message: reviewText.trim(),
+        user,
+      });
+      setReviewText('');
+      setReviewRating(5);
+      setFeedbackMessage('Reseña guardada correctamente.');
+    } catch (error) {
+      setFeedbackMessage('No se pudo guardar la reseña. Revisa la consola.');
+    }
+  };
+
+  const handleVisitFormChange = (field) => (event) => {
+    setVisitForm((prev) => ({ ...prev, [field]: event.target.value }));
+  };
+
+  const handleVisitFormSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!isAuthenticated || !user) {
+      setFeedbackMessage(requireAuthMessage);
+      return;
+    }
+
+    try {
+      await createPropertyForm({
+        propertyId: id,
+        tipoFormulario: 'solicitud_visita',
+        payload: {
+          ...visitForm,
+          propertyTitle: property?.titulo || '',
+        },
+        user,
+      });
+      setVisitForm(INITIAL_VISIT_FORM);
+      setOpen(false);
+      setFeedbackMessage('Solicitud de visita enviada correctamente.');
+    } catch (error) {
+      setFeedbackMessage('No se pudo enviar la solicitud de visita. Revisa la consola.');
+    }
   };
 
   if (loading || authLoading) return <section className="section-container">Cargando propiedad...</section>;
@@ -153,7 +209,7 @@ function PropertyDetailPage() {
           </div>
           {!isAuthenticated && (
             <div className="rounded-2xl border border-brand-500/30 bg-brand-500/5 p-4">
-              <p className="text-sm">Debes iniciar sesión para comentar, reseñar o dar like.</p>
+              <p className="text-sm">Debes iniciar sesión para comentar, reseñar, dar like y enviar formularios.</p>
               <Button className="mt-3" onClick={loginWithGoogle}>Iniciar sesión con Google</Button>
             </div>
           )}
@@ -233,9 +289,29 @@ function PropertyDetailPage() {
       </div>
 
       <Modal open={open} onClose={() => setOpen(false)}>
-        <h2 className="text-2xl font-semibold">Agenda una visita</h2>
-        <p className="mt-2 text-slate-500">Escríbenos por WhatsApp para coordinar fecha y hora.</p>
-        <a href="https://wa.me/18095551234" target="_blank" rel="noreferrer" className="mt-4 inline-block"><Button>Ir a WhatsApp</Button></a>
+        <h2 className="text-2xl font-semibold">Solicitar visita</h2>
+        <p className="mt-2 text-slate-500">Este formulario es protegido y se guarda en la propiedad actual.</p>
+        {!isAuthenticated && (
+          <div className="mt-4 rounded-xl border border-brand-500/30 bg-brand-500/5 p-4">
+            <p className="text-sm">Debes iniciar sesión para enviar la solicitud.</p>
+            <Button className="mt-3" type="button" onClick={loginWithGoogle}>Iniciar sesión con Google</Button>
+          </div>
+        )}
+        <form className="mt-4 space-y-3" onSubmit={handleVisitFormSubmit}>
+          <Input label="Teléfono" value={visitForm.phone} onChange={handleVisitFormChange('phone')} placeholder="Tu teléfono" />
+          <Input label="Fecha preferida" type="date" value={visitForm.preferredDate} onChange={handleVisitFormChange('preferredDate')} />
+          <label>
+            <span className="mb-2 block text-sm font-medium">Notas</span>
+            <textarea
+              rows="4"
+              value={visitForm.notes}
+              onChange={handleVisitFormChange('notes')}
+              placeholder="Horario, acompañantes o detalles adicionales"
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900"
+            />
+          </label>
+          <Button type="submit" disabled={!isAuthenticated}>Enviar solicitud</Button>
+        </form>
       </Modal>
     </section>
   );
