@@ -22,7 +22,7 @@ function Footer() {
         </div>
         <div className="flex gap-3">
           {social.map(({ icon: Icon, href, label }) => (
-            <a key={label} href={href} target="_blank" rel="noreferrer" className="rounded-full bg-slate-800 p-3 transition hover:bg-brand-500" aria-label={label}><Icon size={18} /></a>
+            <a key={label} href={href} target="_blank" rel="noreferrer" className="rounded-full bg-slate-800 p-3 transition-colors hover:bg-brand-500" aria-label={label}><Icon size={18} className="text-brand-100" /></a>
           ))}
         </div>
       </div>

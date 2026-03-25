@@ -21,7 +21,7 @@ export default {
         sans: ['Inter', 'sans-serif'],
       },
       backgroundImage: {
-        hero: 'linear-gradient(rgba(2,6,23,0.55), rgba(2,6,23,0.55)), url("https://images.unsplash.com/photo-1564013799919-ab600027ffc6")',
+        hero: 'linear-gradient(120deg, rgba(136,19,55,0.72), rgba(2,6,23,0.64)), url("https://images.unsplash.com/photo-1564013799919-ab600027ffc6")',
       },
     },
   },
