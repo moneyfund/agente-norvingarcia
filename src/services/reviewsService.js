@@ -1,52 +1,45 @@
-import { collection, doc, getDoc, onSnapshot, orderBy, query, serverTimestamp, setDoc } from 'firebase/firestore';
+import { addDoc, collection, onSnapshot, orderBy, query, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import { buildError, validateAuthUser, validatePropertyId, validateReviewPayload } from './firestoreValidation';
 
 function resenasCollectionRef(propertyId) {
   return collection(db, 'propiedades', propertyId, 'resenas');
 }
 
-export function subscribeToReviews(propertyId, callback) {
-  try {
-    const q = query(resenasCollectionRef(propertyId), orderBy('updatedAt', 'desc'));
+export function getReviewsByProperty(propertyId, onData, onError) {
+  const safePropertyId = validatePropertyId(propertyId);
+  const q = query(resenasCollectionRef(safePropertyId), orderBy('createdAt', 'desc'));
 
-    return onSnapshot(
-      q,
-      (snapshot) => {
-        const resenas = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
-        callback(resenas);
-      },
-      (error) => {
-        console.error('Error al escuchar reseñas de la propiedad', { propertyId, error });
-      },
-    );
-  } catch (error) {
-    console.error('Error al crear listener de reseñas', { propertyId, error });
-    return () => {};
-  }
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const resenas = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
+      onData(resenas);
+    },
+    (error) => {
+      console.error('Error al leer reseñas', { propertyId: safePropertyId, error });
+      onError?.(buildError(error, 'No se pudieron cargar las reseñas.'));
+    },
+  );
 }
 
-export async function upsertReview({ propertyId, rating, message, user }) {
-  const reviewRef = doc(db, 'propiedades', propertyId, 'resenas', user.uid);
+export async function createReview(propertyId, payload, user) {
+  const safePropertyId = validatePropertyId(propertyId);
+  const safePayload = validateReviewPayload(payload);
+  const safeUser = validateAuthUser(user);
 
   try {
-    const existingReview = await getDoc(reviewRef);
-
-    await setDoc(
-      reviewRef,
-      {
-        uid: user.uid,
-        propertyId,
-        displayName: user.displayName || user.email || 'Usuario',
-        photoURL: user.photoURL || '',
-        rating,
-        message,
-        createdAt: existingReview.exists() ? existingReview.data().createdAt : serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true },
-    );
+    await addDoc(resenasCollectionRef(safePropertyId), {
+      ...safeUser,
+      propertyId: safePropertyId,
+      rating: safePayload.rating,
+      message: safePayload.message,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      status: 'publicado',
+    });
   } catch (error) {
-    console.error('Error al crear o actualizar reseña', { propertyId, uid: user?.uid, error });
-    throw error;
+    console.error('Error al crear reseña', { propertyId: safePropertyId, uid: safeUser.uid, error });
+    throw buildError(error, 'No se pudo guardar la reseña.');
   }
 }

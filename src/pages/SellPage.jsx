@@ -4,7 +4,7 @@ import Button from '../components/Button';
 import Input from '../components/Input';
 import Seo from '../components/Seo';
 import { useAuth } from '../hooks/useAuth';
-import { createGeneralForm } from '../services/formulariosService';
+import { useProtectedForm } from '../hooks/useProtectedForm';
 
 const INITIAL_FORM = {
   name: '',
@@ -17,6 +17,7 @@ const INITIAL_FORM = {
 function SellPage() {
   const { isAuthenticated, user, loginWithGoogle } = useAuth();
   const [statusMessage, setStatusMessage] = useState('');
+  const { submitGeneralForm, saving, error } = useProtectedForm(user);
   const [form, setForm] = useState(INITIAL_FORM);
 
   const handleChange = (field) => (event) => {
@@ -31,20 +32,19 @@ function SellPage() {
     }
 
     try {
-      await createGeneralForm({
-        tipoFormulario: 'vender_propiedad',
-        payload: {
-          ...form,
-          name: form.name || user.displayName || '',
-          email: form.email || user.email || '',
-        },
-        user,
+      await submitGeneralForm({
+        tipo: 'vender_propiedad',
+        name: form.name || user.displayName || '',
+        phone: form.phone,
+        email: form.email || user.email || '',
+        propertyType: form.propertyType,
+        description: form.description,
       });
 
       setForm(INITIAL_FORM);
       setStatusMessage(`Solicitud enviada correctamente. Gracias, ${user?.displayName || 'usuario'}.`);
     } catch (error) {
-      setStatusMessage('No se pudo enviar la solicitud. Revisa la consola para más detalle.');
+      setStatusMessage(error.message || 'No se pudo enviar la solicitud.');
     }
   };
 
@@ -73,8 +73,9 @@ function SellPage() {
           <textarea rows="5" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900" placeholder="Cuéntame más sobre tu propiedad" value={form.description} onChange={handleChange('description')}></textarea>
         </label>
         {statusMessage && <p className="rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800">{statusMessage}</p>}
+        {error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
         <div className="flex flex-wrap gap-3">
-          <Button type="submit" disabled={!isAuthenticated}>Enviar solicitud</Button>
+          <Button type="submit" disabled={!isAuthenticated || saving}>{saving ? 'Enviando...' : 'Enviar solicitud'}</Button>
           <a href="https://wa.me/18095551234" target="_blank" rel="noreferrer"><Button type="button" variant="secondary" className="inline-flex items-center gap-2"><MessageCircle size={16} /> Contacto directo</Button></a>
         </div>
       </form>

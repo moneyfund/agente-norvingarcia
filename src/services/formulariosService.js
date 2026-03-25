@@ -1,42 +1,43 @@
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import { buildError, validateAuthUser, validateFormPayload, validatePropertyId } from './firestoreValidation';
 
-function userData(user) {
-  return {
-    uid: user.uid,
-    displayName: user.displayName || user.email || 'Usuario',
-    email: user.email || '',
-    photoURL: user.photoURL || '',
-  };
-}
+export async function createProtectedForm(propertyId, payload, user) {
+  const safePropertyId = validatePropertyId(propertyId);
+  const safePayload = validateFormPayload(payload);
+  const safeUser = validateAuthUser(user);
 
-export async function createPropertyForm({ propertyId, tipoFormulario, payload, user }) {
   try {
-    const ref = collection(db, 'propiedades', propertyId, 'formularios');
+    const ref = collection(db, 'propiedades', safePropertyId, 'formularios');
     await addDoc(ref, {
-      ...userData(user),
-      propertyId,
-      tipoFormulario,
-      payload,
+      ...safeUser,
+      propertyId: safePropertyId,
+      content: safePayload,
       createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      status: 'enviado',
     });
   } catch (error) {
-    console.error('Error al enviar formulario protegido de propiedad', { propertyId, uid: user?.uid, error });
-    throw error;
+    console.error('Error al enviar formulario de propiedad', { propertyId: safePropertyId, uid: safeUser.uid, error });
+    throw buildError(error, 'No se pudo enviar el formulario de la propiedad.');
   }
 }
 
-export async function createGeneralForm({ tipoFormulario, payload, user }) {
+export async function createGeneralForm(payload, user) {
+  const safePayload = validateFormPayload(payload);
+  const safeUser = validateAuthUser(user);
+
   try {
-    const ref = collection(db, 'formularios_generales');
+    const ref = collection(db, 'formularios');
     await addDoc(ref, {
-      ...userData(user),
-      tipoFormulario,
-      payload,
+      ...safeUser,
+      content: safePayload,
       createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      status: 'enviado',
     });
   } catch (error) {
-    console.error('Error al enviar formulario protegido general', { tipoFormulario, uid: user?.uid, error });
-    throw error;
+    console.error('Error al enviar formulario general', { uid: safeUser.uid, error });
+    throw buildError(error, 'No se pudo enviar el formulario general.');
   }
 }

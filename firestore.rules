@@ -9,17 +9,41 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == uid;
     }
 
-    function sameUid(fieldName) {
-      return isSignedIn() && request.resource.data[fieldName] == request.auth.uid;
+    function hasCommonUserFields() {
+      return request.resource.data.uid == request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.userName is string
+        && request.resource.data.userEmail is string
+        && request.resource.data.userPhotoURL is string;
     }
 
-    function isResourceOwner(fieldName) {
-      return isSignedIn() && resource.data[fieldName] == request.auth.uid;
+    function hasOnlyCommentFields() {
+      return request.resource.data.keys().hasOnly([
+        'uid', 'userId', 'userName', 'userEmail', 'userPhotoURL', 'propertyId', 'message', 'createdAt', 'updatedAt', 'status'
+      ]);
+    }
+
+    function hasOnlyReviewFields() {
+      return request.resource.data.keys().hasOnly([
+        'uid', 'userId', 'userName', 'userEmail', 'userPhotoURL', 'propertyId', 'message', 'rating', 'createdAt', 'updatedAt', 'status'
+      ]);
+    }
+
+    function hasOnlyPropertyFormFields() {
+      return request.resource.data.keys().hasOnly([
+        'uid', 'userId', 'userName', 'userEmail', 'userPhotoURL', 'propertyId', 'content', 'createdAt', 'updatedAt', 'status'
+      ]);
+    }
+
+    function hasOnlyGeneralFormFields() {
+      return request.resource.data.keys().hasOnly([
+        'uid', 'userId', 'userName', 'userEmail', 'userPhotoURL', 'content', 'createdAt', 'updatedAt', 'status'
+      ]);
     }
 
     match /users/{uid} {
       allow read: if isSignedIn();
-      allow create, update: if isSelf(uid) && sameUid('uid');
+      allow create, update: if isSelf(uid) && request.resource.data.uid == request.auth.uid;
       allow delete: if false;
     }
 
@@ -35,33 +59,53 @@ service cloud.firestore {
 
       match /likes/{uid} {
         allow read: if true;
-        allow create: if isSelf(uid) && sameUid('uid') && request.resource.data.propertyId == propertyId;
-        allow delete: if isSelf(uid) && isResourceOwner('uid');
+        allow create: if isSelf(uid)
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.propertyId == propertyId;
+        allow delete: if isSelf(uid) && resource.data.uid == request.auth.uid;
         allow update: if false;
       }
 
       match /comentarios/{commentId} {
         allow read: if true;
-        allow create: if sameUid('uid') && request.resource.data.propertyId == propertyId;
-        allow update, delete: if isResourceOwner('uid');
+        allow create: if isSignedIn()
+          && hasCommonUserFields()
+          && hasOnlyCommentFields()
+          && request.resource.data.propertyId == propertyId
+          && request.resource.data.message is string;
+        allow update, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
       }
 
-      match /resenas/{uid} {
+      match /resenas/{reviewId} {
         allow read: if true;
-        allow create, update: if isSelf(uid) && sameUid('uid') && request.resource.data.propertyId == propertyId;
-        allow delete: if isSelf(uid) && isResourceOwner('uid');
+        allow create: if isSignedIn()
+          && hasCommonUserFields()
+          && hasOnlyReviewFields()
+          && request.resource.data.propertyId == propertyId
+          && request.resource.data.message is string
+          && request.resource.data.rating is number
+          && request.resource.data.rating >= 1
+          && request.resource.data.rating <= 5;
+        allow update, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
       }
 
       match /formularios/{formId} {
-        allow read: if isSignedIn() && isResourceOwner('uid');
-        allow create: if sameUid('uid') && request.resource.data.propertyId == propertyId;
+        allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+        allow create: if isSignedIn()
+          && hasCommonUserFields()
+          && hasOnlyPropertyFormFields()
+          && request.resource.data.propertyId == propertyId
+          && request.resource.data.content is map;
         allow update, delete: if false;
       }
     }
 
-    match /formularios_generales/{formId} {
-      allow read: if isSignedIn() && isResourceOwner('uid');
-      allow create: if sameUid('uid');
+    match /formularios/{formId} {
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow create: if isSignedIn()
+        && hasCommonUserFields()
+        && hasOnlyGeneralFormFields()
+        && request.resource.data.content is map;
       allow update, delete: if false;
     }
   }

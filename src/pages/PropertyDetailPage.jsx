@@ -8,10 +8,10 @@ import Modal from '../components/Modal';
 import Input from '../components/Input';
 import Seo from '../components/Seo';
 import { useAuth } from '../hooks/useAuth';
-import { subscribeToComments, createComment } from '../services/commentsService';
+import { usePropertyComments } from '../hooks/usePropertyComments';
 import { subscribeToLikes, togglePropertyLike } from '../services/likesService';
-import { subscribeToReviews, upsertReview } from '../services/reviewsService';
-import { createPropertyForm } from '../services/formulariosService';
+import { usePropertyReviews } from '../hooks/usePropertyReviews';
+import { useProtectedForm } from '../hooks/useProtectedForm';
 import { getPropiedadById } from '../services/propiedadesService';
 
 const money = new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
@@ -30,14 +30,16 @@ function PropertyDetailPage() {
   const [activeImage, setActiveImage] = useState('');
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [comments, setComments] = useState([]);
-  const [reviews, setReviews] = useState([]);
   const [likes, setLikes] = useState([]);
   const [commentText, setCommentText] = useState('');
   const [reviewText, setReviewText] = useState('');
   const [reviewRating, setReviewRating] = useState(5);
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [visitForm, setVisitForm] = useState(INITIAL_VISIT_FORM);
+
+  const { comments, loading: commentsLoading, saving: commentsSaving, error: commentsError, submitComment } = usePropertyComments(id, user);
+  const { reviews, loading: reviewsLoading, saving: reviewsSaving, error: reviewsError, submitReview } = usePropertyReviews(id, user);
+  const { saving: formSaving, error: formError, submitPropertyForm } = useProtectedForm(user);
 
   useEffect(() => {
     const load = async () => {
@@ -56,18 +58,14 @@ function PropertyDetailPage() {
     load();
   }, [id]);
 
+
   useEffect(() => {
     const unsubscribeLikes = subscribeToLikes(id, setLikes);
-    const unsubscribeComments = subscribeToComments(id, setComments);
-    const unsubscribeReviews = subscribeToReviews(id, setReviews);
 
     return () => {
       unsubscribeLikes();
-      unsubscribeComments();
-      unsubscribeReviews();
     };
   }, [id]);
-
   const hasLiked = useMemo(() => Boolean(user?.uid && likes.some((like) => like.uid === user.uid)), [likes, user?.uid]);
 
   const averageRating = useMemo(() => {
@@ -102,15 +100,11 @@ function PropertyDetailPage() {
     if (!commentText.trim()) return;
 
     try {
-      await createComment({
-        propertyId: id,
-        message: commentText.trim(),
-        user,
-      });
+      await submitComment(commentText.trim());
       setCommentText('');
       setFeedbackMessage('Comentario publicado correctamente.');
     } catch (error) {
-      setFeedbackMessage('No se pudo publicar el comentario. Revisa la consola.');
+      setFeedbackMessage(error.message || 'No se pudo publicar el comentario.');
     }
   };
 
@@ -124,17 +118,15 @@ function PropertyDetailPage() {
     if (!reviewText.trim()) return;
 
     try {
-      await upsertReview({
-        propertyId: id,
+      await submitReview({
         rating: Number(reviewRating),
         message: reviewText.trim(),
-        user,
       });
       setReviewText('');
       setReviewRating(5);
       setFeedbackMessage('Reseña guardada correctamente.');
     } catch (error) {
-      setFeedbackMessage('No se pudo guardar la reseña. Revisa la consola.');
+      setFeedbackMessage(error.message || 'No se pudo guardar la reseña.');
     }
   };
 
@@ -151,20 +143,18 @@ function PropertyDetailPage() {
     }
 
     try {
-      await createPropertyForm({
-        propertyId: id,
-        tipoFormulario: 'solicitud_visita',
-        payload: {
-          ...visitForm,
-          propertyTitle: property?.titulo || '',
-        },
-        user,
+      await submitPropertyForm(id, {
+        tipo: 'solicitud_visita',
+        phone: visitForm.phone,
+        preferredDate: visitForm.preferredDate,
+        notes: visitForm.notes,
+        propertyTitle: property?.titulo || '',
       });
       setVisitForm(INITIAL_VISIT_FORM);
       setOpen(false);
       setFeedbackMessage('Solicitud de visita enviada correctamente.');
     } catch (error) {
-      setFeedbackMessage('No se pudo enviar la solicitud de visita. Revisa la consola.');
+      setFeedbackMessage(error.message || 'No se pudo enviar la solicitud de visita.');
     }
   };
 
@@ -237,19 +227,21 @@ function PropertyDetailPage() {
               placeholder="Comparte tu opinión sobre esta propiedad"
               className="w-full rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900"
             />
-            <Button type="submit" disabled={!isAuthenticated}>Publicar comentario</Button>
+            <Button type="submit" disabled={!isAuthenticated || commentsSaving}>{commentsSaving ? 'Publicando...' : 'Publicar comentario'}</Button>
           </form>
+          {commentsError && <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-700">{commentsError}</p>}
           <div className="mt-4 space-y-3">
             {comments.map((comment) => (
               <article key={comment.id} className="rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800">
                 <div className="flex items-center gap-2">
-                  {comment.photoURL && <img src={comment.photoURL} alt={comment.displayName} className="h-7 w-7 rounded-full" />}
-                  <p className="font-semibold">{comment.displayName}</p>
+                  {comment.userPhotoURL && <img src={comment.userPhotoURL} alt={comment.userName} className="h-7 w-7 rounded-full" />}
+                  <p className="font-semibold">{comment.userName}</p>
                 </div>
                 <p className="mt-1 text-slate-600 dark:text-slate-300">{comment.message}</p>
               </article>
             ))}
-            {!comments.length && <p className="text-sm text-slate-500">Aún no hay comentarios.</p>}
+            {commentsLoading && <p className="text-sm text-slate-500">Cargando comentarios...</p>}
+            {!commentsLoading && !comments.length && <p className="text-sm text-slate-500">Aún no hay comentarios.</p>}
           </div>
         </div>
 
@@ -271,19 +263,21 @@ function PropertyDetailPage() {
               placeholder="¿Cómo calificas esta propiedad?"
               className="w-full rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900"
             />
-            <Button type="submit" disabled={!isAuthenticated}>Publicar reseña</Button>
+            <Button type="submit" disabled={!isAuthenticated || reviewsSaving}>{reviewsSaving ? 'Publicando...' : 'Publicar reseña'}</Button>
           </form>
+          {reviewsError && <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-700">{reviewsError}</p>}
           <div className="mt-4 space-y-3">
             {reviews.map((review) => (
               <article key={review.id} className="rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800">
                 <div className="flex items-center gap-2">
-                  {review.photoURL && <img src={review.photoURL} alt={review.displayName} className="h-7 w-7 rounded-full" />}
-                  <p className="font-semibold">{review.displayName} · {review.rating}/5</p>
+                  {review.userPhotoURL && <img src={review.userPhotoURL} alt={review.userName} className="h-7 w-7 rounded-full" />}
+                  <p className="font-semibold">{review.userName} · {review.rating}/5</p>
                 </div>
                 <p className="mt-1 text-slate-600 dark:text-slate-300">{review.message}</p>
               </article>
             ))}
-            {!reviews.length && <p className="text-sm text-slate-500">Aún no hay reseñas.</p>}
+            {reviewsLoading && <p className="text-sm text-slate-500">Cargando reseñas...</p>}
+            {!reviewsLoading && !reviews.length && <p className="text-sm text-slate-500">Aún no hay reseñas.</p>}
           </div>
         </div>
       </div>
@@ -297,6 +291,7 @@ function PropertyDetailPage() {
             <Button className="mt-3" type="button" onClick={loginWithGoogle}>Iniciar sesión con Google</Button>
           </div>
         )}
+        {formError && <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-700">{formError}</p>}
         <form className="mt-4 space-y-3" onSubmit={handleVisitFormSubmit}>
           <Input label="Teléfono" value={visitForm.phone} onChange={handleVisitFormChange('phone')} placeholder="Tu teléfono" />
           <Input label="Fecha preferida" type="date" value={visitForm.preferredDate} onChange={handleVisitFormChange('preferredDate')} />
@@ -310,7 +305,7 @@ function PropertyDetailPage() {
               className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900"
             />
           </label>
-          <Button type="submit" disabled={!isAuthenticated}>Enviar solicitud</Button>
+          <Button type="submit" disabled={!isAuthenticated || formSaving}>{formSaving ? 'Enviando...' : 'Enviar solicitud'}</Button>
         </form>
       </Modal>
     </section>

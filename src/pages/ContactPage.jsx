@@ -6,7 +6,7 @@ import Button from '../components/Button';
 import Input from '../components/Input';
 import Seo from '../components/Seo';
 import { useAuth } from '../hooks/useAuth';
-import { createGeneralForm } from '../services/formulariosService';
+import { useProtectedForm } from '../hooks/useProtectedForm';
 
 const INITIAL_FORM = {
   name: '',
@@ -19,6 +19,7 @@ function ContactPage() {
   const { isAuthenticated, user, loginWithGoogle } = useAuth();
   const [form, setForm] = useState(INITIAL_FORM);
   const [statusMessage, setStatusMessage] = useState('');
+  const { submitGeneralForm, saving, error } = useProtectedForm(user);
 
   const handleChange = (field) => (event) => {
     setForm((prev) => ({ ...prev, [field]: event.target.value }));
@@ -32,20 +33,18 @@ function ContactPage() {
     }
 
     try {
-      await createGeneralForm({
-        tipoFormulario: 'contacto',
-        payload: {
-          ...form,
-          name: form.name || user.displayName || '',
-          email: form.email || user.email || '',
-        },
-        user,
+      await submitGeneralForm({
+        tipo: 'contacto',
+        name: form.name || user.displayName || '',
+        email: form.email || user.email || '',
+        phone: form.phone,
+        message: form.message,
       });
 
       setStatusMessage('Mensaje enviado correctamente. Te responderemos pronto.');
       setForm(INITIAL_FORM);
     } catch (error) {
-      setStatusMessage('No se pudo enviar el mensaje. Revisa la consola para más detalle.');
+      setStatusMessage(error.message || 'No se pudo enviar el mensaje.');
     }
   };
 
@@ -69,7 +68,8 @@ function ContactPage() {
             <textarea rows="5" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900" value={form.message} onChange={handleChange('message')} />
           </label>
           {statusMessage && <p className="rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800">{statusMessage}</p>}
-          <Button type="submit" disabled={!isAuthenticated}>Enviar mensaje</Button>
+          {error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+          <Button type="submit" disabled={!isAuthenticated || saving}>{saving ? 'Enviando...' : 'Enviar mensaje'}</Button>
         </form>
         <div className="space-y-4 rounded-2xl bg-white p-6 shadow-premium dark:bg-slate-900">
           <p className="flex items-center gap-2"><Phone size={16}/> +505 8744-6657</p>

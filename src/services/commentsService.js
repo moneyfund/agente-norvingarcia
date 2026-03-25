@@ -1,42 +1,44 @@
 import { addDoc, collection, onSnapshot, orderBy, query, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import { buildError, validateAuthUser, validateCommentPayload, validatePropertyId } from './firestoreValidation';
 
 function comentariosCollectionRef(propertyId) {
   return collection(db, 'propiedades', propertyId, 'comentarios');
 }
 
-export function subscribeToComments(propertyId, callback) {
-  try {
-    const q = query(comentariosCollectionRef(propertyId), orderBy('createdAt', 'desc'));
+export function getCommentsByProperty(propertyId, onData, onError) {
+  const safePropertyId = validatePropertyId(propertyId);
+  const q = query(comentariosCollectionRef(safePropertyId), orderBy('createdAt', 'desc'));
 
-    return onSnapshot(
-      q,
-      (snapshot) => {
-        const comentarios = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
-        callback(comentarios);
-      },
-      (error) => {
-        console.error('Error al escuchar comentarios de la propiedad', { propertyId, error });
-      },
-    );
-  } catch (error) {
-    console.error('Error al crear listener de comentarios', { propertyId, error });
-    return () => {};
-  }
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const comentarios = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
+      onData(comentarios);
+    },
+    (error) => {
+      console.error('Error al leer comentarios', { propertyId: safePropertyId, error });
+      onError?.(buildError(error, 'No se pudieron cargar los comentarios.'));
+    },
+  );
 }
 
-export async function createComment({ propertyId, message, user }) {
+export async function createComment(propertyId, payload, user) {
+  const safePropertyId = validatePropertyId(propertyId);
+  const safePayload = validateCommentPayload(payload);
+  const safeUser = validateAuthUser(user);
+
   try {
-    await addDoc(comentariosCollectionRef(propertyId), {
-      uid: user.uid,
-      propertyId,
-      displayName: user.displayName || user.email || 'Usuario',
-      photoURL: user.photoURL || '',
-      message,
+    await addDoc(comentariosCollectionRef(safePropertyId), {
+      ...safeUser,
+      propertyId: safePropertyId,
+      message: safePayload.message,
       createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      status: 'publicado',
     });
   } catch (error) {
-    console.error('Error al crear comentario', { propertyId, uid: user?.uid, error });
-    throw error;
+    console.error('Error al crear comentario', { propertyId: safePropertyId, uid: safeUser.uid, error });
+    throw buildError(error, 'No se pudo guardar el comentario.');
   }
 }
