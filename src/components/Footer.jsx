@@ -13,7 +13,7 @@ function Footer() {
       <div className="section-container grid gap-10 md:grid-cols-3">
         <div>
           <h3 className="font-display text-2xl">Norvin García</h3>
-          <p className="mt-3 text-sm text-slate-400">Agente de DIAMANTES REALTY GROUP, operando en Nicaragua con asesoría inmobiliaria premium y acompañamiento integral.</p>
+          <p className="mt-3 text-sm text-slate-400">Agente de DIAMANTES REALTY GROUP, operando en Nicaragua con asesoría inmobiliaria y acompañamiento integral.</p>
         </div>
         <div className="space-y-3 text-sm text-slate-300">
           <p className="flex items-center gap-2"><Phone size={15}/> +505 5852 0409 </p>
