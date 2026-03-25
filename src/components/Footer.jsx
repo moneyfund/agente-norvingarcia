@@ -8,11 +8,15 @@ const social = [
 ];
 
 function Footer() {
+  const logoSrc = '/LOGO DIAMANTES.png';
+
   return (
     <footer className="mt-16 bg-slate-900 text-slate-200">
       <div className="section-container grid gap-10 md:grid-cols-3">
         <div>
-          <img src="/LOGO DIAMANTES.png" className="h-6 w-auto object-contain" />
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-visible rounded-full border border-slate-600 bg-white p-1 shadow-sm">
+            <img src={logoSrc} alt="Logo DIAMANTES REALTY GROUP" className="block h-9 w-9 min-h-9 min-w-9 shrink-0 object-contain opacity-100" />
+          </div>
         </div>
         <div className="space-y-3 text-sm text-slate-300">
           <p className="flex items-center gap-2"><Phone size={15}/> +505 8744 6657 </p>
