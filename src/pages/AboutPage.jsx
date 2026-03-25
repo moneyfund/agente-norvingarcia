@@ -18,7 +18,12 @@ function AboutPage() {
         <div>
           <h1 className="font-display text-4xl font-semibold">{agent?.nombre || 'Norvin García'}</h1>
           <p className="mt-2 inline-block rounded-full bg-brand-500/10 px-3 py-1 text-sm font-semibold text-brand-600 dark:text-brand-100">Agente de DIAMANTES REALTY GROUP · Operando en Nicaragua</p>
-          <p className="mt-4 text-slate-600 dark:text-slate-300">{agent?.biografia || 'Soy asesor inmobiliario con más de 10 años de experiencia en compraventa de propiedades residenciales, comerciales y de inversión.'}</p>
+          <p className="mt-4 text-slate-600 dark:text-slate-300">{agent?.biografia || 'Soy un profesional del mercado inmobiliario enfocado en brindar soluciones reales y oportunidades de valor a cada cliente. Me especializo en la compra, venta y asesoría de propiedades, combinando conocimiento del mercado, estrategia comercial y atención personalizada para lograr resultados efectivos.
+
+Mi enfoque va más allá de cerrar negocios: busco entender las necesidades de cada persona, acompañándola en todo el proceso con transparencia, compromiso y confianza. Creo firmemente que cada propiedad representa una meta importante, ya sea inversión, hogar o crecimiento patrimonial.
+
+Trabajo con dedicación para ofrecer opciones seguras, asesoría clara y un servicio profesional que marque la diferencia en el sector inmobiliario.
+'}</p>
           <div className="mt-6 space-y-2">
             <p><strong>Experiencia:</strong> 10+ años en bienes raíces.</p>
             <p><strong>Especialización:</strong> Mercado premium y captación de propiedades de alto valor.</p>
