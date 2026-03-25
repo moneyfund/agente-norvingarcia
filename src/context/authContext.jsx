@@ -2,10 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import {
   GoogleAuthProvider,
   browserLocalPersistence,
-  getRedirectResult,
   onAuthStateChanged,
   setPersistence,
-  signInWithEmailAndPassword,
   signInWithRedirect,
   signOut,
 } from 'firebase/auth';
@@ -14,12 +12,15 @@ import { auth, db } from '../services/firebase';
 
 const AuthContext = createContext(null);
 
+const provider = new GoogleAuthProvider();
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const ensureUserDocument = useCallback(async (firebaseUser) => {
     if (!firebaseUser) return;
+
     const userRef = doc(db, 'usuarios', firebaseUser.uid);
     const userSnapshot = await getDoc(userRef);
     const payload = {
@@ -50,16 +51,6 @@ export function AuthProvider({ children }) {
       console.error('Error configurando persistencia:', error);
     });
 
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result?.user) {
-          console.log('Usuario logueado:', result.user);
-        }
-      })
-      .catch((error) => {
-        console.error('Error login:', error);
-      });
-
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       try {
         if (firebaseUser) {
@@ -80,11 +71,7 @@ export function AuthProvider({ children }) {
     user,
     loading,
     isAuthenticated: Boolean(user),
-    login: (email, password) => signInWithEmailAndPassword(auth, email, password),
-    loginWithGoogle: () => {
-      const provider = new GoogleAuthProvider();
-      return signInWithRedirect(auth, provider);
-    },
+    loginWithGoogle: () => signInWithRedirect(auth, provider),
     logout: () => signOut(auth),
   }), [user, loading]);
 
