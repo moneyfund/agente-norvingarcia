@@ -1,12 +1,11 @@
 import { collection, doc, getDoc, getDocs, query, setDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { assertFirebaseEnabled, db, storage } from './firebase';
+import { db, storage } from './firebase';
 
 const agentesCollection = 'agentes';
 const defaultAgentId = 'norvin-garcia';
 
 export async function getAgente(agentId = defaultAgentId) {
-  assertFirebaseEnabled();
   const snap = await getDoc(doc(db, agentesCollection, agentId));
   if (snap.exists()) {
     return { id: snap.id, ...snap.data() };
@@ -23,7 +22,6 @@ export async function getAgente(agentId = defaultAgentId) {
 }
 
 export async function uploadAgentPhoto(file) {
-  assertFirebaseEnabled();
   if (!file) return '';
   const safeName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
   const fileRef = ref(storage, `agentes/${safeName}`);
@@ -32,7 +30,6 @@ export async function uploadAgentPhoto(file) {
 }
 
 export async function saveAgente(data, agentId = defaultAgentId) {
-  assertFirebaseEnabled();
   await setDoc(doc(db, agentesCollection, agentId), data, { merge: true });
   return agentId;
 }
