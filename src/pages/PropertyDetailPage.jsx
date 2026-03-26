@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Heart, MapPin, Star } from 'lucide-react';
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
@@ -9,9 +9,9 @@ import Input from '../components/Input';
 import Seo from '../components/Seo';
 import { useAuth } from '../hooks/useAuth';
 import { usePropertyComments } from '../hooks/usePropertyComments';
-import { subscribeToLikes, toggleLike } from '../services/likes.service';
 import { usePropertyReviews } from '../hooks/usePropertyReviews';
-import { useProtectedForm } from '../hooks/useProtectedForm';
+import { usePropertyLikes } from '../hooks/usePropertyLikes';
+import { useProtectedPropertyForm } from '../hooks/useProtectedPropertyForm';
 import { getPropiedadById } from '../services/propiedadesService';
 import { propertyMarkerIcon } from '../utils/mapMarkers';
 
@@ -20,8 +20,7 @@ const placeholderImage = 'https://via.placeholder.com/1200x900?text=Propiedad';
 
 const INITIAL_VISIT_FORM = {
   phone: '',
-  preferredDate: '',
-  notes: '',
+  message: '',
 };
 
 function PropertyDetailPage() {
@@ -31,16 +30,23 @@ function PropertyDetailPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [likes, setLikes] = useState([]);
   const [commentText, setCommentText] = useState('');
   const [reviewText, setReviewText] = useState('');
   const [reviewRating, setReviewRating] = useState(5);
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [visitForm, setVisitForm] = useState(INITIAL_VISIT_FORM);
 
-  const { comments, loading: commentsLoading, saving: commentsSaving, error: commentsError, submitComment } = usePropertyComments(id, user);
-  const { reviews, loading: reviewsLoading, saving: reviewsSaving, error: reviewsError, submitReview } = usePropertyReviews(id, user);
-  const { saving: formSaving, error: formError, submitPropertyForm } = useProtectedForm(user);
+  const { comments, loading: commentsLoading, submitting: commentsSubmitting, error: commentsError, submitComment } = usePropertyComments(id);
+  const {
+    reviews,
+    averageRating,
+    loading: reviewsLoading,
+    submitting: reviewsSubmitting,
+    error: reviewsError,
+    submitReview,
+  } = usePropertyReviews(id);
+  const { likesCount, hasLiked, loading: likesLoading, error: likesError, toggle } = usePropertyLikes(id);
+  const { submitForm, submitting: formSubmitting, error: formError, success: formSuccess } = useProtectedPropertyForm(id);
 
   useEffect(() => {
     const load = async () => {
@@ -59,39 +65,16 @@ function PropertyDetailPage() {
     load();
   }, [id]);
 
-
-  useEffect(() => {
-    if (!id) return () => {};
-
-    const unsubscribeLikes = subscribeToLikes(id, setLikes);
-
-    return () => {
-      unsubscribeLikes();
-    };
-  }, [id]);
-  const hasLiked = useMemo(() => Boolean(user?.uid && likes.some((like) => like.uid === user.uid)), [likes, user?.uid]);
-
-  const averageRating = useMemo(() => {
-    if (!reviews.length) return '0.0';
-    const total = reviews.reduce((sum, item) => sum + Number(item.rating || 0), 0);
-    return (total / reviews.length).toFixed(1);
-  }, [reviews]);
-
   const requireAuthMessage = 'Debes iniciar sesión para realizar esta acción.';
 
   const handleLike = async () => {
-    if (!id) {
-      setFeedbackMessage('No se pudo identificar la propiedad.');
-      return;
-    }
-
     if (!isAuthenticated || !user) {
       setFeedbackMessage(requireAuthMessage);
       return;
     }
 
     try {
-      await toggleLike(id, user);
+      await toggle();
       setFeedbackMessage('Like actualizado correctamente.');
     } catch (error) {
       setFeedbackMessage(error.message || 'No se pudo actualizar el like.');
@@ -100,10 +83,6 @@ function PropertyDetailPage() {
 
   const handleCommentSubmit = async (event) => {
     event.preventDefault();
-    if (!id) {
-      setFeedbackMessage('No se pudo identificar la propiedad.');
-      return;
-    }
 
     if (!isAuthenticated || !user) {
       setFeedbackMessage(requireAuthMessage);
@@ -123,10 +102,6 @@ function PropertyDetailPage() {
 
   const handleReviewSubmit = async (event) => {
     event.preventDefault();
-    if (!id) {
-      setFeedbackMessage('No se pudo identificar la propiedad.');
-      return;
-    }
 
     if (!isAuthenticated || !user) {
       setFeedbackMessage(requireAuthMessage);
@@ -136,10 +111,7 @@ function PropertyDetailPage() {
     if (!reviewText.trim()) return;
 
     try {
-      await submitReview({
-        rating: Number(reviewRating),
-        message: reviewText.trim(),
-      });
+      await submitReview(Number(reviewRating), reviewText.trim());
       setReviewText('');
       setReviewRating(5);
       setFeedbackMessage('Reseña guardada correctamente.');
@@ -155,26 +127,18 @@ function PropertyDetailPage() {
   const handleVisitFormSubmit = async (event) => {
     event.preventDefault();
 
-    if (!id) {
-      setFeedbackMessage('No se pudo identificar la propiedad.');
-      return;
-    }
-
     if (!isAuthenticated || !user) {
       setFeedbackMessage(requireAuthMessage);
       return;
     }
 
     try {
-      await submitPropertyForm(id, {
-        tipo: 'solicitud_visita',
+      await submitForm({
         phone: visitForm.phone,
-        preferredDate: visitForm.preferredDate,
-        message: [visitForm.preferredDate ? `Fecha preferida: ${visitForm.preferredDate}` : '', visitForm.notes].filter(Boolean).join(' | '),
+        message: visitForm.message,
       });
       setVisitForm(INITIAL_VISIT_FORM);
-      setOpen(false);
-      setFeedbackMessage('Solicitud de visita enviada correctamente.');
+      setFeedbackMessage('Solicitud enviada correctamente.');
     } catch (error) {
       setFeedbackMessage(error.message || 'No se pudo enviar la solicitud de visita.');
     }
@@ -253,8 +217,8 @@ function PropertyDetailPage() {
           <div className="flex flex-wrap gap-3">
             <a href="https://wa.me/18095551234" target="_blank" rel="noreferrer"><Button>Contactar por WhatsApp</Button></a>
             <Button variant="outline" onClick={() => setOpen(true)}>Solicitar visita</Button>
-            <Button type="button" variant={hasLiked ? 'primary' : 'outline'} onClick={handleLike} className="inline-flex items-center gap-2">
-              <Heart size={16} /> {hasLiked ? 'Te gusta' : 'Me gusta'} ({likes.length})
+            <Button type="button" variant={hasLiked ? 'primary' : 'outline'} onClick={handleLike} disabled={likesLoading} className="inline-flex items-center gap-2">
+              <Heart size={16} /> {hasLiked ? 'Te gusta' : 'Me gusta'} ({likesCount})
             </Button>
           </div>
           {!isAuthenticated && (
@@ -263,7 +227,7 @@ function PropertyDetailPage() {
               <Button className="mt-3" onClick={loginWithGoogle}>Iniciar sesión con Google</Button>
             </div>
           )}
-          {feedbackMessage && <p className="rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800">{feedbackMessage}</p>}
+          {(feedbackMessage || likesError) && <p className="rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800">{feedbackMessage || likesError}</p>}
         </div>
       </div>
 
@@ -287,7 +251,7 @@ function PropertyDetailPage() {
               placeholder="Comparte tu opinión sobre esta propiedad"
               className="w-full rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900"
             />
-            <Button type="submit" disabled={!isAuthenticated || commentsSaving}>{commentsSaving ? 'Publicando...' : 'Publicar comentario'}</Button>
+            <Button type="submit" disabled={!isAuthenticated || commentsSubmitting}>{commentsSubmitting ? 'Publicando...' : 'Publicar comentario'}</Button>
           </form>
           {commentsError && <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-700">{commentsError}</p>}
           <div className="mt-4 space-y-3">
@@ -307,7 +271,7 @@ function PropertyDetailPage() {
 
         <div className="rounded-2xl bg-white p-5 shadow-premium dark:bg-slate-900">
           <h2 className="text-xl font-semibold">Reseñas</h2>
-          <p className="mt-2 text-sm text-slate-500">Valoración promedio: {averageRating} <Star size={14} className="inline text-amber-400" fill="currentColor" /></p>
+          <p className="mt-2 text-sm text-slate-500">Valoración promedio: {averageRating.toFixed(1)} <Star size={14} className="inline text-amber-400" fill="currentColor" /></p>
           <form className="mt-4 space-y-3" onSubmit={handleReviewSubmit}>
             <select
               value={reviewRating}
@@ -323,7 +287,7 @@ function PropertyDetailPage() {
               placeholder="¿Cómo calificas esta propiedad?"
               className="w-full rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900"
             />
-            <Button type="submit" disabled={!isAuthenticated || reviewsSaving}>{reviewsSaving ? 'Publicando...' : 'Publicar reseña'}</Button>
+            <Button type="submit" disabled={!isAuthenticated || reviewsSubmitting}>{reviewsSubmitting ? 'Publicando...' : 'Publicar reseña'}</Button>
           </form>
           {reviewsError && <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-700">{reviewsError}</p>}
           <div className="mt-4 space-y-3">
@@ -352,20 +316,20 @@ function PropertyDetailPage() {
           </div>
         )}
         {formError && <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-700">{formError}</p>}
+        {formSuccess && <p className="mt-3 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700">Formulario enviado correctamente.</p>}
         <form className="mt-4 space-y-3" onSubmit={handleVisitFormSubmit}>
           <Input label="Teléfono" value={visitForm.phone} onChange={handleVisitFormChange('phone')} placeholder="Tu teléfono" />
-          <Input label="Fecha preferida" type="date" value={visitForm.preferredDate} onChange={handleVisitFormChange('preferredDate')} />
           <label>
-            <span className="mb-2 block text-sm font-medium">Notas</span>
+            <span className="mb-2 block text-sm font-medium">Mensaje</span>
             <textarea
               rows="4"
-              value={visitForm.notes}
-              onChange={handleVisitFormChange('notes')}
-              placeholder="Horario, acompañantes o detalles adicionales"
+              value={visitForm.message}
+              onChange={handleVisitFormChange('message')}
+              placeholder="Cuéntanos cuándo te gustaría visitar la propiedad"
               className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900"
             />
           </label>
-          <Button type="submit" disabled={!isAuthenticated || formSaving}>{formSaving ? 'Enviando...' : 'Enviar solicitud'}</Button>
+          <Button type="submit" disabled={!isAuthenticated || formSubmitting}>{formSubmitting ? 'Enviando...' : 'Enviar solicitud'}</Button>
         </form>
       </Modal>
     </section>

@@ -5,92 +5,87 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isSelf(uid) {
+    function isOwner(uid) {
       return isSignedIn() && request.auth.uid == uid;
     }
 
-    function isValidBaseUserFields() {
+    function isTimestampOrServerTimestamp(field) {
+      return field is timestamp || field == request.time;
+    }
+
+    function hasValidUserProfileFields() {
       return request.resource.data.uid == request.auth.uid
         && request.resource.data.userName is string
         && request.resource.data.userName.size() > 0
         && request.resource.data.userEmail is string
-        && request.resource.data.userEmail.size() > 0;
+        && request.resource.data.userEmail.size() > 0
+        && (request.resource.data.userPhotoURL == null || request.resource.data.userPhotoURL is string);
     }
 
-    function hasValidOptionalPhoto() {
-      return !('userPhotoURL' in request.resource.data)
-        || request.resource.data.userPhotoURL is string
-        || request.resource.data.userPhotoURL == null;
-    }
-
-    function isValidComment(propertyId) {
+    function hasValidCommentShape(propertyId) {
       return request.resource.data.keys().hasOnly([
           'uid', 'userName', 'userEmail', 'userPhotoURL', 'content', 'propertyId', 'createdAt', 'updatedAt'
         ])
-        && request.resource.data.keys().hasAll([
-          'uid', 'userName', 'userEmail', 'content', 'propertyId', 'createdAt', 'updatedAt'
-        ])
-        && isValidBaseUserFields()
-        && hasValidOptionalPhoto()
+        && hasValidUserProfileFields()
         && request.resource.data.content is string
         && request.resource.data.content.size() > 0
-        && request.resource.data.propertyId is string
-        && request.resource.data.propertyId == propertyId;
+        && request.resource.data.propertyId == propertyId
+        && isTimestampOrServerTimestamp(request.resource.data.createdAt)
+        && isTimestampOrServerTimestamp(request.resource.data.updatedAt);
     }
 
-    function isValidReview(propertyId) {
+    function hasValidReviewShape(propertyId) {
       return request.resource.data.keys().hasOnly([
           'uid', 'userName', 'userEmail', 'userPhotoURL', 'rating', 'content', 'propertyId', 'createdAt', 'updatedAt'
         ])
-        && request.resource.data.keys().hasAll([
-          'uid', 'userName', 'userEmail', 'rating', 'content', 'propertyId', 'createdAt', 'updatedAt'
-        ])
-        && isValidBaseUserFields()
-        && hasValidOptionalPhoto()
+        && hasValidUserProfileFields()
         && request.resource.data.rating is number
         && request.resource.data.rating >= 1
         && request.resource.data.rating <= 5
         && request.resource.data.content is string
         && request.resource.data.content.size() > 0
-        && request.resource.data.propertyId is string
-        && request.resource.data.propertyId == propertyId;
+        && request.resource.data.propertyId == propertyId
+        && isTimestampOrServerTimestamp(request.resource.data.createdAt)
+        && isTimestampOrServerTimestamp(request.resource.data.updatedAt);
     }
 
-    function isValidPropertyForm(propertyId) {
+    function hasValidLikeShape(propertyId) {
+      return request.resource.data.keys().hasOnly(['uid', 'propertyId', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.propertyId == propertyId
+        && isTimestampOrServerTimestamp(request.resource.data.createdAt);
+    }
+
+    function hasValidPropertyFormShape(propertyId) {
       return request.resource.data.keys().hasOnly([
-          'uid', 'userName', 'userEmail', 'phone', 'message', 'propertyId', 'createdAt', 'status'
+          'uid', 'userName', 'userEmail', 'userPhotoURL', 'phone', 'message', 'propertyId', 'createdAt', 'status'
         ])
-        && request.resource.data.keys().hasAll([
-          'uid', 'userName', 'userEmail', 'phone', 'message', 'propertyId', 'createdAt', 'status'
-        ])
-        && isValidBaseUserFields()
+        && hasValidUserProfileFields()
         && request.resource.data.phone is string
         && request.resource.data.phone.size() > 0
         && request.resource.data.message is string
         && request.resource.data.message.size() > 0
-        && request.resource.data.status is string
-        && request.resource.data.propertyId is string
-        && request.resource.data.propertyId == propertyId;
+        && request.resource.data.propertyId == propertyId
+        && request.resource.data.status == 'nuevo'
+        && isTimestampOrServerTimestamp(request.resource.data.createdAt);
     }
 
-    function isValidGeneralForm() {
+    function hasValidGeneralFormShape() {
       return request.resource.data.keys().hasOnly([
-          'uid', 'userName', 'userEmail', 'phone', 'message', 'createdAt', 'status'
+          'uid', 'userName', 'userEmail', 'userPhotoURL', 'phone', 'message', 'createdAt', 'status'
         ])
-        && request.resource.data.keys().hasAll([
-          'uid', 'userName', 'userEmail', 'phone', 'message', 'createdAt', 'status'
-        ])
-        && isValidBaseUserFields()
+        && hasValidUserProfileFields()
         && request.resource.data.phone is string
         && request.resource.data.phone.size() > 0
         && request.resource.data.message is string
         && request.resource.data.message.size() > 0
-        && request.resource.data.status is string;
+        && request.resource.data.status == 'nuevo'
+        && isTimestampOrServerTimestamp(request.resource.data.createdAt);
     }
 
     match /users/{uid} {
       allow read: if isSignedIn();
-      allow create, update: if isSelf(uid) && request.resource.data.uid == request.auth.uid;
+      allow create, update: if isOwner(uid) && request.resource.data.uid == request.auth.uid;
       allow delete: if false;
     }
 
@@ -106,46 +101,33 @@ service cloud.firestore {
 
       match /comentarios/{commentId} {
         allow read: if true;
-        allow create: if isSignedIn() && isValidComment(propertyId);
-        allow update: if isSignedIn()
-          && resource.data.uid == request.auth.uid
-          && isValidComment(propertyId)
-          && request.resource.data.uid == resource.data.uid
-          && request.resource.data.propertyId == resource.data.propertyId;
-        allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+        allow create: if isSignedIn() && hasValidCommentShape(propertyId);
+        allow update, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
       }
 
       match /resenas/{reviewId} {
         allow read: if true;
-        allow create: if isSignedIn() && isValidReview(propertyId);
-        allow update: if isSignedIn()
-          && resource.data.uid == request.auth.uid
-          && isValidReview(propertyId)
-          && request.resource.data.uid == resource.data.uid
-          && request.resource.data.propertyId == resource.data.propertyId;
-        allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+        allow create: if isSignedIn() && hasValidReviewShape(propertyId);
+        allow update, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
       }
 
       match /likes/{uid} {
         allow read: if true;
-        allow create: if isSelf(uid)
-          && request.resource.data.keys().hasOnly(['uid', 'propertyId', 'createdAt'])
-          && request.resource.data.uid == request.auth.uid
-          && request.resource.data.propertyId == propertyId;
-        allow delete: if isSelf(uid) && resource.data.uid == request.auth.uid;
+        allow create: if isOwner(uid) && hasValidLikeShape(propertyId);
+        allow delete: if isOwner(uid);
         allow update: if false;
       }
 
       match /formularios/{formId} {
+        allow create: if isSignedIn() && hasValidPropertyFormShape(propertyId);
         allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
-        allow create: if isSignedIn() && isValidPropertyForm(propertyId);
         allow update, delete: if false;
       }
     }
 
     match /formularios/{formId} {
+      allow create: if isSignedIn() && hasValidGeneralFormShape();
       allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
-      allow create: if isSignedIn() && isValidGeneralForm();
       allow update, delete: if false;
     }
   }

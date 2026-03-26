@@ -1,52 +1,47 @@
 import { useCallback, useEffect, useState } from 'react';
-import { createComment, getCommentsByProperty } from '../services/comments.service';
+import { useAuth } from './useAuth';
+import { createComment, subscribeToComments } from '../services/comments.service';
 
-export function usePropertyComments(propertyId, user) {
+export function usePropertyComments(propertyId) {
+  const { user } = useAuth();
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (!propertyId) {
       setComments([]);
       setLoading(false);
-      return;
+      return () => {};
     }
 
     setLoading(true);
     setError('');
 
-    const unsubscribe = getCommentsByProperty(
-      propertyId,
-      (data) => {
-        setComments(data);
-        setLoading(false);
-      },
-      (err) => {
-        setError(err.message);
-        setLoading(false);
-      },
-    );
+    const unsubscribe = subscribeToComments(propertyId, (data) => {
+      setComments(data);
+      setLoading(false);
+    });
 
     return () => unsubscribe();
   }, [propertyId]);
 
   const submitComment = useCallback(
-    async (message) => {
-      setSaving(true);
+    async (content) => {
+      setSubmitting(true);
       setError('');
       try {
-        await createComment(propertyId, user, message);
+        await createComment(propertyId, user, content);
       } catch (err) {
         setError(err.message || 'No se pudo publicar el comentario.');
         throw err;
       } finally {
-        setSaving(false);
+        setSubmitting(false);
       }
     },
     [propertyId, user],
   );
 
-  return { comments, loading, saving, error, submitComment };
+  return { comments, loading, error, submitComment, submitting };
 }

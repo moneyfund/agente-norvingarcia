@@ -1,4 +1,4 @@
-import { collection, deleteDoc, doc, getCountFromServer, getDoc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDoc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { buildError, validateAuthUser, validatePropertyId, validateUid } from './firestoreValidation';
 
@@ -10,28 +10,40 @@ function likeRef(propertyId, uid) {
   return doc(db, 'propiedades', propertyId, 'likes', uid);
 }
 
-export function subscribeToLikes(propertyId, callback) {
+export function subscribeToLikesCount(propertyId, callback) {
   const safePropertyId = validatePropertyId(propertyId);
+  if (typeof callback !== 'function') {
+    throw new Error('Debes proporcionar un callback para escuchar likes.');
+  }
 
   return onSnapshot(
     likesCollectionRef(safePropertyId),
     (snapshot) => {
-      const likes = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
-      callback(likes);
+      callback(snapshot.size);
     },
     (error) => {
-      console.error('Firestore subscribeToLikes error:', { propertyId: safePropertyId, error });
+      console.error('Firestore subscribeToLikesCount error:', { propertyId: safePropertyId, error });
     },
   );
+}
+
+export async function getUserLikeStatus(propertyId, uid) {
+  const safePropertyId = validatePropertyId(propertyId);
+  const safeUid = validateUid(uid);
+
+  try {
+    const snapshot = await getDoc(likeRef(safePropertyId, safeUid));
+    return snapshot.exists();
+  } catch (error) {
+    console.error('Firestore getUserLikeStatus error:', { propertyId: safePropertyId, uid: safeUid, error });
+    throw buildError(error, 'No se pudo validar el like del usuario.');
+  }
 }
 
 export async function toggleLike(propertyId, user) {
   const safePropertyId = validatePropertyId(propertyId);
   const safeUser = validateAuthUser(user);
   const ref = likeRef(safePropertyId, safeUser.uid);
-
-  console.log('toggleLike propertyId:', safePropertyId);
-  console.log('auth user:', safeUser.uid);
 
   try {
     const currentLike = await getDoc(ref);
@@ -51,30 +63,5 @@ export async function toggleLike(propertyId, user) {
   } catch (error) {
     console.error('Firestore toggleLike error:', { propertyId: safePropertyId, uid: safeUser.uid, error });
     throw buildError(error, 'No se pudo actualizar el like.');
-  }
-}
-
-export async function getLikesCount(propertyId) {
-  const safePropertyId = validatePropertyId(propertyId);
-
-  try {
-    const snapshot = await getCountFromServer(likesCollectionRef(safePropertyId));
-    return snapshot.data().count;
-  } catch (error) {
-    console.error('Firestore getLikesCount error:', { propertyId: safePropertyId, error });
-    throw buildError(error, 'No se pudo obtener el total de likes.');
-  }
-}
-
-export async function hasUserLiked(propertyId, uid) {
-  const safePropertyId = validatePropertyId(propertyId);
-  const safeUid = validateUid(uid);
-
-  try {
-    const snapshot = await getDoc(likeRef(safePropertyId, safeUid));
-    return snapshot.exists();
-  } catch (error) {
-    console.error('Firestore hasUserLiked error:', { propertyId: safePropertyId, uid: safeUid, error });
-    throw buildError(error, 'No se pudo validar el like del usuario.');
   }
 }
