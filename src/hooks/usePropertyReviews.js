@@ -1,52 +1,56 @@
-import { useCallback, useEffect, useState } from 'react';
-import { createReview, getReviewsByProperty } from '../services/reviews.service';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useAuth } from './useAuth';
+import { createReview, subscribeToReviews } from '../services/reviews.service';
 
-export function usePropertyReviews(propertyId, user) {
+export function usePropertyReviews(propertyId) {
+  const { user } = useAuth();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (!propertyId) {
       setReviews([]);
       setLoading(false);
-      return;
+      return () => {};
     }
 
     setLoading(true);
     setError('');
 
-    const unsubscribe = getReviewsByProperty(
-      propertyId,
-      (data) => {
-        setReviews(data);
-        setLoading(false);
-      },
-      (err) => {
-        setError(err.message);
-        setLoading(false);
-      },
-    );
+    const unsubscribe = subscribeToReviews(propertyId, (data) => {
+      setReviews(data);
+      setLoading(false);
+    });
 
     return () => unsubscribe();
   }, [propertyId]);
 
+  const averageRating = useMemo(() => {
+    if (!reviews.length) {
+      return 0;
+    }
+
+    const total = reviews.reduce((sum, item) => sum + Number(item.rating || 0), 0);
+    return total / reviews.length;
+  }, [reviews]);
+
   const submitReview = useCallback(
-    async ({ rating, message }) => {
-      setSaving(true);
+    async (rating, content) => {
+      setSubmitting(true);
       setError('');
       try {
-        await createReview(propertyId, user, rating, message);
+        await createReview(propertyId, user, rating, content);
       } catch (err) {
         setError(err.message || 'No se pudo publicar la reseña.');
         throw err;
       } finally {
-        setSaving(false);
+        setSubmitting(false);
       }
     },
     [propertyId, user],
   );
 
-  return { reviews, loading, saving, error, submitReview };
+  return { reviews, averageRating, loading, error, submitReview, submitting };
 }

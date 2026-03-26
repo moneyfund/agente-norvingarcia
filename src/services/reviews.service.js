@@ -6,19 +6,22 @@ function resenasCollectionRef(propertyId) {
   return collection(db, 'propiedades', propertyId, 'resenas');
 }
 
-export function getReviewsByProperty(propertyId, onData, onError) {
+export function subscribeToReviews(propertyId, callback) {
   const safePropertyId = validatePropertyId(propertyId);
+  if (typeof callback !== 'function') {
+    throw new Error('Debes proporcionar un callback para escuchar reseñas.');
+  }
+
   const q = query(resenasCollectionRef(safePropertyId), orderBy('createdAt', 'desc'));
 
   return onSnapshot(
     q,
     (snapshot) => {
       const resenas = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
-      onData(resenas);
+      callback(resenas);
     },
     (error) => {
-      console.error('Firestore getReviewsByProperty error:', { propertyId: safePropertyId, error });
-      onError?.(buildError(error, 'No se pudieron cargar las reseñas.'));
+      console.error('Firestore subscribeToReviews error:', { propertyId: safePropertyId, error });
     },
   );
 }
@@ -28,9 +31,6 @@ export async function createReview(propertyId, user, rating, content) {
   const safeUser = validateAuthUser(user);
   const safeRating = validateRating(rating);
   const safeContent = validateContent(content, 'reseña');
-
-  console.log('createReview propertyId:', safePropertyId);
-  console.log('auth user:', safeUser.uid);
 
   try {
     await addDoc(resenasCollectionRef(safePropertyId), {

@@ -19,11 +19,16 @@ export function validateAuthUser(user) {
     throw new Error('Debes iniciar sesión para realizar esta acción.');
   }
 
+  const userEmail = user.email || '';
+  if (!userEmail.trim()) {
+    throw new Error('No se encontró un correo de usuario válido.');
+  }
+
   return {
     uid: user.uid,
-    userName: user.displayName || user.email || 'Usuario',
-    userEmail: user.email || '',
-    userPhotoURL: user.photoURL || '',
+    userName: user.displayName?.trim() || userEmail,
+    userEmail,
+    userPhotoURL: user.photoURL || null,
   };
 }
 
