@@ -10,7 +10,7 @@ function likeRef(propertyId, uid) {
   return doc(db, 'propiedades', propertyId, 'likes', uid);
 }
 
-export function subscribeToLikesCount(propertyId, callback) {
+export function subscribeToLikesCount(propertyId, callback, onError) {
   const safePropertyId = validatePropertyId(propertyId);
   if (typeof callback !== 'function') {
     throw new Error('Debes proporcionar un callback para escuchar likes.');
@@ -22,7 +22,11 @@ export function subscribeToLikesCount(propertyId, callback) {
       callback(snapshot.size);
     },
     (error) => {
-      console.error('Firestore subscribeToLikesCount error:', { propertyId: safePropertyId, error });
+      const safeError = buildError(error, 'No se pudieron cargar los likes.');
+      console.error('Firestore subscribeToLikesCount error:', { propertyId: safePropertyId, error: safeError });
+      if (typeof onError === 'function') {
+        onError(safeError);
+      }
     },
   );
 }

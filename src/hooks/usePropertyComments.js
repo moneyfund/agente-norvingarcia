@@ -19,10 +19,17 @@ export function usePropertyComments(propertyId) {
     setLoading(true);
     setError('');
 
-    const unsubscribe = subscribeToComments(propertyId, (data) => {
-      setComments(data);
-      setLoading(false);
-    });
+    const unsubscribe = subscribeToComments(
+      propertyId,
+      (data) => {
+        setComments(data);
+        setLoading(false);
+      },
+      (err) => {
+        setError(err.message || 'No se pudieron cargar los comentarios.');
+        setLoading(false);
+      },
+    );
 
     return () => unsubscribe();
   }, [propertyId]);
