@@ -19,10 +19,17 @@ export function usePropertyReviews(propertyId) {
     setLoading(true);
     setError('');
 
-    const unsubscribe = subscribeToReviews(propertyId, (data) => {
-      setReviews(data);
-      setLoading(false);
-    });
+    const unsubscribe = subscribeToReviews(
+      propertyId,
+      (data) => {
+        setReviews(data);
+        setLoading(false);
+      },
+      (err) => {
+        setError(err.message || 'No se pudieron cargar las reseñas.');
+        setLoading(false);
+      },
+    );
 
     return () => unsubscribe();
   }, [propertyId]);

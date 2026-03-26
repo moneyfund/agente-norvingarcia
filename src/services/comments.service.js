@@ -6,7 +6,7 @@ function comentariosCollectionRef(propertyId) {
   return collection(db, 'propiedades', propertyId, 'comentarios');
 }
 
-export function subscribeToComments(propertyId, callback) {
+export function subscribeToComments(propertyId, callback, onError) {
   const safePropertyId = validatePropertyId(propertyId);
   if (typeof callback !== 'function') {
     throw new Error('Debes proporcionar un callback para escuchar comentarios.');
@@ -21,7 +21,11 @@ export function subscribeToComments(propertyId, callback) {
       callback(comentarios);
     },
     (error) => {
-      console.error('Firestore subscribeToComments error:', { propertyId: safePropertyId, error });
+      const safeError = buildError(error, 'No se pudieron cargar los comentarios.');
+      console.error('Firestore subscribeToComments error:', { propertyId: safePropertyId, error: safeError });
+      if (typeof onError === 'function') {
+        onError(safeError);
+      }
     },
   );
 }

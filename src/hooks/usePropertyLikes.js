@@ -20,10 +20,17 @@ export function usePropertyLikes(propertyId) {
     setError('');
     setLoading(true);
 
-    const unsubscribe = subscribeToLikesCount(propertyId, (count) => {
-      setLikesCount(count);
-      setLoading(false);
-    });
+    const unsubscribe = subscribeToLikesCount(
+      propertyId,
+      (count) => {
+        setLikesCount(count);
+        setLoading(false);
+      },
+      (err) => {
+        setError(err.message || 'No se pudieron cargar los likes.');
+        setLoading(false);
+      },
+    );
 
     return () => unsubscribe();
   }, [propertyId]);
@@ -62,6 +69,8 @@ export function usePropertyLikes(propertyId) {
     }
 
     setError('');
+    setLoading(true);
+
     try {
       const liked = await toggleLike(propertyId, user);
       setHasLiked(liked);
@@ -69,6 +78,8 @@ export function usePropertyLikes(propertyId) {
     } catch (err) {
       setError(err.message || 'No se pudo actualizar el like.');
       throw err;
+    } finally {
+      setLoading(false);
     }
   }, [isAuthenticated, propertyId, user]);
 

@@ -6,7 +6,7 @@ function resenasCollectionRef(propertyId) {
   return collection(db, 'propiedades', propertyId, 'resenas');
 }
 
-export function subscribeToReviews(propertyId, callback) {
+export function subscribeToReviews(propertyId, callback, onError) {
   const safePropertyId = validatePropertyId(propertyId);
   if (typeof callback !== 'function') {
     throw new Error('Debes proporcionar un callback para escuchar reseñas.');
@@ -21,7 +21,11 @@ export function subscribeToReviews(propertyId, callback) {
       callback(resenas);
     },
     (error) => {
-      console.error('Firestore subscribeToReviews error:', { propertyId: safePropertyId, error });
+      const safeError = buildError(error, 'No se pudieron cargar las reseñas.');
+      console.error('Firestore subscribeToReviews error:', { propertyId: safePropertyId, error: safeError });
+      if (typeof onError === 'function') {
+        onError(safeError);
+      }
     },
   );
 }
