@@ -12,6 +12,20 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
+const missingFirebaseEnv = Object.entries(firebaseConfig)
+  .filter(([, value]) => !value)
+  .map(([key]) => key);
+
+if (missingFirebaseEnv.length) {
+  console.error('[Firebase] Variables faltantes:', missingFirebaseEnv.join(', '));
+}
+
+if (firebaseConfig.storageBucket && !firebaseConfig.storageBucket.includes('.')) {
+  console.error(
+    '[Firebase] storageBucket parece inválido. Debe verse como "mi-proyecto.firebasestorage.app" o "mi-proyecto.appspot.com".',
+  );
+}
+
 const app = initializeApp(firebaseConfig);
 
 const auth = getAuth(app);
@@ -21,4 +35,4 @@ const storage = getStorage(app);
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-export { app, auth, db, storage, googleProvider };
+export { app, auth, db, storage, googleProvider, firebaseConfig };
