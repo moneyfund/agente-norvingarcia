@@ -9,6 +9,13 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == uid;
     }
 
+    function isAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
+          || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+
     function isTimestampOrServerTimestamp(field) {
       return field is timestamp || field == request.time;
     }
@@ -97,7 +104,7 @@ service cloud.firestore {
 
     match /propiedades/{propertyId} {
       allow read: if true;
-      allow write: if false;
+      allow create, update, delete: if isAdmin();
 
       match /comentarios/{commentId} {
         allow read: if true;
