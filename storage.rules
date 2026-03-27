@@ -1,0 +1,26 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && firestore.exists(/databases/(default)/documents/users/$(request.auth.uid))
+        && (
+          firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin == true
+          || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin'
+        );
+    }
+
+    match /propiedades/{propertyId}/{mediaFolder}/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin() && (mediaFolder == 'imagenes' || mediaFolder == 'videos');
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
@@ -16,16 +16,16 @@ import { usePropertyReviews } from '../hooks/usePropertyReviews';
 import { usePropertyLikes } from '../hooks/usePropertyLikes';
 import { useProtectedPropertyForm } from '../hooks/useProtectedPropertyForm';
 import { getPropiedadById } from '../services/propiedadesService';
+import { normalizePropertyMedia } from '../utils/propertyMedia';
 import { propertyMarkerIcon } from '../utils/mapMarkers';
 
 const money = new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-const placeholderImage = 'https://via.placeholder.com/1200x900?text=Propiedad';
 
 function PropertyDetailPage() {
   const { id } = useParams();
   const { isAuthenticated, loginWithGoogle, loading: authLoading } = useAuth();
   const [property, setProperty] = useState(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [feedbackMessage, setFeedbackMessage] = useState('');
@@ -48,7 +48,7 @@ function PropertyDetailPage() {
         setLoading(true);
         const data = await getPropiedadById(id);
         setProperty(data);
-        setCurrentImageIndex(0);
+        setCurrentMediaIndex(0);
       } catch (error) {
         console.error('Error al cargar la propiedad', { propertyId: id, error });
       } finally {
@@ -73,27 +73,40 @@ function PropertyDetailPage() {
     }
   };
 
+  const gallery = useMemo(() => {
+    const media = normalizePropertyMedia(property || {});
+    if (media.length) return media;
+
+    return [{
+      type: 'image',
+      url: 'https://via.placeholder.com/1200x900?text=Propiedad',
+      path: '',
+      name: 'placeholder',
+      order: 0,
+      createdAt: Date.now(),
+    }];
+  }, [property]);
+
   if (loading || authLoading) return <section className="section-container">Cargando propiedad...</section>;
   if (!property) return <section className="section-container">No se encontró esta propiedad.</section>;
 
-  const gallery = property.imagenes?.length ? property.imagenes : [placeholderImage];
-  const hasMultipleImages = gallery.length > 1;
-  const activeImage = gallery[currentImageIndex] || gallery[0];
+  const hasMultipleMedia = gallery.length > 1;
+  const activeMedia = gallery[currentMediaIndex] || gallery[0];
   const operationLabel = property.tipoOperacion === 'alquiler' ? 'En Alquiler' : 'En Venta';
-  const showGalleryFallback = !property.imagenes?.length;
+  const showGalleryFallback = !normalizePropertyMedia(property).length;
 
-  const goToPreviousImage = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex - 1 + gallery.length) % gallery.length);
+  const goToPrevious = () => {
+    setCurrentMediaIndex((prevIndex) => (prevIndex - 1 + gallery.length) % gallery.length);
   };
 
-  const goToNextImage = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % gallery.length);
+  const goToNext = () => {
+    setCurrentMediaIndex((prevIndex) => (prevIndex + 1) % gallery.length);
   };
 
   const handleGalleryKeyDown = (event) => {
-    if (!hasMultipleImages) return;
-    if (event.key === 'ArrowLeft') goToPreviousImage();
-    if (event.key === 'ArrowRight') goToNextImage();
+    if (!hasMultipleMedia) return;
+    if (event.key === 'ArrowLeft') goToPrevious();
+    if (event.key === 'ArrowRight') goToNext();
   };
 
   return (
@@ -104,24 +117,28 @@ function PropertyDetailPage() {
           <div
             className="relative"
             onKeyDown={handleGalleryKeyDown}
-            tabIndex={hasMultipleImages ? 0 : -1}
-            aria-label="Galería de imágenes de la propiedad"
+            tabIndex={hasMultipleMedia ? 0 : -1}
+            aria-label="Galería de imágenes y videos de la propiedad"
           >
-            <img src={activeImage} alt={property.titulo} className="h-96 w-full rounded-2xl object-cover shadow-premium" />
-            {hasMultipleImages && (
+            {activeMedia.type === 'video' ? (
+              <video src={activeMedia.url} controls className="h-96 w-full rounded-2xl bg-black object-contain shadow-premium" preload="metadata" />
+            ) : (
+              <img src={activeMedia.url} alt={property.titulo} className="h-96 w-full rounded-2xl object-cover shadow-premium" />
+            )}
+            {hasMultipleMedia && (
               <>
                 <button
                   type="button"
-                  onClick={goToPreviousImage}
-                  aria-label="Imagen anterior"
+                  onClick={goToPrevious}
+                  aria-label="Elemento anterior"
                   className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/45 p-2 text-white transition hover:bg-black/65 focus:outline-none focus:ring-2 focus:ring-white/80"
                 >
                   <ChevronLeft size={24} />
                 </button>
                 <button
                   type="button"
-                  onClick={goToNextImage}
-                  aria-label="Imagen siguiente"
+                  onClick={goToNext}
+                  aria-label="Elemento siguiente"
                   className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/45 p-2 text-white transition hover:bg-black/65 focus:outline-none focus:ring-2 focus:ring-white/80"
                 >
                   <ChevronRight size={24} />
@@ -129,7 +146,23 @@ function PropertyDetailPage() {
               </>
             )}
           </div>
-          {showGalleryFallback && <p className="mt-3 text-sm text-slate-500">Esta propiedad no tiene imágenes disponibles aún.</p>}
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
+            {gallery.map((item, index) => (
+              <button
+                type="button"
+                key={`${item.url}-${index}`}
+                onClick={() => setCurrentMediaIndex(index)}
+                className={`overflow-hidden rounded-lg border ${index === currentMediaIndex ? 'border-brand-500 ring-1 ring-brand-500' : 'border-slate-200'}`}
+              >
+                {item.type === 'video' ? (
+                  <div className="flex h-16 w-24 items-center justify-center bg-slate-900 text-xs text-white">Video</div>
+                ) : (
+                  <img src={item.url} alt={`Miniatura ${index + 1}`} className="h-16 w-24 object-cover" />
+                )}
+              </button>
+            ))}
+          </div>
+          {showGalleryFallback && <p className="mt-3 text-sm text-slate-500">Esta propiedad no tiene medios disponibles aún.</p>}
         </div>
         <div className="space-y-5">
           <p className="text-4xl font-bold text-brand-500">{money.format(property.precio)}</p>

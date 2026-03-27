@@ -2,11 +2,12 @@ import { motion } from 'framer-motion';
 import { BedDouble, Bath, Heart, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from './Button';
+import { getPrimaryImageUrl } from '../utils/propertyMedia';
 
 const currency = new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 
 function PropertyCard({ property }) {
-  const image = property.imagenes?.[0] || 'https://via.placeholder.com/800x600?text=Propiedad';
+  const image = getPrimaryImageUrl(property) || 'https://via.placeholder.com/800x600?text=Propiedad';
   const operationLabel = property.tipoOperacion === 'alquiler' ? 'En Alquiler' : 'En Venta';
 
   return (
