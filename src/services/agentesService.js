@@ -1,6 +1,7 @@
 import { collection, doc, getDoc, getDocs, query, setDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { db, storage } from '../firebase/config';
+import { assertAllowedAdmin } from './adminAuth';
 
 const agentesCollection = 'agentes';
 const defaultAgentId = 'norvin-garcia';
@@ -22,6 +23,8 @@ export async function getAgente(agentId = defaultAgentId) {
 }
 
 export async function uploadAgentPhoto(file) {
+  assertAllowedAdmin();
+
   if (!file) return '';
   const safeName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
   const fileRef = ref(storage, `agentes/${safeName}`);
@@ -30,6 +33,7 @@ export async function uploadAgentPhoto(file) {
 }
 
 export async function saveAgente(data, agentId = defaultAgentId) {
+  assertAllowedAdmin();
   await setDoc(doc(db, agentesCollection, agentId), data, { merge: true });
   return agentId;
 }

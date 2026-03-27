@@ -1,29 +1,19 @@
-import { doc, getDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import {
   deleteObject,
   getDownloadURL,
   ref,
   uploadBytesResumable,
 } from 'firebase/storage';
-import { auth, db, firebaseConfig, storage } from '../firebase/config';
+import { db, firebaseConfig, storage } from '../firebase/config';
+import { assertAllowedAdmin } from './adminAuth';
 
 const propiedadesCollection = 'propiedades';
 const UPLOAD_STALL_TIMEOUT_MS = 60_000;
 
 
-async function assertCurrentUserCanUpload() {
-  const uid = auth.currentUser?.uid;
-  if (!uid) {
-    throw new Error('Debes iniciar sesión para subir archivos al panel admin.');
-  }
-
-  const userSnap = await getDoc(doc(db, 'users', uid));
-  const role = userSnap.data()?.role;
-  const isAdmin = userSnap.data()?.isAdmin === true || role === 'admin';
-
-  if (!isAdmin) {
-    throw new Error('Tu usuario no tiene rol admin para subir archivos a Firebase Storage.');
-  }
+function assertCurrentUserCanUpload() {
+  assertAllowedAdmin();
 }
 
 function sanitizeFilename(fileName = '') {
@@ -161,7 +151,7 @@ function uploadSingleFile({ propertyId, type, file, onProgress }) {
 async function uploadPropertyMedia(propertyId, files, type, onFileProgress) {
   if (!Array.isArray(files) || !files.length) return [];
 
-  await assertCurrentUserCanUpload();
+  assertCurrentUserCanUpload();
 
   const uploadJobs = files.map((file, index) => uploadSingleFile({
     propertyId,

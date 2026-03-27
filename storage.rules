@@ -5,28 +5,27 @@ service firebase.storage {
       return request.auth != null;
     }
 
-    function isAdmin() {
-      return isSignedIn()
-        && firestore.exists(/databases/(default)/documents/users/$(request.auth.uid))
-        && (
-          firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin == true
-          || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin'
-        );
+    function normalizedEmail() {
+      return isSignedIn() && request.auth.token.email is string
+        ? lower(request.auth.token.email)
+        : '';
     }
 
-    // DEBUG TEMPORAL (solo mientras diagnosticas):
-    // match /{allPaths=**} {
-    //   allow read: if true;
-    //   allow write: if isSignedIn();
-    // }
+    function isAllowedAdmin() {
+      return isSignedIn() && normalizedEmail() == 'agentenorvingarcia@gmail.com';
+    }
 
-    // Producción recomendada: medios solo para admins autenticados.
     match /propiedades/{propertyId}/{mediaFolder}/{fileName} {
       allow read: if true;
-      allow write: if isAdmin()
+      allow write: if isAllowedAdmin()
         && propertyId.size() > 0
         && (mediaFolder == 'imagenes' || mediaFolder == 'videos')
         && fileName.size() > 0;
+    }
+
+    match /agentes/{fileName} {
+      allow read: if true;
+      allow write: if isAllowedAdmin() && fileName.size() > 0;
     }
 
     match /{allPaths=**} {

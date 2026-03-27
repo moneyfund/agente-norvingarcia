@@ -1,6 +1,7 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import { initializeAuth, logoutUser, onAuthChange, signInWithGoogle } from '../services/authService';
 import { upsertUserProfile } from '../services/userService';
+import { isAllowedAdminEmail } from '../config/admin';
 
 export const AuthContext = createContext(null);
 
@@ -53,6 +54,7 @@ export function AuthProvider({ children }) {
       user,
       loading,
       isAuthenticated: Boolean(user),
+      isAdmin: isAllowedAdminEmail(user?.email),
       loginWithGoogle: handleGoogleLogin,
       logout: handleLogout,
     }),
