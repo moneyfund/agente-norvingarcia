@@ -13,6 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { normalizePropertyMedia } from '../utils/propertyMedia';
+import { assertAllowedAdmin } from './adminAuth';
 
 const propiedadesCollection = 'propiedades';
 
@@ -48,6 +49,8 @@ export async function getPropiedadById(id) {
 }
 
 export async function createPropiedad(payload) {
+  assertAllowedAdmin();
+
   const data = {
     ...payload,
     updatedAt: serverTimestamp(),
@@ -65,6 +68,7 @@ export async function createPropiedad(payload) {
 }
 
 export async function updatePropiedad(id, payload) {
+  assertAllowedAdmin();
   const { id: _ignoredId, ...rest } = payload || {};
   await updateDoc(doc(db, propiedadesCollection, id), {
     ...rest,
@@ -73,5 +77,6 @@ export async function updatePropiedad(id, payload) {
 }
 
 export async function deletePropiedad(id) {
+  assertAllowedAdmin();
   await deleteDoc(doc(db, propiedadesCollection, id));
 }

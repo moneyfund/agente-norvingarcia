@@ -5,15 +5,18 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isOwner(uid) {
-      return isSignedIn() && request.auth.uid == uid;
+    function normalizedEmail() {
+      return isSignedIn() && request.auth.token.email is string
+        ? lower(request.auth.token.email)
+        : '';
     }
 
-    function isAdmin() {
-      return isSignedIn()
-        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
-          || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    function isAllowedAdmin() {
+      return isSignedIn() && normalizedEmail() == 'agentenorvingarcia@gmail.com';
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
     }
 
     function isTimestampOrServerTimestamp(field) {
@@ -91,20 +94,20 @@ service cloud.firestore {
     }
 
     match /users/{uid} {
-      allow read: if isSignedIn();
+      allow read: if isOwner(uid) || isAllowedAdmin();
       allow create, update: if isOwner(uid) && request.resource.data.uid == request.auth.uid;
       allow delete: if false;
     }
 
     match /agentes/{agenteId} {
       allow read: if true;
-      allow create, update: if isSignedIn();
+      allow create, update: if isAllowedAdmin();
       allow delete: if false;
     }
 
     match /propiedades/{propertyId} {
       allow read: if true;
-      allow create, update, delete: if isAdmin();
+      allow create, update, delete: if isAllowedAdmin();
 
       match /comentarios/{commentId} {
         allow read: if true;
@@ -127,14 +130,14 @@ service cloud.firestore {
 
       match /formularios/{formId} {
         allow create: if isSignedIn() && hasValidPropertyFormShape(propertyId);
-        allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+        allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isAllowedAdmin());
         allow update, delete: if false;
       }
     }
 
     match /formularios/{formId} {
       allow create: if isSignedIn() && hasValidGeneralFormShape();
-      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isAllowedAdmin());
       allow update, delete: if false;
     }
   }

@@ -13,11 +13,17 @@ function AdminPropertiesPage() {
   const [propiedades, setPropiedades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
+  const [pageError, setPageError] = useState('');
+  const [actionLoading, setActionLoading] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
+    setPageError('');
     try {
       setPropiedades(await getPropiedades());
+    } catch (error) {
+      console.error('[AdminPropertiesPage] Error cargando propiedades', error);
+      setPageError(error.message || 'No fue posible cargar propiedades.');
     } finally {
       setLoading(false);
     }
@@ -28,25 +34,65 @@ function AdminPropertiesPage() {
   }, []);
 
   const handleCreate = async (payload) => {
-    await createPropiedad(payload);
-    await loadData();
+    setActionLoading(true);
+    setPageError('');
+    try {
+      await createPropiedad(payload);
+      await loadData();
+    } catch (error) {
+      console.error('[AdminPropertiesPage] Error creando propiedad', error);
+      setPageError(error.message || 'No fue posible crear la propiedad.');
+      throw error;
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleUpdate = async (payload) => {
-    await updatePropiedad(selected.id, payload);
-    setSelected(null);
-    await loadData();
+    if (!selected?.id) return;
+
+    setActionLoading(true);
+    setPageError('');
+
+    try {
+      await updatePropiedad(selected.id, payload);
+      setSelected(null);
+      await loadData();
+    } catch (error) {
+      console.error('[AdminPropertiesPage] Error actualizando propiedad', error);
+      setPageError(error.message || 'No fue posible actualizar la propiedad.');
+      throw error;
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleDelete = async (id) => {
+    if (actionLoading) return;
     if (!window.confirm('¿Seguro que deseas eliminar esta propiedad?')) return;
-    await deletePropiedad(id);
-    await loadData();
+
+    setActionLoading(true);
+    setPageError('');
+
+    try {
+      await deletePropiedad(id);
+      if (selected?.id === id) {
+        setSelected(null);
+      }
+      await loadData();
+    } catch (error) {
+      console.error('[AdminPropertiesPage] Error eliminando propiedad', error);
+      setPageError(error.message || 'No fue posible eliminar la propiedad.');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Gestión de propiedades</h1>
+
+      {pageError && <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{pageError}</p>}
 
       <PropertyForm
         key={selected?.id || 'new'}
@@ -77,8 +123,8 @@ function AdminPropertiesPage() {
                 <td className="px-4 py-3">{property.premium ? 'Sí' : 'No'}</td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => setSelected(property)}><Pencil size={16} /></Button>
-                    <Button variant="outline" onClick={() => handleDelete(property.id)}><Trash2 size={16} /></Button>
+                    <Button variant="outline" disabled={actionLoading} onClick={() => setSelected(property)}><Pencil size={16} /></Button>
+                    <Button variant="outline" disabled={actionLoading} onClick={() => handleDelete(property.id)}><Trash2 size={16} /></Button>
                   </div>
                 </td>
               </tr>
