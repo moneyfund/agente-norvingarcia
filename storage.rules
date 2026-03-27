@@ -14,9 +14,19 @@ service firebase.storage {
         );
     }
 
+    // DEBUG TEMPORAL (solo mientras diagnosticas):
+    // match /{allPaths=**} {
+    //   allow read: if true;
+    //   allow write: if isSignedIn();
+    // }
+
+    // Producción recomendada: medios solo para admins autenticados.
     match /propiedades/{propertyId}/{mediaFolder}/{fileName} {
       allow read: if true;
-      allow write: if isAdmin() && (mediaFolder == 'imagenes' || mediaFolder == 'videos');
+      allow write: if isAdmin()
+        && propertyId.size() > 0
+        && (mediaFolder == 'imagenes' || mediaFolder == 'videos')
+        && fileName.size() > 0;
     }
 
     match /{allPaths=**} {

@@ -50,6 +50,21 @@ const createExistingMediaItem = (item, index) => ({
   order: index,
 });
 
+
+const formatMediaErrorMessage = (error) => {
+  const code = error?.code || '';
+
+  if (code.includes('storage/unauthorized')) {
+    return 'No tienes permisos para subir archivos. Verifica reglas de Storage y rol admin.';
+  }
+
+  if (code.includes('storage/stalled-upload')) {
+    return 'La subida se quedó sin progreso y fue cancelada automáticamente. Revisa bucket, reglas y red.';
+  }
+
+  return error?.message || 'Error guardando la propiedad.';
+};
+
 const buildPendingMediaItem = (file, type) => ({
   id: `pending-${Math.random().toString(36).slice(2, 10)}`,
   source: 'pending',
@@ -278,7 +293,8 @@ function PropertyForm({ initialValues, onSubmit, submitLabel = 'Guardar' }) {
         setMediaItems([]);
       }
     } catch (submitError) {
-      setError(submitError.message || 'Error guardando la propiedad.');
+      console.error('[Admin][PropertyForm] Error en submit de propiedad', submitError);
+      setError(formatMediaErrorMessage(submitError));
     } finally {
       setLoading(false);
     }
