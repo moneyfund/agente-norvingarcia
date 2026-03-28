@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowDown, ArrowUp, Trash2, Upload } from 'lucide-react';
+import { ArrowDown, ArrowUp, Link as LinkIcon, Trash2, Upload } from 'lucide-react';
 import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import Button from '../../components/Button';
@@ -24,6 +24,7 @@ const MAX_VIDEO_SIZE = 80 * 1024 * 1024;
 const MAX_MEDIA_ITEMS = 20;
 const IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 const VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
+const VIDEO_URL_EXTENSIONS = ['.mp4', '.webm', '.mov', '.m4v'];
 
 const initialState = {
   titulo: '',
@@ -41,15 +42,15 @@ const initialState = {
 
 const createExistingMediaItem = (item, index) => ({
   id: `existing-${item.path || item.url || index}`,
-  source: 'existing',
+  status: 'existing',
+  source: item.source || (item.path ? 'storage' : 'url'),
   type: item.type,
   url: item.url,
-  path: item.path || '',
+  path: item.path || null,
   name: item.name || `media-${index + 1}`,
   createdAt: item.createdAt || Date.now(),
   order: index,
 });
-
 
 const formatMediaErrorMessage = (error) => {
   const code = error?.code || '';
@@ -67,7 +68,8 @@ const formatMediaErrorMessage = (error) => {
 
 const buildPendingMediaItem = (file, type) => ({
   id: `pending-${Math.random().toString(36).slice(2, 10)}`,
-  source: 'pending',
+  status: 'pending',
+  source: 'storage',
   type,
   file,
   name: file.name,
@@ -75,6 +77,28 @@ const buildPendingMediaItem = (file, type) => ({
   progress: 0,
   createdAt: Date.now(),
 });
+
+const buildUrlMediaItem = ({ url, type, name }) => ({
+  id: `url-${Math.random().toString(36).slice(2, 10)}`,
+  status: 'url',
+  source: 'url',
+  type,
+  url,
+  path: null,
+  name,
+  createdAt: Date.now(),
+});
+
+const inferMediaTypeFromUrl = (url) => {
+  const normalized = String(url || '').toLowerCase();
+  return VIDEO_URL_EXTENSIONS.some((ext) => normalized.includes(ext)) ? 'video' : 'image';
+};
+
+const getFileMediaType = (file) => {
+  if (IMAGE_TYPES.includes(file.type)) return 'image';
+  if (VIDEO_TYPES.includes(file.type)) return 'video';
+  return null;
+};
 
 function LocationPicker({ position, onSelect }) {
   useMapEvents({
@@ -109,6 +133,9 @@ function PropertyForm({ initialValues, onSubmit, submitLabel = 'Guardar' }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [mediaMode, setMediaMode] = useState('direct');
+  const [urlDraft, setUrlDraft] = useState('');
+  const [urlTypeDraft, setUrlTypeDraft] = useState('auto');
   const [mediaItems, setMediaItems] = useState(() => normalizePropertyMedia(initialValues || {}).map(createExistingMediaItem));
   const [removedExistingMedia, setRemovedExistingMedia] = useState([]);
 
@@ -144,11 +171,11 @@ function PropertyForm({ initialValues, onSubmit, submitLabel = 'Guardar' }) {
       const target = prev.find((item) => item.id === itemId);
       if (!target) return prev;
 
-      if (target.source === 'pending' && target.previewUrl) {
+      if (target.status === 'pending' && target.previewUrl) {
         URL.revokeObjectURL(target.previewUrl);
       }
 
-      if (target.source === 'existing') {
+      if (target.status === 'existing') {
         setRemovedExistingMedia((current) => [...current, target]);
       }
 
@@ -156,34 +183,84 @@ function PropertyForm({ initialValues, onSubmit, submitLabel = 'Guardar' }) {
     });
   };
 
-  const validateFiles = (files, type) => {
-    const acceptedTypes = type === 'image' ? IMAGE_TYPES : VIDEO_TYPES;
-    const maxSize = type === 'image' ? MAX_IMAGE_SIZE : MAX_VIDEO_SIZE;
-    const invalidType = files.find((file) => !acceptedTypes.includes(file.type));
+  const validateUrl = (rawUrl) => {
+    let parsed;
 
-    if (invalidType) {
-      const label = type === 'image' ? 'imagen' : 'video';
-      throw new Error(`El archivo ${invalidType.name} no es un ${label} permitido.`);
+    try {
+      parsed = new URL(rawUrl);
+    } catch (_error) {
+      throw new Error('La URL ingresada no es válida.');
     }
 
-    const invalidSize = files.find((file) => file.size > maxSize);
-    if (invalidSize) {
-      const maxSizeMb = Math.round(maxSize / (1024 * 1024));
-      throw new Error(`El archivo ${invalidSize.name} supera el límite de ${maxSizeMb} MB.`);
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      throw new Error('Solo se permiten URLs con http o https.');
+    }
+
+    return parsed.toString();
+  };
+
+  const handleAddUrlMedia = () => {
+    try {
+      if (!urlDraft.trim()) {
+        throw new Error('Pega una URL antes de agregar el medio.');
+      }
+
+      if (mediaItems.length >= MAX_MEDIA_ITEMS) {
+        throw new Error(`Solo puedes guardar hasta ${MAX_MEDIA_ITEMS} medios por propiedad.`);
+      }
+
+      const normalizedUrl = validateUrl(urlDraft.trim());
+      const inferredType = inferMediaTypeFromUrl(normalizedUrl);
+      const type = urlTypeDraft === 'auto' ? inferredType : urlTypeDraft;
+      const fileName = decodeURIComponent(normalizedUrl.split('/').pop() || '').split('?')[0] || `medio-url-${mediaItems.length + 1}`;
+
+      setMediaItems((prev) => [...prev, buildUrlMediaItem({
+        url: normalizedUrl,
+        type,
+        name: fileName,
+      })]);
+      setUrlDraft('');
+      setUrlTypeDraft('auto');
+      setError('');
+    } catch (urlError) {
+      setError(urlError.message || 'No se pudo agregar la URL.');
     }
   };
 
-  const handleFileSelection = (event, type) => {
+  const validateFiles = (files) => {
+    const invalidFile = files.find((file) => !getFileMediaType(file));
+    if (invalidFile) {
+      throw new Error(`El archivo ${invalidFile.name} no es un formato permitido.`);
+    }
+
+    const oversizeFile = files.find((file) => {
+      const mediaType = getFileMediaType(file);
+      const maxSize = mediaType === 'video' ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
+      return file.size > maxSize;
+    });
+
+    if (oversizeFile) {
+      const mediaType = getFileMediaType(oversizeFile);
+      const maxSize = mediaType === 'video' ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
+      const maxSizeMb = Math.round(maxSize / (1024 * 1024));
+      throw new Error(`El archivo ${oversizeFile.name} supera el límite de ${maxSizeMb} MB.`);
+    }
+  };
+
+  const handleFileSelection = (event) => {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
 
     try {
-      validateFiles(files, type);
+      validateFiles(files);
       if (mediaItems.length + files.length > MAX_MEDIA_ITEMS) {
         throw new Error(`Solo puedes guardar hasta ${MAX_MEDIA_ITEMS} medios por propiedad.`);
       }
 
-      setMediaItems((prev) => [...prev, ...files.map((file) => buildPendingMediaItem(file, type))]);
+      setMediaItems((prev) => [
+        ...prev,
+        ...files.map((file) => buildPendingMediaItem(file, getFileMediaType(file))),
+      ]);
       setError('');
     } catch (selectionError) {
       setError(selectionError.message || 'No se pudieron seleccionar los archivos.');
@@ -201,8 +278,8 @@ function PropertyForm({ initialValues, onSubmit, submitLabel = 'Guardar' }) {
   };
 
   const uploadPendingMedia = async (propertyId) => {
-    const pendingImages = mediaItems.filter((item) => item.source === 'pending' && item.type === 'image');
-    const pendingVideos = mediaItems.filter((item) => item.source === 'pending' && item.type === 'video');
+    const pendingImages = mediaItems.filter((item) => item.status === 'pending' && item.type === 'image');
+    const pendingVideos = mediaItems.filter((item) => item.status === 'pending' && item.type === 'video');
 
     const pendingImageResult = pendingImages.length
       ? await uploadPropertyImages(
@@ -235,11 +312,12 @@ function PropertyForm({ initialValues, onSubmit, submitLabel = 'Guardar' }) {
 
     return mediaItems
       .map((item) => {
-        if (item.source === 'existing') {
+        if (item.status === 'existing' || item.status === 'url') {
           return {
             type: item.type,
+            source: item.source,
             url: item.url,
-            path: item.path || '',
+            path: item.source === 'url' ? null : item.path || null,
             name: item.name || '',
             createdAt: item.createdAt || Date.now(),
           };
@@ -286,11 +364,14 @@ function PropertyForm({ initialValues, onSubmit, submitLabel = 'Guardar' }) {
 
       await onSubmit(payload);
       setRemovedExistingMedia([]);
-      setSuccessMessage('Propiedad guardada correctamente con medios en Firebase Storage.');
+      setSuccessMessage('Propiedad guardada correctamente.');
 
       if (!initialValues) {
         setForm(initialState);
         setMediaItems([]);
+        setMediaMode('direct');
+        setUrlDraft('');
+        setUrlTypeDraft('auto');
       }
     } catch (submitError) {
       console.error('[Admin][PropertyForm] Error en submit de propiedad', submitError);
@@ -334,31 +415,68 @@ function PropertyForm({ initialValues, onSubmit, submitLabel = 'Guardar' }) {
             <p className="text-sm font-semibold">Medios de la propiedad</p>
             <p className="text-xs text-slate-500">{mediaSummary.images} imágenes · {mediaSummary.videos} videos · máximo {MAX_MEDIA_ITEMS}</p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <label className="cursor-pointer rounded-xl border px-3 py-2 text-sm hover:bg-slate-50">
-              <Upload size={14} className="mr-1 inline" /> Imágenes
+        </div>
+
+        <div className="inline-flex rounded-xl border bg-slate-50 p-1">
+          <button
+            type="button"
+            onClick={() => setMediaMode('url')}
+            className={`rounded-lg px-3 py-2 text-sm transition ${mediaMode === 'url' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-600'}`}
+            disabled={loading}
+          >
+            <LinkIcon size={14} className="mr-1 inline" /> Subir con URL
+          </button>
+          <button
+            type="button"
+            onClick={() => setMediaMode('direct')}
+            className={`rounded-lg px-3 py-2 text-sm transition ${mediaMode === 'direct' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-600'}`}
+            disabled={loading}
+          >
+            <Upload size={14} className="mr-1 inline" /> Subir directamente
+          </button>
+        </div>
+
+        {mediaMode === 'url' ? (
+          <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3">
+            <p className="mb-2 text-xs text-slate-600">Puedes pegar URLs de imágenes o videos públicos (mp4/webm/mov). Se guardan en Firestore con source=url y path=null.</p>
+            <div className="flex flex-col gap-2 md:flex-row">
               <input
-                type="file"
-                accept="image/jpeg,image/jpg,image/png,image/webp"
-                multiple
-                className="hidden"
-                onChange={(event) => handleFileSelection(event, 'image')}
+                type="url"
+                placeholder="https://ejemplo.com/media/propiedad.jpg"
+                value={urlDraft}
+                onChange={(event) => setUrlDraft(event.target.value)}
+                className="w-full rounded-xl border p-3 text-sm"
                 disabled={loading}
               />
-            </label>
-            <label className="cursor-pointer rounded-xl border px-3 py-2 text-sm hover:bg-slate-50">
-              <Upload size={14} className="mr-1 inline" /> Videos
+              <select
+                value={urlTypeDraft}
+                onChange={(event) => setUrlTypeDraft(event.target.value)}
+                className="rounded-xl border p-3 text-sm"
+                disabled={loading}
+              >
+                <option value="auto">Auto detectar</option>
+                <option value="image">Imagen</option>
+                <option value="video">Video</option>
+              </select>
+              <Button type="button" onClick={handleAddUrlMedia} disabled={loading}>Agregar URL</Button>
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3">
+            <p className="mb-2 text-xs text-slate-600">Selecciona imágenes o videos para subir a Firebase Storage con barra de progreso real.</p>
+            <label className="inline-flex cursor-pointer items-center rounded-xl border bg-white px-3 py-2 text-sm hover:bg-slate-50">
+              <Upload size={14} className="mr-1 inline" /> Seleccionar archivos
               <input
                 type="file"
-                accept="video/mp4,video/webm,video/quicktime"
+                accept="image/jpeg,image/jpg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
                 multiple
                 className="hidden"
-                onChange={(event) => handleFileSelection(event, 'video')}
+                onChange={handleFileSelection}
                 disabled={loading}
               />
             </label>
           </div>
-        </div>
+        )}
 
         {!mediaItems.length && <p className="rounded-xl bg-slate-50 p-3 text-sm text-slate-500">Agrega imágenes o videos para esta propiedad.</p>}
 
@@ -368,6 +486,7 @@ function PropertyForm({ initialValues, onSubmit, submitLabel = 'Guardar' }) {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-sm font-medium">
                   {item.type === 'video' ? '🎬 Video' : '🖼️ Imagen'} · {item.name}
+                  <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] uppercase tracking-wide text-slate-600">{item.source}</span>
                 </p>
                 <div className="flex gap-2">
                   <Button type="button" variant="outline" onClick={() => moveMedia(index, 'up')} disabled={loading || index === 0}><ArrowUp size={14} /></Button>
@@ -384,7 +503,7 @@ function PropertyForm({ initialValues, onSubmit, submitLabel = 'Guardar' }) {
                 )}
               </div>
 
-              {item.source === 'pending' && (
+              {item.status === 'pending' && (
                 <div className="mt-3">
                   <div className="h-2 overflow-hidden rounded-full bg-slate-200">
                     <div className="h-full bg-brand-500 transition-all" style={{ width: `${item.progress || 0}%` }} />

@@ -8,10 +8,17 @@ function isVideoUrl(url = '') {
 function normalizeMediaItem(item = {}, fallbackOrder = 0) {
   if (!item?.url || !item?.type) return null;
 
+  const source = item.source === 'storage' || item.source === 'url'
+    ? item.source
+    : item.path
+      ? 'storage'
+      : 'url';
+
   return {
     type: item.type === 'video' ? 'video' : 'image',
+    source,
     url: item.url,
-    path: item.path || '',
+    path: source === 'storage' ? item.path || null : null,
     name: item.name || '',
     order: Number.isFinite(Number(item.order)) ? Number(item.order) : fallbackOrder,
     createdAt: typeof item.createdAt === 'number' ? item.createdAt : Date.now(),
@@ -19,19 +26,26 @@ function normalizeMediaItem(item = {}, fallbackOrder = 0) {
 }
 
 export function buildLegacyMedia(data = {}) {
-  const images = Array.isArray(data.imagenes)
+  const legacyImages = Array.isArray(data.imagenes)
     ? data.imagenes
-    : typeof data.imagen === 'string' && data.imagen.trim()
-      ? [data.imagen.trim()]
-      : [];
+    : Array.isArray(data.images)
+      ? data.images
+      : Array.isArray(data.imageUrls)
+        ? data.imageUrls
+        : typeof data.imagen === 'string' && data.imagen.trim()
+          ? [data.imagen.trim()]
+          : typeof data.image === 'string' && data.image.trim()
+            ? [data.image.trim()]
+            : [];
 
   const videos = Array.isArray(data.videos) ? data.videos : [];
 
-  const imageItems = images
+  const imageItems = legacyImages
     .map((url, index) => ({
       type: isVideoUrl(url) ? 'video' : 'image',
+      source: 'url',
       url,
-      path: '',
+      path: null,
       name: '',
       order: index,
       createdAt: Date.now(),
@@ -41,8 +55,9 @@ export function buildLegacyMedia(data = {}) {
   const videoItems = videos
     .map((url, index) => ({
       type: 'video',
+      source: 'url',
       url,
-      path: '',
+      path: null,
       name: '',
       order: imageItems.length + index,
       createdAt: Date.now(),
