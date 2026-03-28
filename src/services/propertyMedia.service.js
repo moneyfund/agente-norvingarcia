@@ -134,6 +134,7 @@ function uploadSingleFile({ propertyId, type, file, onProgress }) {
           settled = true;
           resolve({
             type,
+            source: 'storage',
             url,
             path,
             name: file.name,
@@ -181,7 +182,8 @@ export async function syncPropertyMedia(propertyId, media) {
   const normalized = media.map((item, index) => ({
     type: item.type === 'video' ? 'video' : 'image',
     url: item.url,
-    path: item.path || '',
+    path: item.source === 'url' ? null : item.path || null,
+    source: item.source === 'storage' ? 'storage' : 'url',
     name: item.name || '',
     order: index,
     createdAt: typeof item.createdAt === 'number' ? item.createdAt : Date.now(),
