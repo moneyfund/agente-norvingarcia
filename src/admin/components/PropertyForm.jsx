@@ -12,7 +12,12 @@ import {
 import { normalizePropertyMedia } from '../../utils/propertyMedia';
 import { propertyMarkerIcon } from '../../utils/mapMarkers';
 
-const propertyTypes = ['casa', 'apartamento', 'terreno', 'bodega'];
+const propertyTypes = ['casa', 'apartamento', 'terreno', 'bodega', 'hotel', 'propiedad comercial', 'edificio'];
+const measurementUnits = [
+  { value: 'varas', singularLabel: 'vara' },
+  { value: 'metros', singularLabel: 'metro' },
+  { value: 'manzanas', singularLabel: 'manzana' },
+];
 const operationTypes = [
   { value: 'venta', label: 'Venta' },
   { value: 'alquiler', label: 'Alquiler' },
@@ -35,6 +40,10 @@ const initialState = {
   descripcion: '',
   habitaciones: 0,
   banos: 0,
+  area: '',
+  areaConstruida: '',
+  unidadMedida: 'varas',
+  precioPorArea: null,
   lat: defaultCenter[0],
   lng: defaultCenter[1],
   premium: false,
@@ -146,6 +155,11 @@ function PropertyForm({ initialValues, onSubmit, submitLabel = 'Guardar' }) {
   }, [mediaItems]);
 
   const mediaCount = mediaItems.length;
+  const selectedUnit = measurementUnits.find((unit) => unit.value === form.unidadMedida) || measurementUnits[0];
+  const parsedPrecio = Number(form.precio);
+  const parsedArea = Number(form.area);
+  const canCalculatePriceByArea = form.precio !== '' && form.area !== '' && Number.isFinite(parsedPrecio) && Number.isFinite(parsedArea) && parsedArea > 0;
+  const computedPrecioPorArea = canCalculatePriceByArea ? parsedPrecio / parsedArea : null;
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -335,8 +349,21 @@ function PropertyForm({ initialValues, onSubmit, submitLabel = 'Guardar' }) {
     setError('');
     setSuccessMessage('');
 
-    if (!form.titulo || !form.ubicacion || !form.descripcion || !form.precio) {
+    if (!form.titulo || !form.ubicacion || !form.descripcion || form.precio === '') {
       setError('Completa todos los campos obligatorios.');
+      return;
+    }
+
+    const parsedAreaValue = form.area === '' ? null : Number(form.area);
+    const parsedAreaConstruidaValue = form.areaConstruida === '' ? null : Number(form.areaConstruida);
+
+    if (parsedAreaValue !== null && (!Number.isFinite(parsedAreaValue) || parsedAreaValue < 0)) {
+      setError('El campo área debe contener un número válido mayor o igual a 0.');
+      return;
+    }
+
+    if (parsedAreaConstruidaValue !== null && (!Number.isFinite(parsedAreaConstruidaValue) || parsedAreaConstruidaValue < 0)) {
+      setError('El campo área construida debe contener un número válido mayor o igual a 0.');
       return;
     }
 
@@ -356,6 +383,10 @@ function PropertyForm({ initialValues, onSubmit, submitLabel = 'Guardar' }) {
         precio: Number(form.precio),
         habitaciones: Number(form.habitaciones),
         banos: Number(form.banos),
+        area: parsedAreaValue,
+        areaConstruida: parsedAreaConstruidaValue,
+        unidadMedida: form.unidadMedida || 'varas',
+        precioPorArea: canCalculatePriceByArea ? computedPrecioPorArea : null,
         lat: Number(form.lat),
         lng: Number(form.lng),
         media: uploadedMedia,
@@ -403,8 +434,18 @@ function PropertyForm({ initialValues, onSubmit, submitLabel = 'Guardar' }) {
         <input name="ubicacion" value={form.ubicacion} onChange={handleChange} placeholder="Ubicación" className="rounded-xl border p-3" required />
         <input name="habitaciones" type="number" value={form.habitaciones} onChange={handleChange} placeholder="Habitaciones" className="rounded-xl border p-3" />
         <input name="banos" type="number" value={form.banos} onChange={handleChange} placeholder="Baños" className="rounded-xl border p-3" />
+        <input name="area" type="number" min="0" step="any" value={form.area} onChange={handleChange} placeholder="Área" className="rounded-xl border p-3" />
+        <input name="areaConstruida" type="number" min="0" step="any" value={form.areaConstruida} onChange={handleChange} placeholder="Área construida" className="rounded-xl border p-3" />
+        <select name="unidadMedida" value={form.unidadMedida} onChange={handleChange} className="rounded-xl border p-3">
+          {measurementUnits.map((unit) => <option key={unit.value} value={unit.value}>{unit.value}</option>)}
+        </select>
         <input name="lat" type="number" step="any" value={form.lat} onChange={handleChange} placeholder="Latitud" className="rounded-xl border p-3" />
         <input name="lng" type="number" step="any" value={form.lng} onChange={handleChange} placeholder="Longitud" className="rounded-xl border p-3" />
+      </div>
+      <div className="rounded-xl bg-slate-50 p-3 text-sm text-slate-600">
+        {canCalculatePriceByArea
+          ? `Precio por ${selectedUnit.singularLabel}: ${computedPrecioPorArea.toLocaleString('es-DO', { maximumFractionDigits: 2 })}`
+          : `Precio por ${selectedUnit.singularLabel}: pendiente de cálculo (completa precio y área mayor que 0).`}
       </div>
 
       <textarea name="descripcion" value={form.descripcion} onChange={handleChange} placeholder="Descripción" className="min-h-28 w-full rounded-xl border p-3" required />
