@@ -20,6 +20,11 @@ import { normalizePropertyMedia } from '../utils/propertyMedia';
 import { propertyMarkerIcon } from '../utils/mapMarkers';
 
 const money = new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+const measurementLabelByUnit = {
+  varas: 'vara',
+  metros: 'metro',
+  manzanas: 'manzana',
+};
 
 function PropertyDetailPage() {
   const { id } = useParams();
@@ -94,6 +99,12 @@ function PropertyDetailPage() {
   const activeMedia = gallery[currentMediaIndex] || gallery[0];
   const operationLabel = property.tipoOperacion === 'alquiler' ? 'En Alquiler' : 'En Venta';
   const showGalleryFallback = !normalizePropertyMedia(property).length;
+  const areaValue = property.area != null ? Number(property.area) : null;
+  const areaConstruidaValue = property.areaConstruida != null ? Number(property.areaConstruida) : null;
+  const unit = property.unidadMedida || 'varas';
+  const unitLabel = measurementLabelByUnit[unit] || 'unidad';
+  const calculatedPrecioPorArea = areaValue && areaValue > 0 ? Number(property.precio || 0) / areaValue : null;
+  const precioPorAreaValue = property.precioPorArea ?? calculatedPrecioPorArea;
 
   const goToPrevious = () => {
     setCurrentMediaIndex((prevIndex) => (prevIndex - 1 + gallery.length) % gallery.length);
@@ -175,6 +186,11 @@ function PropertyDetailPage() {
             <li className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">Tipo: {property.tipo}</li>
             <li className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">Operación: {operationLabel}</li>
             <li className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">Premium: {property.premium ? 'Sí' : 'No'}</li>
+            {areaValue !== null && Number.isFinite(areaValue) && <li className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">Área del terreno: {areaValue} {unit}</li>}
+            {areaConstruidaValue !== null && Number.isFinite(areaConstruidaValue) && <li className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">Área construida: {areaConstruidaValue} {unit}</li>}
+            {precioPorAreaValue !== null && Number.isFinite(precioPorAreaValue) && (
+              <li className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">Precio por {unitLabel}: {money.format(precioPorAreaValue)}</li>
+            )}
           </ul>
           <div className="flex flex-wrap gap-3">
             <a href="https://wa.me/18095551234" target="_blank" rel="noreferrer"><Button>Contactar por WhatsApp</Button></a>

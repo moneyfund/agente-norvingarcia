@@ -5,10 +5,19 @@ import Button from './Button';
 import { getPrimaryImageUrl } from '../utils/propertyMedia';
 
 const currency = new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+const measurementLabelByUnit = {
+  varas: 'vara',
+  metros: 'metro',
+  manzanas: 'manzana',
+};
 
 function PropertyCard({ property }) {
   const image = getPrimaryImageUrl(property) || 'https://via.placeholder.com/800x600?text=Propiedad';
   const operationLabel = property.tipoOperacion === 'alquiler' ? 'En Alquiler' : 'En Venta';
+  const unit = property.unidadMedida || 'varas';
+  const unitLabel = measurementLabelByUnit[unit] || 'unidad';
+  const hasValidArea = property.area !== null && property.area !== undefined && Number(property.area) > 0;
+  const precioPorArea = property.precioPorArea ?? (hasValidArea ? Number(property.precio || 0) / Number(property.area) : null);
 
   return (
     <motion.article whileHover={{ y: -6 }} className={`overflow-hidden rounded-2xl bg-white shadow-premium transition dark:bg-slate-900 ${property.premium ? 'ring-1 ring-brand-500/40 shadow-[0_12px_36px_rgba(225,29,72,0.2)]' : ''}`}>
@@ -28,6 +37,12 @@ function PropertyCard({ property }) {
           <span className="flex items-center gap-1"><Bath size={14} /> {property.banos ?? 0}</span>
           <span className="rounded-full bg-slate-100 px-2 py-1 capitalize dark:bg-slate-800">{property.tipo}</span>
         </div>
+        {hasValidArea && (
+          <p className="text-sm text-slate-500 dark:text-slate-300">
+            Área: {property.area} {unit}
+            {precioPorArea !== null && Number.isFinite(precioPorArea) && ` · Precio por ${unitLabel}: ${currency.format(precioPorArea)}`}
+          </p>
+        )}
         <Link to={`/propiedad/${property.id}`}><Button className="w-full">Ver más</Button></Link>
         <p className="flex items-center gap-1 text-sm text-slate-500 dark:text-slate-300"><Heart size={14} className="text-brand-500" /> {property.likes?.length || 0} me gusta</p>
       </div>
