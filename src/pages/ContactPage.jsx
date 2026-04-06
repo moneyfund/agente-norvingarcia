@@ -71,7 +71,7 @@ function ContactPage() {
         </form>
         <div className="space-y-4 rounded-2xl bg-white p-6 shadow-premium dark:bg-slate-900">
           <p className="flex items-center gap-2"><Phone size={16}/> +505 8744-6657</p>
-          <p className="flex items-center gap-2"><Mail size={16}/> norvingarcia220@gmail.com</p>
+          <p className="flex items-center gap-2"><Mail size={16}/> agentenorvingarcia@gmail.com</p>
           <div className="flex gap-3">
             {[MessageCircle, Facebook, Instagram, Music2].map((Icon, index) => <button key={index} className="rounded-full bg-slate-100 p-3 dark:bg-slate-800"><Icon size={16} /></button>)}
           </div>
