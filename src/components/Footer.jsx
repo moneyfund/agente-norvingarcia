@@ -23,7 +23,7 @@ function Footer() {
 
         <div className="space-y-3 text-sm text-slate-300">
           <p className="flex items-center gap-2"><Phone size={15} /> +505 8744 6657</p>
-          <p className="flex items-center gap-2"><Mail size={15} /> norvingarcia220@gmail.com</p>
+          <p className="flex items-center gap-2"><Mail size={15} /> agentenorvingarcia@gmail.com</p>
           <p className="flex items-center gap-2"><MapPin size={15} /> Nicaragua</p>
         </div>
 
