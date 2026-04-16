@@ -5,6 +5,7 @@ import { useMemo, useRef } from 'react';
 import Button from '../components/Button';
 import PropertyCard from '../components/PropertyCard';
 import Seo from '../components/Seo';
+import AnnouncementTicker from '../components/AnnouncementTicker';
 import { usePropiedades } from '../hooks/usePropiedades';
 
 const testimonials = [
@@ -56,6 +57,8 @@ function HomePage() {
           </div>
         </div>
       </section>
+
+      <AnnouncementTicker />
 
       <section className="section-container">
         <div className="flex flex-wrap items-center justify-between gap-4">
