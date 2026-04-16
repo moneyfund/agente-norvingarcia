@@ -105,6 +105,13 @@ function PropertyDetailPage() {
   const unitLabel = measurementLabelByUnit[unit] || 'unidad';
   const calculatedPrecioPorArea = areaValue && areaValue > 0 ? Number(property.precio || 0) / areaValue : null;
   const precioPorAreaValue = property.precioPorArea ?? calculatedPrecioPorArea;
+  const whatsappMessage = `Hola, estoy interesado en esta propiedad:
+${property.titulo || 'Sin título'}
+Precio: ${money.format(Number(property.precio || 0))}
+Ubicación: ${property.ubicacion || 'No especificada'}
+
+Estoy contactando desde la web.`;
+  const whatsappUrl = `https://wa.me/50587446657?text=${encodeURIComponent(whatsappMessage)}`;
 
   const goToPrevious = () => {
     setCurrentMediaIndex((prevIndex) => (prevIndex - 1 + gallery.length) % gallery.length);
@@ -193,7 +200,7 @@ function PropertyDetailPage() {
             )}
           </ul>
           <div className="flex flex-wrap gap-3">
-            <a href="https://wa.me/18095551234" target="_blank" rel="noreferrer"><Button>Contactar por WhatsApp</Button></a>
+            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"><Button>Contactar por WhatsApp</Button></a>
             <Button variant="outline" onClick={() => setOpen(true)}>Solicitar visita</Button>
             <PropertyLikeButton
               likesCount={likesCount}
