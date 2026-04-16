@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { useMemo, useRef } from 'react';
 import Button from '../components/Button';
 import PropertyCard from '../components/PropertyCard';
 import Seo from '../components/Seo';
@@ -13,7 +14,33 @@ const testimonials = [
 
 function HomePage() {
   const { propiedades, loading } = usePropiedades();
-  const featured = propiedades.filter((property) => property.premium).slice(0, 3);
+  const featured = useMemo(() => {
+    const premiumProperties = propiedades.filter((property) => property.premium);
+    return premiumProperties.length ? premiumProperties : propiedades;
+  }, [propiedades]);
+  const sliderRef = useRef(null);
+
+  const scrollProperties = (direction) => {
+    if (!sliderRef.current) return;
+
+    const scrollAmount = sliderRef.current.clientWidth * 0.85;
+    sliderRef.current.scrollBy({
+      left: direction === 'next' ? scrollAmount : -scrollAmount,
+      behavior: 'smooth',
+    });
+  };
+
+  const handleSliderKeyDown = (event) => {
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      scrollProperties('next');
+    }
+
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      scrollProperties('prev');
+    }
+  };
 
   return (
     <>
@@ -31,10 +58,43 @@ function HomePage() {
       </section>
 
       <section className="section-container">
-        <h2 className="font-display text-3xl font-semibold">Propiedades destacadas</h2>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h2 className="font-display text-3xl font-semibold">Propiedades destacadas</h2>
+          {featured.length > 1 && (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => scrollProperties('prev')}
+                className="rounded-full border border-brand-200/70 bg-white p-2 text-slate-700 transition hover:border-brand-500 hover:text-brand-500 dark:border-brand-900/70 dark:bg-slate-900 dark:text-slate-200"
+                aria-label="Ver propiedades anteriores"
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollProperties('next')}
+                className="rounded-full border border-brand-200/70 bg-white p-2 text-slate-700 transition hover:border-brand-500 hover:text-brand-500 dark:border-brand-900/70 dark:bg-slate-900 dark:text-slate-200"
+                aria-label="Ver propiedades siguientes"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          )}
+        </div>
         {loading && <p className="mt-4 text-slate-500">Cargando propiedades...</p>}
-        <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {featured.map((property) => <PropertyCard key={property.id} property={property} />)}
+        <div
+          ref={sliderRef}
+          className="property-slider mt-8 flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth pb-3"
+          onKeyDown={handleSliderKeyDown}
+          tabIndex={0}
+          role="region"
+          aria-label="Carrusel de propiedades destacadas"
+        >
+          {featured.map((property) => (
+            <div key={property.id} className="w-[85%] shrink-0 snap-start sm:w-[70%] md:w-[48%] lg:w-[32%]">
+              <PropertyCard property={property} />
+            </div>
+          ))}
         </div>
       </section>
 

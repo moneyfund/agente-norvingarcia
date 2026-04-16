@@ -17,4 +17,22 @@
   .glass {
     @apply border border-white/20 bg-white/70 backdrop-blur-lg dark:border-slate-700 dark:bg-slate-900/70;
   }
+
+  .property-slider {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
+  }
+
+  .property-slider::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .property-slider::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .property-slider::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background: rgba(148, 163, 184, 0.45);
+  }
 }
