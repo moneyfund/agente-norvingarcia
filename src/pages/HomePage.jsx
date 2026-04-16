@@ -128,8 +128,7 @@ function HomePage() {
             <Link to="/propiedades"><Button>Ver Propiedades</Button></Link>
             <a href="https://wa.me/50587446657" target="_blank" rel="noreferrer">
               <Button
-                variant="secondary"
-                className="bg-[#25D366] text-white hover:bg-[#1ebe5d] dark:bg-[#25D366] dark:text-white dark:hover:bg-[#1ebe5d]"
+                className="!bg-[#25D366] !text-white hover:!bg-[#1ebe5d] transition-all duration-300"
               >
                 Contactar por WhatsApp
               </Button>
