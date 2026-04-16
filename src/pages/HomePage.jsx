@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Button from '../components/Button';
 import PropertyCard from '../components/PropertyCard';
 import Seo from '../components/Seo';
@@ -13,6 +13,14 @@ const testimonials = [
   { name: 'Carlos Peña', text: 'Experiencia y acompañamiento profesional en cada etapa.' },
 ];
 
+const heroImages = [
+  'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=2000&q=80', // casa premium
+  'https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=2000&q=80', // arquitectura moderna
+  'https://images.unsplash.com/photo-1479839672679-a46483c0e7c8?auto=format&fit=crop&w=2000&q=80', // ciudad moderna
+  'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=2000&q=80', // costa/paisaje
+  'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=2000&q=80', // propiedad premium
+];
+
 function HomePage() {
   const { propiedades, loading } = usePropiedades();
   const featured = useMemo(() => {
@@ -20,6 +28,31 @@ function HomePage() {
     return premiumProperties.length ? premiumProperties : propiedades;
   }, [propiedades]);
   const sliderRef = useRef(null);
+  const [heroIndex, setHeroIndex] = useState(0);
+
+  useEffect(() => {
+    const preloadImages = heroImages.map((src) => {
+      const image = new Image();
+      image.src = src;
+      return image;
+    });
+
+    return () => {
+      preloadImages.forEach((image) => {
+        image.src = '';
+      });
+    };
+  }, []);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setHeroIndex((current) => (current + 1) % heroImages.length);
+    }, 3000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, []);
 
   const scrollProperties = (direction) => {
     if (!sliderRef.current) return;
@@ -46,7 +79,24 @@ function HomePage() {
   return (
     <>
       <Seo title="Norvin García | Agente de DIAMANTES REALTY GROUP" description="Agente de DIAMANTES REALTY GROUP operando en Nicaragua con propiedades exclusivas y asesoría premium." />
-      <section className="bg-hero bg-cover bg-center text-white">
+      <section className="relative isolate overflow-hidden text-white">
+        <div className="absolute inset-0 -z-20">
+          {heroImages.map((image, index) => (
+            <div
+              key={image}
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ease-in-out will-change-transform"
+              style={{
+                backgroundImage: `url(${image})`,
+                opacity: index === heroIndex ? 1 : 0,
+                transform: index === heroIndex ? 'scale(1.04)' : 'scale(1)',
+                transitionProperty: 'opacity, transform',
+              }}
+              aria-hidden="true"
+            />
+          ))}
+        </div>
+        <div className="absolute inset-0 -z-10 bg-black/50" aria-hidden="true" />
+
         <div className="section-container py-28">
           <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl font-display text-4xl font-bold sm:text-6xl">Norvin García - Agente de DIAMANTES REALTY GROUP</motion.h1>
           <p className="mt-6 max-w-2xl text-lg text-slate-200">Operando en Nicaragua, conectando personas con inversiones extraordinarias en el mercado inmobiliario.</p>
@@ -54,6 +104,20 @@ function HomePage() {
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/propiedades"><Button>Ver Propiedades</Button></Link>
             <a href="https://wa.me/50587446657" target="_blank" rel="noreferrer"><Button variant="secondary">Contactar por WhatsApp</Button></a>
+          </div>
+
+          <div className="mt-10 flex items-center gap-2" role="tablist" aria-label="Seleccionar imagen del hero">
+            {heroImages.map((image, index) => (
+              <button
+                key={image}
+                type="button"
+                onClick={() => setHeroIndex(index)}
+                className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${index === heroIndex ? 'bg-white w-6' : 'bg-white/60 hover:bg-white/80'}`}
+                aria-label={`Mostrar imagen ${index + 1} del hero`}
+                aria-selected={index === heroIndex}
+                role="tab"
+              />
+            ))}
           </div>
         </div>
       </section>
