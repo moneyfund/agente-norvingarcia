@@ -36,3 +36,48 @@
     background: rgba(148, 163, 184, 0.45);
   }
 }
+
+@layer components {
+  .announcement-ticker {
+    @apply relative flex items-center gap-3 overflow-hidden border-y border-brand-100/40 bg-gradient-to-r from-brand-900 via-brand-600 to-brand-900 px-4 py-3 text-brand-50 shadow-premium sm:px-6;
+  }
+
+  .announcement-ticker__label {
+    @apply z-10 inline-flex shrink-0 items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] backdrop-blur;
+  }
+
+  .announcement-ticker__viewport {
+    @apply relative min-w-0 flex-1 overflow-hidden;
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+
+  .announcement-ticker__track {
+    width: max-content;
+    @apply flex items-center gap-10 whitespace-nowrap will-change-transform;
+    animation: ticker-marquee 30s linear infinite;
+  }
+
+  .announcement-ticker:hover .announcement-ticker__track {
+    animation-play-state: paused;
+  }
+
+  .ticker-item {
+    @apply relative pr-10 text-sm font-medium text-white/95 sm:text-base;
+  }
+
+  .ticker-item::after {
+    content: '• • •';
+    @apply pointer-events-none absolute right-0 text-white/70;
+    transform: translateX(50%);
+  }
+}
+
+@keyframes ticker-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
