@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { ArrowUpRight, ChevronLeft, ChevronRight, Handshake, MapPinned, ShieldCheck, Star, Timer } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Button from '../components/Button';
 import PropertyCard from '../components/PropertyCard';
@@ -19,6 +19,29 @@ const heroImages = [
   'https://images.unsplash.com/photo-1479839672679-a46483c0e7c8?auto=format&fit=crop&w=2000&q=80', // ciudad moderna
   'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=2000&q=80', // costa/paisaje
   'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=2000&q=80', // propiedad premium
+];
+
+const agentBenefits = [
+  {
+    icon: Timer,
+    title: 'Vendemos más rápido',
+    description: 'Activamos estrategias de comercialización premium para conectar tu propiedad con compradores calificados en menor tiempo.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Propiedades reales y seguras',
+    description: 'Validamos información y documentación para que cada proceso sea confiable, transparente y sin sorpresas.',
+  },
+  {
+    icon: MapPinned,
+    title: 'Especialistas en Nicaragua',
+    description: 'Conocemos el mercado local zona por zona para recomendar oportunidades con verdadero potencial de plusvalía.',
+  },
+  {
+    icon: Handshake,
+    title: 'Asesoría completa',
+    description: 'Te acompañamos desde la estrategia inicial hasta el cierre con negociación experta y atención personalizada.',
+  },
 ];
 
 function HomePage() {
@@ -173,12 +196,80 @@ function HomePage() {
       </section>
 
       <section className="section-container grid gap-6 md:grid-cols-3">
-        {['Atención personalizada', 'Marketing premium', 'Negociación estratégica'].map((item) => (
-          <div key={item} className="rounded-2xl border border-brand-100/60 bg-white p-6 shadow-premium dark:border-brand-900/70 dark:bg-slate-900">
-            <h3 className="text-xl font-semibold">{item}</h3>
-            <p className="mt-2 text-slate-500">Estrategias enfocadas en maximizar el valor de tu inversión inmobiliaria.</p>
+        <div className="md:col-span-3">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.45 }}
+            className="mx-auto max-w-4xl text-center"
+          >
+            <h2 className="font-display text-3xl font-semibold md:text-4xl">Vende o encuentra tu propiedad con expertos en Nicaragua</h2>
+            <p className="mt-4 text-base text-slate-500 md:text-lg dark:text-slate-300">
+              En DIAMANTES REALTY GROUP aceleramos el proceso con estrategia, visibilidad y acompañamiento profesional.
+            </p>
+          </motion.div>
+        </div>
+
+        <div className="grid gap-6 md:col-span-3 md:grid-cols-2 xl:grid-cols-4">
+          {agentBenefits.map((benefit, index) => {
+            const Icon = benefit.icon;
+            return (
+              <motion.article
+                key={benefit.title}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.35, delay: index * 0.08 }}
+                className="group rounded-3xl border border-brand-100/70 bg-white p-6 shadow-premium transition-all duration-300 hover:-translate-y-1 hover:border-brand-400/80 dark:border-brand-900/70 dark:bg-slate-900"
+              >
+                <span className="inline-flex rounded-2xl bg-brand-500/10 p-3 text-brand-500 transition-colors duration-300 group-hover:bg-brand-500 group-hover:text-white">
+                  <Icon size={22} />
+                </span>
+                <h3 className="mt-5 text-xl font-semibold">{benefit.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-slate-500 dark:text-slate-300">{benefit.description}</p>
+              </motion.article>
+            );
+          })}
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.45 }}
+          className="relative isolate overflow-hidden rounded-3xl md:col-span-3"
+        >
+          <div
+            className="absolute inset-0 -z-20 bg-cover bg-center bg-no-repeat"
+            style={{
+              backgroundImage: "url('https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1600&q=80')",
+            }}
+            aria-hidden="true"
+          />
+          <div className="absolute inset-0 -z-10 bg-slate-950/70" aria-hidden="true" />
+          <div className="flex min-h-[320px] flex-col items-center justify-center px-6 py-16 text-center text-white md:min-h-[360px]">
+            <p className="max-w-3xl font-display text-3xl font-semibold leading-tight md:text-5xl">
+              No solo mostramos propiedades… creamos oportunidades.
+            </p>
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+              <Link to="/propiedades">
+                <Button className="inline-flex items-center gap-2">
+                  Ver propiedades
+                  <ArrowUpRight size={18} />
+                </Button>
+              </Link>
+              <a href="https://wa.me/50587446657" target="_blank" rel="noreferrer">
+                <Button
+                  variant="secondary"
+                  className="bg-[#25D366] text-white hover:bg-[#1ebe5d] dark:bg-[#25D366] dark:text-white dark:hover:bg-[#1ebe5d]"
+                >
+                  Contactar por WhatsApp
+                </Button>
+              </a>
+            </div>
           </div>
-        ))}
+        </motion.div>
       </section>
 
       <section className="section-container">
