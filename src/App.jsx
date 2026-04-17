@@ -11,6 +11,7 @@ const AboutPage = lazy(() => import('./pages/AboutPage'));
 const MapPage = lazy(() => import('./pages/MapPage'));
 const SellPage = lazy(() => import('./pages/SellPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
+const AIPropertyDesignPage = lazy(() => import('./pages/AIPropertyDesignPage'));
 
 const AdminLoginPage = lazy(() => import('./admin/pages/AdminLoginPage'));
 const AdminDashboardPage = lazy(() => import('./admin/pages/AdminDashboardPage'));
@@ -38,6 +39,7 @@ function App() {
           <Route path="/mapa" element={<MapPage />} />
           <Route path="/quieres-vender" element={<SellPage />} />
           <Route path="/contacto" element={<ContactPage />} />
+          <Route path="/edicion-propiedades" element={<AIPropertyDesignPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

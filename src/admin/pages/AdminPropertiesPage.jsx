@@ -110,6 +110,7 @@ function AdminPropertiesPage() {
               <th className="px-4 py-3">Operación</th>
               <th className="px-4 py-3">Precio</th>
               <th className="px-4 py-3">Premium</th>
+              <th className="px-4 py-3">Edición visual IA</th>
               <th className="px-4 py-3">Acciones</th>
             </tr>
           </thead>
@@ -121,6 +122,7 @@ function AdminPropertiesPage() {
                 <td className="px-4 py-3 capitalize">{property.tipoOperacion || 'venta'}</td>
                 <td className="px-4 py-3">US$ {Number(property.precio || 0).toLocaleString('es-DO')}</td>
                 <td className="px-4 py-3">{property.premium ? 'Sí' : 'No'}</td>
+                <td className="px-4 py-3">{property.editableConIA ? 'Sí' : 'No'}</td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2">
                     <Button variant="outline" disabled={actionLoading} onClick={() => setSelected(property)}><Pencil size={16} /></Button>
