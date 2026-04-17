@@ -10,6 +10,7 @@ const navItems = [
   { to: '/propiedades', label: 'Propiedades' },
   { to: '/sobre-mi', label: 'Sobre mí' },
   { to: '/mapa', label: 'Mapa' },
+  { to: '/edicion-propiedades', label: 'Edición IA' },
   { to: '/quieres-vender', label: '¿Quieres vender?' },
   { to: '/contacto', label: 'Contacto' },
 ];

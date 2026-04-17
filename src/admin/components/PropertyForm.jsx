@@ -47,6 +47,7 @@ const initialState = {
   lat: defaultCenter[0],
   lng: defaultCenter[1],
   premium: false,
+  editableConIA: false,
 };
 
 const createExistingMediaItem = (item, index) => ({
@@ -566,6 +567,15 @@ function PropertyForm({ initialValues, onSubmit, submitLabel = 'Guardar' }) {
 
       <label className="flex items-center gap-2 text-sm">
         <input name="premium" type="checkbox" checked={form.premium} onChange={handleChange} /> Propiedad premium
+      </label>
+      <label className="flex items-center gap-2 text-sm">
+        <input
+          name="editableConIA"
+          type="checkbox"
+          checked={Boolean(form.editableConIA)}
+          onChange={handleChange}
+        />
+        Habilitar para edición visual
       </label>
 
       {error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-600">{error}</p>}

@@ -29,6 +29,7 @@ const normalizeProperty = (snapshot) => {
     areaConstruida: data.areaConstruida ?? null,
     unidadMedida: data.unidadMedida || 'varas',
     precioPorArea: data.precioPorArea ?? null,
+    editableConIA: Boolean(data.editableConIA),
     media,
     imagenes: media.filter((item) => item.type === 'image').map((item) => item.url),
     lat: Number(data.lat ?? 0),
