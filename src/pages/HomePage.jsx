@@ -44,6 +44,18 @@ const agentBenefits = [
   },
 ];
 
+const landCategoryKeywords = ['terreno', 'finca', 'quinta', 'lote', 'lotes', 'parcela'];
+
+const normalizeText = (value = '') => value.toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
+const isLandCategory = (property) => {
+  const propertyType = normalizeText(property.tipo);
+  return landCategoryKeywords.some((keyword) => {
+    const normalizedKeyword = normalizeText(keyword);
+    return propertyType === normalizedKeyword || propertyType.includes(normalizedKeyword);
+  });
+};
+
 function HomePage() {
   const { propiedades, loading } = usePropiedades();
   const featured = useMemo(() => {
@@ -52,6 +64,7 @@ function HomePage() {
   }, [propiedades]);
   const sliderRef = useRef(null);
   const [heroIndex, setHeroIndex] = useState(0);
+  const landSliderRef = useRef(null);
 
   useEffect(() => {
     const preloadImages = heroImages.map((src) => {
@@ -98,6 +111,10 @@ function HomePage() {
       scrollProperties('prev');
     }
   };
+
+  const landProperties = useMemo(() => featured.filter((property) => isLandCategory(property)), [featured]);
+  const featuredLandProperties = useMemo(() => landProperties.slice(0, 6), [landProperties]);
+  const hasMoreLandProperties = landProperties.length > featuredLandProperties.length;
 
   return (
     <>
@@ -193,6 +210,89 @@ function HomePage() {
           ))}
         </div>
       </section>
+
+      {featuredLandProperties.length > 0 && (
+        <section className="section-container pt-0">
+          <div className="rounded-[2rem] border border-emerald-200/70 bg-gradient-to-br from-emerald-50 via-white to-brand-50 p-6 shadow-premium dark:border-emerald-900/70 dark:from-emerald-950/40 dark:via-slate-900 dark:to-slate-900 md:p-8">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <span className="inline-flex rounded-full border border-emerald-500/40 bg-emerald-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-200">
+                  Categoría especial
+                </span>
+                <h2 className="mt-3 font-display text-3xl font-semibold md:text-4xl">TERRENOS Y FINCAS DESTACADAS</h2>
+                <p className="mt-3 max-w-3xl text-slate-600 dark:text-slate-300">
+                  Descubre oportunidades ideales para invertir, construir o desarrollar en ubicaciones estratégicas.
+                </p>
+              </div>
+              {featuredLandProperties.length > 1 && (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!landSliderRef.current) return;
+                      const scrollAmount = landSliderRef.current.clientWidth * 0.85;
+                      landSliderRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                    }}
+                    className="rounded-full border border-emerald-200 bg-white/95 p-2 text-slate-700 transition hover:border-emerald-500 hover:text-emerald-600 dark:border-emerald-900 dark:bg-slate-900 dark:text-slate-200"
+                    aria-label="Ver terrenos anteriores"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!landSliderRef.current) return;
+                      const scrollAmount = landSliderRef.current.clientWidth * 0.85;
+                      landSliderRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                    }}
+                    className="rounded-full border border-emerald-200 bg-white/95 p-2 text-slate-700 transition hover:border-emerald-500 hover:text-emerald-600 dark:border-emerald-900 dark:bg-slate-900 dark:text-slate-200"
+                    aria-label="Ver terrenos siguientes"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-5 rounded-2xl border border-emerald-200/60 bg-white/75 p-4 text-sm text-slate-700 shadow-sm dark:border-emerald-900/70 dark:bg-slate-900/70 dark:text-slate-200">
+              Inversiones con alto potencial para construir, desarrollar o expandir tu patrimonio.
+            </div>
+
+            <div
+              ref={landSliderRef}
+              className="property-slider mt-8 flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth pb-3"
+              tabIndex={0}
+              role="region"
+              aria-label="Carrusel de terrenos y fincas destacadas"
+            >
+              {featuredLandProperties.map((property) => (
+                <div key={property.id} className="w-[85%] shrink-0 snap-start sm:w-[70%] md:w-[48%] lg:w-[32%]">
+                  <div className="mb-3 flex flex-wrap gap-2">
+                    <span className="inline-flex rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-200">
+                      {property.tipo}
+                    </span>
+                    <span className="inline-flex rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-200">
+                      Oportunidad
+                    </span>
+                  </div>
+                  <PropertyCard property={property} ctaLabel="Ver detalle" />
+                </div>
+              ))}
+            </div>
+
+            {hasMoreLandProperties && (
+              <div className="mt-8 flex justify-center">
+                <Link to="/propiedades?categoria=terrenos-fincas">
+                  <Button className="inline-flex items-center gap-2">
+                    Ver más terrenos y fincas
+                    <ArrowUpRight size={18} />
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       <section className="section-container grid gap-6 md:grid-cols-3">
         <div className="md:col-span-3">

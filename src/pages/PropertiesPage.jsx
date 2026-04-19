@@ -1,12 +1,17 @@
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import PropertyCard from '../components/PropertyCard';
 import Seo from '../components/Seo';
 import { usePropiedades } from '../hooks/usePropiedades';
 
 const propertyTypes = ['casa', 'apartamento', 'terreno', 'bodega', 'hotel', 'propiedad comercial', 'edificio'];
+const terrainFocusedTypes = ['terreno', 'finca', 'quinta', 'lote', 'lotes', 'parcela'];
+const normalizeText = (value = '') => value.toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
 function PropertiesPage() {
   const { propiedades, loading, error } = usePropiedades();
+  const [searchParams] = useSearchParams();
+  const selectedCategory = searchParams.get('categoria');
   const [filters, setFilters] = useState({ type: '', location: '', maxPrice: '' });
 
   const filtered = useMemo(
@@ -14,9 +19,10 @@ function PropertiesPage() {
       const typeMatch = !filters.type || property.tipo === filters.type;
       const locationMatch = !filters.location || property.ubicacion.toLowerCase().includes(filters.location.toLowerCase());
       const priceMatch = !filters.maxPrice || Number(property.precio) <= Number(filters.maxPrice);
-      return typeMatch && locationMatch && priceMatch;
+      const isLandOrFarmCategory = selectedCategory !== 'terrenos-fincas' || terrainFocusedTypes.some((typeKeyword) => normalizeText(property.tipo).includes(typeKeyword));
+      return typeMatch && locationMatch && priceMatch && isLandOrFarmCategory;
     }),
-    [filters, propiedades],
+    [filters, propiedades, selectedCategory],
   );
 
   return (
