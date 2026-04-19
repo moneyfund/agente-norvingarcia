@@ -11,7 +11,7 @@ const measurementLabelByUnit = {
   manzanas: 'manzana',
 };
 
-function PropertyCard({ property }) {
+function PropertyCard({ property, ctaLabel = 'Ver más' }) {
   const image = getPrimaryImageUrl(property) || 'https://via.placeholder.com/800x600?text=Propiedad';
   const operationLabel = property.tipoOperacion === 'alquiler' ? 'En Alquiler' : 'En Venta';
   const unit = property.unidadMedida || 'varas';
@@ -43,7 +43,7 @@ function PropertyCard({ property }) {
             {precioPorArea !== null && Number.isFinite(precioPorArea) && ` · Precio por ${unitLabel}: ${currency.format(precioPorArea)}`}
           </p>
         )}
-        <Link to={`/propiedad/${property.id}`}><Button className="w-full">Ver más</Button></Link>
+        <Link to={`/propiedad/${property.id}`}><Button className="w-full">{ctaLabel}</Button></Link>
         <p className="flex items-center gap-1 text-sm text-slate-500 dark:text-slate-300"><Heart size={14} className="text-brand-500" /> {property.likes?.length || 0} me gusta</p>
       </div>
     </motion.article>
