@@ -7,6 +7,7 @@ import PropertyCard from '../components/PropertyCard';
 import Seo from '../components/Seo';
 import AnnouncementTicker from '../components/AnnouncementTicker';
 import { usePropiedades } from '../hooks/usePropiedades';
+import { isLandOrFarmProperty } from '../utils/propertyTypeFilters';
 
 const testimonials = [
   { name: 'Laura Méndez', text: 'Norvin vendió mi propiedad en tiempo récord con una estrategia impecable.' },
@@ -43,18 +44,6 @@ const agentBenefits = [
     description: 'Te acompañamos desde la estrategia inicial hasta el cierre con negociación experta y atención personalizada.',
   },
 ];
-
-const landCategoryKeywords = ['terreno', 'finca', 'quinta', 'lote', 'lotes', 'parcela'];
-
-const normalizeText = (value = '') => value.toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
-
-const isLandCategory = (property) => {
-  const propertyType = normalizeText(property.tipo);
-  return landCategoryKeywords.some((keyword) => {
-    const normalizedKeyword = normalizeText(keyword);
-    return propertyType === normalizedKeyword || propertyType.includes(normalizedKeyword);
-  });
-};
 
 function HomePage() {
   const { propiedades, loading } = usePropiedades();
@@ -112,9 +101,29 @@ function HomePage() {
     }
   };
 
-  const landProperties = useMemo(() => featured.filter((property) => isLandCategory(property)), [featured]);
-  const featuredLandProperties = useMemo(() => landProperties.slice(0, 6), [landProperties]);
+  const landProperties = useMemo(() => propiedades.filter((property) => isLandOrFarmProperty(property)), [propiedades]);
+  const featuredLandProperties = useMemo(() => {
+    const premiumLand = landProperties.filter((property) => property.premium);
+    const prioritized = premiumLand.length ? [...premiumLand, ...landProperties.filter((property) => !property.premium)] : landProperties;
+    return prioritized.slice(0, 6);
+  }, [landProperties]);
   const hasMoreLandProperties = landProperties.length > featuredLandProperties.length;
+
+  const handleLandSliderKeyDown = (event) => {
+    if (!landSliderRef.current) return;
+
+    const scrollAmount = landSliderRef.current.clientWidth * 0.85;
+
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      landSliderRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      landSliderRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   return (
     <>
@@ -261,6 +270,7 @@ function HomePage() {
             <div
               ref={landSliderRef}
               className="property-slider mt-8 flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth pb-3"
+              onKeyDown={handleLandSliderKeyDown}
               tabIndex={0}
               role="region"
               aria-label="Carrusel de terrenos y fincas destacadas"
