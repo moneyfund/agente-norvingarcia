@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { collection, onSnapshot, query } from 'firebase/firestore';
 import L from 'leaflet';
 import Seo from '../components/Seo';
@@ -56,7 +55,6 @@ function MapPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const navigate = useNavigate();
 
   const propertiesWithCoordinates = useMemo(
     () => propiedades.filter(hasValidCoordinates),
@@ -142,13 +140,24 @@ function MapPage() {
 
         const marker = L.marker([lat, lng], { icon: markerIcon, keyboard: true });
 
+        const propertyTitle = property.title || property.titulo || 'Propiedad disponible';
+        const propertyAddress = property.address || property.direccion || 'Ubicación no disponible';
+        const propertyId = property.id || '';
+        const whatsappMessage = encodeURIComponent(`Hola, estoy interesado en la propiedad: ${propertyTitle}`);
+        const detailUrl = propertyId ? `/propiedad.html?id=${propertyId}` : '#';
+
         const popupHtml = `
-          <article class="property-map-preview-card" data-property-id="${property.id}">
-            <img src="${imageUrl}" alt="${property.title || property.titulo || 'Propiedad'}" class="property-map-preview__image" />
+          <article class="property-map-preview-card" data-property-id="${propertyId}">
+            <img src="${imageUrl}" alt="${propertyTitle}" class="property-map-preview__image" />
             <div class="property-map-preview__body">
-              <h4 class="property-map-preview__title">${property.title || property.titulo || 'Propiedad disponible'}</h4>
+              <h4 class="property-map-preview__title">${propertyTitle}</h4>
+              <p class="property-map-preview__address">${propertyAddress}</p>
               <p class="property-map-preview__price">${formatPrice(property.price ?? property.precio)}</p>
               <p class="property-map-preview__area">Área: ${property.area || 'N/D'}</p>
+              <div class="property-map-preview__actions">
+                <a href="https://wa.me/50587446657?text=${whatsappMessage}" target="_blank" rel="noopener noreferrer" class="property-map-preview__btn property-map-preview__btn--whatsapp">WhatsApp</a>
+                <a href="${detailUrl}" class="property-map-preview__btn property-map-preview__btn--view${propertyId ? '' : ' is-disabled'}" ${propertyId ? '' : 'aria-disabled="true" tabindex="-1"'}>Ver propiedad</a>
+              </div>
             </div>
           </article>
         `;
@@ -171,16 +180,12 @@ function MapPage() {
         });
 
         marker.on('click', () => {
-          if (window.matchMedia('(hover: hover)').matches) {
-            navigate(`/propiedad/${property.id}`);
+          if (marker.isPopupOpen()) {
+            marker.closePopup();
             return;
           }
 
-          if (marker.isPopupOpen()) {
-            navigate(`/propiedad/${property.id}`);
-          } else {
-            marker.openPopup();
-          }
+          marker.openPopup();
         });
 
         marker.on('popupopen', (event) => {
@@ -206,7 +211,7 @@ function MapPage() {
     };
 
     renderMarkers();
-  }, [navigate, propertiesWithCoordinates]);
+  }, [propertiesWithCoordinates]);
 
   return (
     <section className="section-container">

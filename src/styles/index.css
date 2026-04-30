@@ -173,3 +173,42 @@
   font-size: 0.82rem;
   color: #475569;
 }
+
+
+.property-map-preview__address {
+  margin: 0.24rem 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.property-map-preview__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.55rem;
+}
+
+.property-map-preview__btn {
+  flex: 1;
+  text-align: center;
+  padding: 0.38rem 0.35rem;
+  border-radius: 0.45rem;
+  font-size: 0.73rem;
+  line-height: 1.2;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.property-map-preview__btn--whatsapp {
+  background: #25d366;
+  color: #fff;
+}
+
+.property-map-preview__btn--view {
+  background: #1e293b;
+  color: #fff;
+}
+
+.property-map-preview__btn.is-disabled {
+  pointer-events: none;
+  opacity: 0.55;
+}
