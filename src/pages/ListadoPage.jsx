@@ -1,4 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Building2,
+  CheckCircle2,
+  FileText,
+  Home,
+  Landmark,
+  MapPin,
+  Save,
+  TriangleAlert,
+  Upload,
+  Wifi,
+} from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import {
   createListadoPropiedad,
@@ -8,14 +20,15 @@ import {
 } from '../services/listadoService';
 
 const initialForm = {
+  codigoInterno: '',
+  fechaCaptacion: '',
   tipoPropiedad: 'casa',
   asesorResponsable: '',
   departamento: '',
   municipio: '',
   zona: '',
   direccionReferencia: '',
-  acceso: 'asfalto',
-  accesoInvierno: false,
+  ubicacionGPS: '',
   areaTotal: '',
   areaConstruida: '',
   topografia: 'plano',
@@ -23,11 +36,25 @@ const initialForm = {
   usoPotencial: '',
   habitaciones: '',
   banos: '',
-  tieneAgua: false,
-  tieneEnergia: false,
+  sala: false,
+  comedor: false,
+  cocina: false,
+  garaje: false,
+  energia: false,
+  agua: 'potable',
   tipoSuelo: '',
+  acceso: 'asfalto',
+  accesoInvierno: false,
+  serviciosDisponibles: [],
+  manzanasHectareas: '',
+  tipoUso: 'ganadero',
   fuentesAgua: [],
   infraestructura: [],
+  tipoPasto: '',
+  cercas: false,
+  tipoLocal: '',
+  estacionamiento: '',
+  servicios: '',
   senal: 'buena',
   internet: false,
   cercania: [],
@@ -44,66 +71,21 @@ const initialForm = {
   diferencial1: '',
   diferencial2: '',
   diferencial3: '',
-  ubicacionGPS: '',
   imagenes: [],
 };
 
 const toggleArray = (arr, value) => (arr.includes(value) ? arr.filter((v) => v !== value) : [...arr, value]);
-const yesNo = (value) => (value ? 'Sí' : 'No');
-const formatCurrency = (value) => {
-  const amount = Number(value || 0);
-  if (!Number.isFinite(amount)) return 'N/D';
-  return new Intl.NumberFormat('es-NI', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
-};
-const formatText = (value) => (value || 'N/D');
-const formatList = (value) => (Array.isArray(value) && value.length ? value.join(', ') : 'N/D');
-const ensureHtml2Pdf = async () => {
-  if (window.html2pdf) return window.html2pdf;
-  await new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('No fue posible cargar html2pdf.js'));
-    document.body.appendChild(script);
-  });
-  return window.html2pdf;
-};
 
-const buildPdfHtml = (item) => {
-  const mediaHtml = (item.imagenes || []).slice(0, 3).map((src, index) => `<img src="${src}" alt="Imagen ${index + 1}" />`).join('');
-  const dynamicFeatures = item.tipoPropiedad === 'casa'
-    ? `Habitaciones: ${formatText(item.habitaciones)} · Baños: ${formatText(item.banos)}`
-    : `Tipo de suelo: ${formatText(item.tipoSuelo)} · Fuentes de agua: ${formatList(item.fuentesAgua)}`;
-
-  return `
-    <div class="sheet">
-      <header>
-        <img src="${window.location.origin}/logo.png" alt="Logo Norvin García" />
-        <div>
-          <h1>Ficha de Propiedad</h1>
-          <p>Norvin García · Agencia inmobiliaria</p>
-        </div>
-      </header>
-      <section>
-        <h2>Identificación</h2>
-        <div class="grid"><p><strong>Código:</strong> ${formatText(item.codigoInterno)}</p><p><strong>Tipo:</strong> ${formatText(item.tipoPropiedad)}</p></div>
-        <p><strong>Ubicación:</strong> ${formatText(item.departamento)}, ${formatText(item.municipio)}, ${formatText(item.zona)}. ${formatText(item.direccionReferencia)}</p>
-      </section>
-      <section>
-        <h2>Datos generales</h2>
-        <div class="grid"><p><strong>Área total:</strong> ${formatText(item.areaTotal)}</p><p><strong>Área construida:</strong> ${formatText(item.areaConstruida)}</p></div>
-        <p><strong>Topografía:</strong> ${formatText(item.topografia)} · <strong>Uso actual:</strong> ${formatText(item.usoActual)} · <strong>Uso potencial:</strong> ${formatText(item.usoPotencial)}</p>
-      </section>
-      <section><h2>Características</h2><p>${dynamicFeatures}</p></section>
-      <section><h2>Servicios</h2><p>Agua: ${yesNo(item.tieneAgua)} · Energía: ${yesNo(item.tieneEnergia)} · Internet: ${yesNo(item.internet)} · Señal: ${formatText(item.senal)}</p></section>
-      <section><h2>Estado y documentación</h2><p><strong>Estado:</strong> ${formatText(item.estadoGeneral)} · <strong>Mejoras:</strong> ${formatText(item.necesitaMejoras)}</p><p>Escritura: ${yesNo(item.escritura)} · Plano: ${yesNo(item.plano)} · Impuestos: ${yesNo(item.impuestos)}</p><p><strong>Observaciones legales:</strong> ${formatText(item.observacionesLegales)}</p></section>
-      <section><h2>Precio y diferenciales</h2><p><strong>Precio solicitado:</strong> ${formatCurrency(item.precioSolicitado)} · <strong>Precio sugerido:</strong> ${formatCurrency(item.precioSugerido)} · <strong>Negociable:</strong> ${yesNo(item.negociable)}</p><p><strong>Forma de pago:</strong> ${formatText(item.formaPago)}</p><ul><li>${formatText(item.diferencial1)}</li><li>${formatText(item.diferencial2)}</li><li>${formatText(item.diferencial3)}</li></ul></section>
-      <section><h2>Observaciones</h2><p>${formatText(item.ubicacionGPS)}</p></section>
-      ${mediaHtml ? `<section><h2>Imágenes</h2><div class="media">${mediaHtml}</div></section>` : ''}
-    </div>
-  `;
-};
+function Card({ icon: Icon, title, children }) {
+  return (
+    <section className="rounded-2xl border bg-white p-4 shadow-sm">
+      <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold text-slate-800">
+        <Icon size={18} className="text-blue-700" /> {title}
+      </h2>
+      <div className="grid gap-3 md:grid-cols-2">{children}</div>
+    </section>
+  );
+}
 
 function ListadoPage() {
   const { user } = useAuth();
@@ -113,55 +95,32 @@ function ListadoPage() {
   const [search, setSearch] = useState({ zona: '', tipoPropiedad: '', precioMax: '' });
   const [files, setFiles] = useState([]);
   const [saving, setSaving] = useState(false);
-  const [pdfLoadingId, setPdfLoadingId] = useState('');
-
-  const generatePdf = async (item, preview = false) => {
-    setPdfLoadingId(item.id);
-    try {
-      const html2pdf = await ensureHtml2Pdf();
-      const wrapper = document.createElement('div');
-      wrapper.innerHTML = `
-        <style>
-          .sheet { font-family: Arial, sans-serif; color: #0f172a; padding: 28px; }
-          header { display: flex; gap: 12px; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px; }
-          header img { width: 56px; height: 56px; object-fit: contain; }
-          h1 { margin: 0; font-size: 20px; } h2 { margin: 0 0 8px; font-size: 14px; text-transform: uppercase; letter-spacing: .04em; color: #1d4ed8; }
-          p, li { font-size: 12px; line-height: 1.5; margin: 4px 0; } section { margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9; }
-          .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } ul { margin: 6px 0 0 16px; padding: 0; } .media { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-          .media img { width: 100%; height: 130px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; }
-        </style>
-        ${buildPdfHtml(item)}
-      `;
-
-      const options = { margin: 0.35, filename: `propiedad-${item.codigoInterno || item.id}.pdf`, image: { type: 'jpeg', quality: 0.95 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } };
-      if (preview) {
-        const pdf = await html2pdf().from(wrapper).set(options).toPdf().get('pdf');
-        window.open(pdf.output('bloburl'), '_blank', 'noopener,noreferrer');
-      } else {
-        await html2pdf().from(wrapper).set(options).save();
-      }
-    } finally {
-      setPdfLoadingId('');
-    }
-  };
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+  const [autoSave, setAutoSave] = useState(true);
+  const [previewUrls, setPreviewUrls] = useState([]);
+  const sectionRefs = useRef({});
 
   const loadItems = async () => {
     const data = await getListadoPropiedades({ zona: search.zona, tipoPropiedad: search.tipoPropiedad });
     setItems(data);
   };
 
-  useEffect(() => {
-    loadItems();
-  }, []);
+  useEffect(() => { loadItems(); }, []);
 
   useEffect(() => {
+    const urls = files.map((f) => URL.createObjectURL(f));
+    setPreviewUrls(urls);
+    return () => urls.forEach((u) => URL.revokeObjectURL(u));
+  }, [files]);
+
+  useEffect(() => {
+    if (!autoSave || !editingId) return undefined;
     const timeout = setTimeout(() => {
-      if (editingId) {
-        updateListadoPropiedad(editingId, form).catch(() => {});
-      }
-    }, 2500);
+      updateListadoPropiedad(editingId, form).catch(() => {});
+    }, 1200);
     return () => clearTimeout(timeout);
-  }, [form, editingId]);
+  }, [form, editingId, autoSave]);
 
   const visibleItems = useMemo(() => {
     const max = Number(search.precioMax || 0);
@@ -171,118 +130,151 @@ function ListadoPage() {
 
   const handleChange = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
+  const validate = () => {
+    if (!form.tipoPropiedad || !form.precioSolicitado || !form.departamento || !form.municipio || !form.zona) {
+      throw new Error('Completa campos obligatorios: tipo, precio y ubicación (departamento/municipio/zona).');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
+    setError('');
+    setSuccess('');
     try {
+      validate();
+      if (!user?.uid) throw new Error('No hay usuario autenticado. Inicia sesión para guardar.');
+
+      let propertyId = editingId;
       if (editingId) {
-        await updateListadoPropiedad(editingId, form);
+        await updateListadoPropiedad(editingId, { ...form, fechaCaptacion: form.fechaCaptacion || new Date().toISOString() });
       } else {
         const created = await createListadoPropiedad({ ...form, fechaCaptacion: new Date().toISOString() }, user.uid);
-        setEditingId(created.id);
+        propertyId = created.id;
       }
 
-      if (files.length) {
-        const urls = await uploadListadoImages(files, editingId || 'temp');
-        await updateListadoPropiedad(editingId, { imagenes: [...(form.imagenes || []), ...urls] });
-        setFiles([]);
+      if (files.length && propertyId) {
+        const urls = await uploadListadoImages(files, propertyId);
+        await updateListadoPropiedad(propertyId, { imagenes: [...(form.imagenes || []), ...urls] });
       }
 
+      setSuccess('Propiedad guardada correctamente');
       await loadItems();
       setForm(initialForm);
+      setFiles([]);
       setEditingId(null);
+    } catch (submitError) {
+      setError(submitError.message || 'No se pudo guardar la propiedad en Firestore.');
     } finally {
       setSaving(false);
     }
   };
 
-  const generateDescription = () => {
-    const text = `${form.tipoPropiedad} en ${form.zona}, ${form.municipio}. Área ${form.areaTotal}. Precio Q${form.precioSolicitado}. Estado ${form.estadoGeneral}.`;
-    handleChange('diferencial1', text);
-  };
-
-  const copyWhatsapp = async () => {
-    const text = `${form.tipoPropiedad.toUpperCase()} | ${form.zona} | Q${form.precioSolicitado} | ${form.diferencial1}`;
-    await navigator.clipboard.writeText(text);
+  const renderDynamicFields = () => {
+    if (form.tipoPropiedad === 'casa') {
+      return (<>
+        <input className="rounded border p-3" placeholder="Habitaciones" value={form.habitaciones} onChange={(e) => handleChange('habitaciones', e.target.value)} />
+        <input className="rounded border p-3" placeholder="Baños" value={form.banos} onChange={(e) => handleChange('banos', e.target.value)} />
+        {['sala', 'comedor', 'cocina', 'garaje', 'energia'].map((key) => <label key={key} className="flex items-center gap-2 rounded border p-3"><input type="checkbox" checked={form[key]} onChange={(e) => handleChange(key, e.target.checked)} /> {key}</label>)}
+        <select className="rounded border p-3" value={form.agua} onChange={(e) => handleChange('agua', e.target.value)}><option value="potable">Agua potable</option><option value="pozo">Pozo</option><option value="otro">Otro</option></select>
+      </>);
+    }
+    if (form.tipoPropiedad === 'terreno') {
+      return (<>
+        <input className="rounded border p-3" placeholder="Tipo de suelo" value={form.tipoSuelo} onChange={(e) => handleChange('tipoSuelo', e.target.value)} />
+        <input className="rounded border p-3" placeholder="Topografía" value={form.topografia} onChange={(e) => handleChange('topografia', e.target.value)} />
+        <select className="rounded border p-3" value={form.acceso} onChange={(e) => handleChange('acceso', e.target.value)}><option value="asfalto">Asfalto</option><option value="balastre">Balastre</option><option value="tierra">Tierra</option></select>
+        <label className="flex items-center gap-2 rounded border p-3"><input type="checkbox" checked={form.accesoInvierno} onChange={(e) => handleChange('accesoInvierno', e.target.checked)} />Acceso en invierno</label>
+        {['agua', 'energia', 'internet', 'drenaje'].map((s) => <label key={s} className="flex items-center gap-2 rounded border p-3"><input type="checkbox" checked={form.serviciosDisponibles.includes(s)} onChange={() => handleChange('serviciosDisponibles', toggleArray(form.serviciosDisponibles, s))} />{s}</label>)}
+      </>);
+    }
+    if (form.tipoPropiedad === 'finca') {
+      return (<>
+        <input className="rounded border p-3" placeholder="Manzanas / hectáreas" value={form.manzanasHectareas} onChange={(e) => handleChange('manzanasHectareas', e.target.value)} />
+        <select className="rounded border p-3" value={form.tipoUso} onChange={(e) => handleChange('tipoUso', e.target.value)}><option value="ganadero">Ganadero</option><option value="agricola">Agrícola</option><option value="mixto">Mixto</option></select>
+        {['rio', 'quebrada', 'pozo', 'naciente'].map((f) => <label key={f} className="flex items-center gap-2 rounded border p-3"><input type="checkbox" checked={form.fuentesAgua.includes(f)} onChange={() => handleChange('fuentesAgua', toggleArray(form.fuentesAgua, f))} />{f}</label>)}
+        {['casa', 'corrales', 'galeras'].map((i) => <label key={i} className="flex items-center gap-2 rounded border p-3"><input type="checkbox" checked={form.infraestructura.includes(i)} onChange={() => handleChange('infraestructura', toggleArray(form.infraestructura, i))} />{i}</label>)}
+        <input className="rounded border p-3" placeholder="Tipo de pasto" value={form.tipoPasto} onChange={(e) => handleChange('tipoPasto', e.target.value)} />
+        <label className="flex items-center gap-2 rounded border p-3"><input type="checkbox" checked={form.cercas} onChange={(e) => handleChange('cercas', e.target.checked)} />Cercas</label>
+      </>);
+    }
+    return (<>
+      <input className="rounded border p-3" placeholder="Tipo de local" value={form.tipoLocal} onChange={(e) => handleChange('tipoLocal', e.target.value)} />
+      <input className="rounded border p-3" placeholder="Área construida" value={form.areaConstruida} onChange={(e) => handleChange('areaConstruida', e.target.value)} />
+      <input className="rounded border p-3" placeholder="Baños" value={form.banos} onChange={(e) => handleChange('banos', e.target.value)} />
+      <input className="rounded border p-3" placeholder="Estacionamiento" value={form.estacionamiento} onChange={(e) => handleChange('estacionamiento', e.target.value)} />
+      <input className="rounded border p-3 md:col-span-2" placeholder="Servicios" value={form.servicios} onChange={(e) => handleChange('servicios', e.target.value)} />
+    </>);
   };
 
   return (
-    <div className="mx-auto max-w-6xl p-4">
-      <h1 className="mb-4 text-2xl font-bold">Listado interno</h1>
-      <div className="mb-4 grid gap-2 rounded-xl bg-white p-3 shadow md:grid-cols-3">
-        <input className="rounded border p-3" placeholder="Buscar zona" value={search.zona} onChange={(e) => setSearch((s) => ({ ...s, zona: e.target.value }))} />
-        <select className="rounded border p-3" value={search.tipoPropiedad} onChange={(e) => setSearch((s) => ({ ...s, tipoPropiedad: e.target.value }))}>
-          <option value="">Tipo</option><option value="casa">Casa</option><option value="finca">Finca</option><option value="terreno">Terreno</option><option value="comercial">Comercial</option>
-        </select>
-        <input className="rounded border p-3" placeholder="Precio máximo" value={search.precioMax} onChange={(e) => setSearch((s) => ({ ...s, precioMax: e.target.value }))} />
+    <div className="mx-auto max-w-6xl p-4 pb-24">
+      <h1 className="mb-3 text-2xl font-bold">Captación profesional de propiedades</h1>
+      <div className="mb-4 flex flex-wrap gap-2">
+        {['id', 'ubicacion', 'datos', 'caracteristicas', 'precio'].map((s) => <button key={s} type="button" className="rounded bg-slate-100 px-3 py-2 text-sm" onClick={() => sectionRefs.current[s]?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>{s}</button>)}
       </div>
-      <div className="mb-8 grid gap-3 md:grid-cols-2">
+      {success && <div className="mb-3 flex items-center gap-2 rounded border border-emerald-200 bg-emerald-50 p-3 text-emerald-700"><CheckCircle2 size={18} />{success}</div>}
+      {error && <div className="mb-3 flex items-center gap-2 rounded border border-red-200 bg-red-50 p-3 text-red-700"><TriangleAlert size={18} />{error}</div>}
+
+      <form className="grid gap-4" onSubmit={handleSubmit}>
+        <div ref={(el) => { sectionRefs.current.id = el; }}><Card icon={FileText} title="Identificación">
+          <input className="rounded border p-3" value={form.codigoInterno} placeholder="Código interno (auto)" disabled />
+          <select className="rounded border p-3" value={form.tipoPropiedad} onChange={(e) => handleChange('tipoPropiedad', e.target.value)}><option value="casa">Casa</option><option value="terreno">Terreno</option><option value="finca">Finca</option><option value="comercial">Comercial</option></select>
+          <input className="rounded border p-3" placeholder="Asesor responsable" value={form.asesorResponsable} onChange={(e) => handleChange('asesorResponsable', e.target.value)} />
+          <input className="rounded border p-3" value={form.fechaCaptacion} placeholder="Fecha captación (auto)" disabled />
+        </Card></div>
+        <div ref={(el) => { sectionRefs.current.ubicacion = el; }}><Card icon={MapPin} title="Ubicación">
+          {['departamento', 'municipio', 'zona', 'direccionReferencia', 'ubicacionGPS'].map((f) => <input key={f} className="rounded border p-3" placeholder={f} value={form[f]} onChange={(e) => handleChange(f, e.target.value)} />)}
+        </Card></div>
+        <div ref={(el) => { sectionRefs.current.datos = el; }}><Card icon={Landmark} title="Datos generales">
+          {['areaTotal', 'areaConstruida', 'topografia', 'usoActual', 'usoPotencial'].map((f) => <input key={f} className="rounded border p-3" placeholder={f} value={form[f]} onChange={(e) => handleChange(f, e.target.value)} />)}
+        </Card></div>
+        <div ref={(el) => { sectionRefs.current.caracteristicas = el; }}><Card icon={Home} title="Características dinámicas">{renderDynamicFields()}</Card></div>
+        <Card icon={Wifi} title="Servicios y entorno">
+          <select className="rounded border p-3" value={form.senal} onChange={(e) => handleChange('senal', e.target.value)}><option value="excelente">Señal excelente</option><option value="buena">Señal buena</option><option value="regular">Señal regular</option></select>
+          <label className="flex items-center gap-2 rounded border p-3"><input type="checkbox" checked={form.internet} onChange={(e) => handleChange('internet', e.target.checked)} />Internet</label>
+          {['escuela', 'hospital', 'mercado', 'transporte'].map((c) => <label key={c} className="flex items-center gap-2 rounded border p-3"><input type="checkbox" checked={form.cercania.includes(c)} onChange={() => handleChange('cercania', toggleArray(form.cercania, c))} />{c}</label>)}
+        </Card>
+        <Card icon={Building2} title="Estado y documentación">
+          <select className="rounded border p-3" value={form.estadoGeneral} onChange={(e) => handleChange('estadoGeneral', e.target.value)}><option value="excelente">Excelente</option><option value="bueno">Bueno</option><option value="regular">Regular</option></select>
+          <textarea className="rounded border p-3 md:col-span-2" placeholder="Necesita mejoras" value={form.necesitaMejoras} onChange={(e) => handleChange('necesitaMejoras', e.target.value)} />
+          {['escritura', 'plano', 'impuestos'].map((k) => <label key={k} className="flex items-center gap-2 rounded border p-3"><input type="checkbox" checked={form[k]} onChange={(e) => handleChange(k, e.target.checked)} />{k}</label>)}
+          <textarea className="rounded border p-3 md:col-span-2" placeholder="Observaciones legales" value={form.observacionesLegales} onChange={(e) => handleChange('observacionesLegales', e.target.value)} />
+        </Card>
+        <div ref={(el) => { sectionRefs.current.precio = el; }}><Card icon={Save} title="Precio y diferenciales">
+          {['precioSolicitado', 'precioSugerido', 'formaPago', 'diferencial1', 'diferencial2', 'diferencial3'].map((f) => <input key={f} className="rounded border p-3" placeholder={f} value={form[f]} onChange={(e) => handleChange(f, e.target.value)} />)}
+          <label className="flex items-center gap-2 rounded border p-3"><input type="checkbox" checked={form.negociable} onChange={(e) => handleChange('negociable', e.target.checked)} />Negociable</label>
+        </Card></div>
+        <Card icon={Upload} title="Media">
+          <input className="rounded border p-3 md:col-span-2" type="file" accept="image/*" multiple onChange={(e) => setFiles(Array.from(e.target.files || []))} />
+          <div className="md:col-span-2 grid grid-cols-3 gap-2">{previewUrls.map((src) => <img key={src} src={src} alt="preview" className="h-24 w-full rounded object-cover" />)}</div>
+        </Card>
+
+        <div className="fixed inset-x-0 bottom-0 z-20 border-t bg-white/95 p-3 backdrop-blur">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2">
+            <button type="submit" disabled={saving} className="rounded-lg bg-blue-700 px-4 py-3 text-white">{saving ? 'Guardando...' : 'Guardar propiedad'}</button>
+            <button type="button" className="rounded-lg bg-slate-900 px-4 py-3 text-white" onClick={() => handleChange('diferencial1', `${form.tipoPropiedad} en ${form.zona}, ${form.municipio}. Precio: ${form.precioSolicitado}`)}>Generar descripción</button>
+            <button type="button" className="rounded-lg bg-emerald-700 px-4 py-3 text-white" onClick={() => navigator.clipboard.writeText(`${form.tipoPropiedad.toUpperCase()} | ${form.zona} | Q${form.precioSolicitado} | ${form.diferencial1}`)}>Copiar para WhatsApp</button>
+            <label className="ml-auto flex items-center gap-2 text-sm"><input type="checkbox" checked={autoSave} onChange={(e) => setAutoSave(e.target.checked)} />Autoguardado</label>
+          </div>
+        </div>
+      </form>
+
+      <div className="mt-8 rounded-xl bg-white p-4 shadow">
+        <h3 className="mb-3 font-semibold">Debug Firestore</h3>
+        <p className="text-sm">Firebase DB: {String(!!import.meta.env.VITE_FIREBASE_API_KEY)} | Auth: {user?.uid ? 'OK' : 'Sin sesión'}</p>
+        <p className="text-xs text-slate-500">Para writes en Firestore revisa reglas en firestore.rules y permite create/update para usuarios autenticados.</p>
+      </div>
+
+      <div className="mt-8 grid gap-3 md:grid-cols-2">
         {visibleItems.map((item) => (
           <div key={item.id} className="rounded-xl border bg-white p-4 shadow-sm">
             <p className="text-sm text-gray-500">{item.codigoInterno} · {item.tipoPropiedad}</p>
             <h3 className="font-semibold">{item.zona} - Q{item.precioSolicitado}</h3>
-            <p className="text-sm">{item.estadoGeneral} · {item.departamento}</p>
-            <span className={`inline-block rounded px-2 py-1 text-xs ${item.precioSolicitado && item.diferencial1 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-              {item.precioSolicitado && item.diferencial1 ? 'Completa' : 'Incompleta'}
-            </span>
-            <button className="ml-3 text-sm font-semibold text-blue-700" onClick={() => { setForm(item); setEditingId(item.id); }}>Editar</button>
-            <button
-              type="button"
-              className="ml-3 text-sm font-semibold text-emerald-700"
-              onClick={() => generatePdf(item)}
-              disabled={pdfLoadingId === item.id}
-            >
-              {pdfLoadingId === item.id ? 'Generando PDF...' : 'Descargar PDF'}
-            </button>
-            <button
-              type="button"
-              className="ml-3 text-sm font-semibold text-slate-700"
-              onClick={() => generatePdf(item, true)}
-              disabled={pdfLoadingId === item.id}
-            >
-              Vista previa PDF
-            </button>
+            <button className="text-sm font-semibold text-blue-700" onClick={() => { setForm(item); setEditingId(item.id); }}>Editar</button>
           </div>
         ))}
       </div>
-
-      <form onSubmit={handleSubmit} className="grid gap-4 rounded-2xl bg-white p-4 shadow">
-        <div className="grid gap-3 md:grid-cols-2">
-          <select className="rounded border p-3" value={form.tipoPropiedad} onChange={(e) => handleChange('tipoPropiedad', e.target.value)}><option value="casa">Casa</option><option value="finca">Finca</option><option value="terreno">Terreno</option><option value="comercial">Comercial</option></select>
-          <input className="rounded border p-3" placeholder="Asesor responsable" value={form.asesorResponsable} onChange={(e) => handleChange('asesorResponsable', e.target.value)} />
-          <input className="rounded border p-3" placeholder="Departamento" value={form.departamento} onChange={(e) => handleChange('departamento', e.target.value)} />
-          <input className="rounded border p-3" placeholder="Municipio" value={form.municipio} onChange={(e) => handleChange('municipio', e.target.value)} />
-          <input className="rounded border p-3" placeholder="Zona" value={form.zona} onChange={(e) => handleChange('zona', e.target.value)} />
-          <input className="rounded border p-3" placeholder="Dirección referencia" value={form.direccionReferencia} onChange={(e) => handleChange('direccionReferencia', e.target.value)} />
-          <input className="rounded border p-3" placeholder="Área total" value={form.areaTotal} onChange={(e) => handleChange('areaTotal', e.target.value)} />
-          <input className="rounded border p-3" placeholder="Área construida" value={form.areaConstruida} onChange={(e) => handleChange('areaConstruida', e.target.value)} />
-          <input className="rounded border p-3" placeholder="Precio solicitado" value={form.precioSolicitado} onChange={(e) => handleChange('precioSolicitado', e.target.value)} />
-          <input className="rounded border p-3" placeholder="Precio sugerido" value={form.precioSugerido} onChange={(e) => handleChange('precioSugerido', e.target.value)} />
-        </div>
-
-        {form.tipoPropiedad === 'casa' ? (
-          <div className="grid gap-3 md:grid-cols-2">
-            <input className="rounded border p-3" placeholder="Habitaciones" value={form.habitaciones} onChange={(e) => handleChange('habitaciones', e.target.value)} />
-            <input className="rounded border p-3" placeholder="Baños" value={form.banos} onChange={(e) => handleChange('banos', e.target.value)} />
-          </div>
-        ) : (
-          <div className="grid gap-3 md:grid-cols-2">
-            <input className="rounded border p-3" placeholder="Tipo de suelo" value={form.tipoSuelo} onChange={(e) => handleChange('tipoSuelo', e.target.value)} />
-            <div className="flex flex-wrap gap-2">{['rio', 'quebrada', 'pozo', 'naciente'].map((f) => <label key={f} className="rounded border px-3 py-2 text-sm"><input type="checkbox" checked={form.fuentesAgua.includes(f)} onChange={() => handleChange('fuentesAgua', toggleArray(form.fuentesAgua, f))} /> {f}</label>)}</div>
-          </div>
-        )}
-
-        <textarea className="rounded border p-3" placeholder="Necesita mejoras" value={form.necesitaMejoras} onChange={(e) => handleChange('necesitaMejoras', e.target.value)} />
-        <textarea className="rounded border p-3" placeholder="Observaciones legales" value={form.observacionesLegales} onChange={(e) => handleChange('observacionesLegales', e.target.value)} />
-        <input className="rounded border p-3" placeholder="Ubicación GPS" value={form.ubicacionGPS} onChange={(e) => handleChange('ubicacionGPS', e.target.value)} />
-        <input multiple type="file" onChange={(e) => setFiles(Array.from(e.target.files || []))} />
-
-        <div className="flex flex-wrap gap-2">
-          <button type="submit" className="rounded bg-blue-700 px-4 py-3 font-semibold text-white">{saving ? 'Guardando...' : 'Guardar'}</button>
-          <button type="button" className="rounded border px-4 py-3" onClick={generateDescription}>Generar descripción automática</button>
-          <button type="button" className="rounded border px-4 py-3" onClick={copyWhatsapp}>Copiar para WhatsApp</button>
-        </div>
-      </form>
     </div>
   );
 }
