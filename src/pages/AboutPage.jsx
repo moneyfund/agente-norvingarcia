@@ -114,7 +114,7 @@ function AboutPage() {
               <a href={agent?.instagram || '#'} target="_blank" rel="noreferrer" className="rounded-full bg-slate-100 p-3 transition hover:-translate-y-0.5 hover:bg-brand-500/10 dark:bg-slate-800">
                 <Instagram size={18} />
               </a>
-              <a href={agent?.tiktok || '#'} target="_blank" rel="noreferrer" className="rounded-full bg-slate-100 p-3 transition hover:-translate-y-0.5 hover:bg-brand-500/10 dark:bg-slate-800">
+              <a href="https://www.tiktok.com/@agentenorvingarcia" target="_blank" rel="noreferrer" className="rounded-full bg-slate-100 p-3 transition hover:-translate-y-0.5 hover:bg-brand-500/10 dark:bg-slate-800">
                 <Music2 size={18} />
               </a>
             </div>
