@@ -145,12 +145,19 @@ function MapPage() {
         const propertyTitle = property.title || property.titulo || 'Propiedad disponible';
         const propertyAddress = property.address || property.ubicacion || 'Ubicación no disponible';
 
+        const whatsappMessage = encodeURIComponent(`Hola, me interesa la propiedad: ${propertyTitle}`);
+        const propertyUrl = `/propiedad.html?id=${property.id}`;
+
         const popupHtml = `
           <article class="property-map-preview-card" data-property-id="${property.id}">
             <img src="${imageUrl}" alt="${propertyTitle}" class="property-map-preview__image" />
             <div class="property-map-preview__body">
               <h4 class="property-map-preview__title">${propertyTitle}</h4>
               <p class="property-map-preview__address">${propertyAddress}</p>
+              <div class="property-map-preview__actions">
+                <a href="https://wa.me/50587446657?text=${whatsappMessage}" target="_blank" rel="noopener noreferrer" class="property-map-preview__action">WhatsApp</a>
+                <a href="${propertyUrl}" class="property-map-preview__action">Ver propiedad</a>
+              </div>
             </div>
           </article>
         `;
