@@ -253,8 +253,6 @@ function ListadoPage() {
         <div className="fixed inset-x-0 bottom-0 z-20 border-t bg-white/95 p-3 backdrop-blur">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2">
             <button type="submit" disabled={saving} className="rounded-lg bg-blue-700 px-4 py-3 text-white">{saving ? 'Guardando...' : 'Guardar propiedad'}</button>
-            <button type="button" className="rounded-lg bg-slate-900 px-4 py-3 text-white" onClick={() => handleChange('diferencial1', `${form.tipoPropiedad} en ${form.zona}, ${form.municipio}. Precio: ${form.precioSolicitado}`)}>Generar descripción</button>
-            <button type="button" className="rounded-lg bg-emerald-700 px-4 py-3 text-white" onClick={() => navigator.clipboard.writeText(`${form.tipoPropiedad.toUpperCase()} | ${form.zona} | Q${form.precioSolicitado} | ${form.diferencial1}`)}>Copiar para WhatsApp</button>
             <label className="ml-auto flex items-center gap-2 text-sm"><input type="checkbox" checked={autoSave} onChange={(e) => setAutoSave(e.target.checked)} />Autoguardado</label>
           </div>
         </div>
