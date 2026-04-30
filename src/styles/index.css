@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap');
+@import 'leaflet/dist/leaflet.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -82,6 +83,11 @@
   }
 }
 
+.property-map-marker-wrapper {
+  background: transparent;
+  border: 0;
+}
+
 .property-map-marker {
   position: relative;
   border: 0;
@@ -102,26 +108,39 @@
   box-shadow: 0 10px 26px rgba(15, 23, 42, 0.26);
 }
 
-.property-map-preview {
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 12px);
-  transform: translate(-50%, 8px);
-  width: 250px;
-  border-radius: 16px;
-  overflow: hidden;
-  background: #fff;
-  box-shadow: 0 20px 40px rgba(2, 6, 23, 0.34);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+.property-map-preview-popup .leaflet-popup-content-wrapper {
+  border-radius: 18px;
+  box-shadow: 0 24px 45px rgba(2, 6, 23, 0.35);
+  padding: 0;
 }
 
-.property-map-preview.is-visible {
-  opacity: 1;
-  visibility: visible;
-  transform: translate(-50%, 0);
+.property-map-preview-popup .leaflet-popup-content {
+  margin: 0;
+  width: 250px !important;
+  animation: property-popup-in 180ms ease;
+}
+
+.property-map-preview-popup .leaflet-popup-tip {
+  box-shadow: none;
+}
+
+.property-map-preview-card {
+  width: 250px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #fff;
+}
+
+@keyframes property-popup-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .property-map-preview__image {
