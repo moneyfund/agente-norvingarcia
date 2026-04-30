@@ -1,10 +1,11 @@
-import { Building2, LayoutDashboard, LogOut, UserCircle } from 'lucide-react';
+import { Building2, LayoutDashboard, ListChecks, LogOut, UserCircle } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
 const links = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/admin/propiedades', label: 'Propiedades', icon: Building2 },
+  { to: '/admin/listados', label: 'Listados', icon: ListChecks },
   { to: '/admin/perfil', label: 'Perfil', icon: UserCircle },
 ];
 

@@ -57,6 +57,11 @@ export async function updateListadoPropiedad(id, payload) {
   });
 }
 
+export async function getCaptacionesAdmin() {
+  const snap = await getDocs(query(collection(db, COLLECTION), orderBy('createdAt', 'desc')));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
 export async function uploadListadoImages(files, propertyId) {
   const uploads = files.map(async (file) => {
     const fileRef = ref(storage, `listado/${propertyId}/${Date.now()}-${file.name}`);

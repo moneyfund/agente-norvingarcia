@@ -19,6 +19,7 @@ const AdminLoginPage = lazy(() => import('./admin/pages/AdminLoginPage'));
 const AdminDashboardPage = lazy(() => import('./admin/pages/AdminDashboardPage'));
 const AdminPropertiesPage = lazy(() => import('./admin/pages/AdminPropertiesPage'));
 const AdminProfilePage = lazy(() => import('./admin/pages/AdminProfilePage'));
+const AdminListadosPage = lazy(() => import('./admin/pages/AdminListadosPage'));
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
             <Route index element={<AdminDashboardPage />} />
             <Route path="propiedades" element={<AdminPropertiesPage />} />
             <Route path="perfil" element={<AdminProfilePage />} />
+            <Route path="listados" element={<AdminListadosPage />} />
           </Route>
         </Route>
 
