@@ -132,7 +132,7 @@ function MapPage() {
           ? await preloadImage(rawImage)
           : rawImage;
 
-        const markerHtml = `<button type="button" class="property-map-marker">${formatPrice(property.price ?? property.precio)}</button>`;
+        const markerHtml = `<button type="button" class="price-marker">${formatPrice(property.price ?? property.precio)}</button>`;
         const markerIcon = L.divIcon({
           html: markerHtml,
           className: 'property-map-marker-wrapper',
