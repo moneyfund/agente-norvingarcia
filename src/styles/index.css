@@ -162,14 +162,9 @@
   color: #0f172a;
 }
 
-.property-map-preview__price {
-  margin: 0.3rem 0 0;
-  color: #2563eb;
-  font-weight: 800;
-}
-
-.property-map-preview__area {
-  margin: 0.24rem 0 0;
+.property-map-preview__address {
+  margin: 0.32rem 0 0;
   font-size: 0.82rem;
-  color: #475569;
+  line-height: 1.35;
+  color: #64748b;
 }
