@@ -13,7 +13,7 @@ import {
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { db, storage } from '../firebase/config';
 
-const COLLECTION = 'propiedades';
+const COLLECTION = 'captaciones';
 
 const buildSearchConstraints = ({ zona, tipoPropiedad }) => {
   const constraints = [where('source', '==', 'listado-interno')];
@@ -41,6 +41,9 @@ export async function createListadoPropiedad(payload, userId) {
     codigoInterno,
     createdBy: userId,
     createdAt: serverTimestamp(),
+    estado: 'borrador',
+    publicada: false,
+    publishedAt: null,
     updatedAt: serverTimestamp(),
   });
 
