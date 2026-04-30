@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, onSnapshot, query } from 'firebase/firestore';
+import L from 'leaflet';
 import Seo from '../components/Seo';
 import { db } from '../firebase/config';
 
-const DEFAULT_CENTER_NICARAGUA = { lat: 12.8654, lng: -85.2072 };
-const MAP_ID = 'norvin-map-style';
+const DEFAULT_CENTER_NICARAGUA = [12.8654, -85.2072];
+const FALLBACK_IMAGE = '/img/placeholder-property.svg';
 
 const hasValidCoordinates = (property) => {
   const lat = Number(property?.lat);
@@ -25,42 +26,31 @@ const formatPrice = (price) => {
     .format(Number(price));
 };
 
-const loadGoogleMapsApi = async () => {
-  if (window.google?.maps) return;
+const getPropertyImageUrl = (property) => property.image || property.imagenes?.[0] || FALLBACK_IMAGE;
 
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+const isPotentiallyFragileExternalImage = (url = '') => /(fbcdn|facebook|fbsbx|akamaihd)/i.test(url);
 
-  if (!apiKey) {
-    throw new Error('Falta VITE_GOOGLE_MAPS_API_KEY para cargar Google Maps.');
+const preloadImage = (url) => new Promise((resolve) => {
+  if (!url) {
+    resolve(FALLBACK_IMAGE);
+    return;
   }
 
-  await new Promise((resolve, reject) => {
-    const existingScript = document.querySelector('script[data-google-maps="true"]');
+  const img = new Image();
+  img.loading = 'eager';
+  img.referrerPolicy = 'no-referrer';
 
-    if (existingScript) {
-      existingScript.addEventListener('load', resolve, { once: true });
-      existingScript.addEventListener('error', reject, { once: true });
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&v=weekly`;
-    script.async = true;
-    script.defer = true;
-    script.dataset.googleMaps = 'true';
-    script.onload = resolve;
-    script.onerror = () => reject(new Error('No fue posible cargar Google Maps API.'));
-    document.head.appendChild(script);
-  });
-};
+  img.onload = () => resolve(url);
+  img.onerror = () => resolve(FALLBACK_IMAGE);
+  img.src = url;
+});
 
 function MapPage() {
   const mapNodeRef = useRef(null);
   const mapRef = useRef(null);
-  const markersRef = useRef(new Map());
-  const clusterRef = useRef(null);
-  const activePreviewRef = useRef(null);
-  const clusterCtorRef = useRef(null);
+  const tileLayerRef = useRef(null);
+  const markersLayerRef = useRef(null);
+  const markerClusterLayerRef = useRef(null);
 
   const [propiedades, setPropiedades] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -74,176 +64,149 @@ function MapPage() {
   );
 
   useEffect(() => {
-    let unsubscribe = () => {};
+    if (mapRef.current || !mapNodeRef.current) return;
 
-    const startRealtimeSync = async () => {
-      try {
-        setLoading(true);
-        await loadGoogleMapsApi();
+    const map = L.map(mapNodeRef.current, {
+      center: DEFAULT_CENTER_NICARAGUA,
+      zoom: 7,
+      zoomControl: true,
+      preferCanvas: true,
+    });
 
-        if (!mapRef.current && mapNodeRef.current) {
-          mapRef.current = new window.google.maps.Map(mapNodeRef.current, {
-            center: DEFAULT_CENTER_NICARAGUA,
-            zoom: 7,
-            mapId: MAP_ID,
-            gestureHandling: 'greedy',
-            streetViewControl: false,
-            mapTypeControl: false,
-            fullscreenControl: true,
-          });
-        }
+    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors',
+    });
 
-        const { AdvancedMarkerElement } = await window.google.maps.importLibrary('marker');
-        if (!window.markerClusterer) {
-          await new Promise((resolve, reject) => {
-            const existingScript = document.querySelector('script[data-marker-clusterer="true"]');
-            if (existingScript) {
-              existingScript.addEventListener('load', resolve, { once: true });
-              existingScript.addEventListener('error', reject, { once: true });
-              return;
-            }
+    tileLayer.addTo(map);
+    mapRef.current = map;
+    tileLayerRef.current = tileLayer;
+    markersLayerRef.current = L.layerGroup().addTo(map);
 
-            const script = document.createElement('script');
-            script.src = 'https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js';
-            script.async = true;
-            script.defer = true;
-            script.dataset.markerClusterer = 'true';
-            script.onload = resolve;
-            script.onerror = () => reject(new Error('No se pudo cargar MarkerClusterer.'));
-            document.head.appendChild(script);
-          });
-        }
+    return () => {
+      map.remove();
+      mapRef.current = null;
+      tileLayerRef.current = null;
+      markersLayerRef.current = null;
+      markerClusterLayerRef.current = null;
+    };
+  }, []);
 
-        clusterCtorRef.current = window.markerClusterer?.MarkerClusterer || null;
+  useEffect(() => {
+    const collectionRef = query(collection(db, 'propiedades'));
+    const unsubscribe = onSnapshot(collectionRef, (snapshot) => {
+      const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setPropiedades(docs);
+      setLoading(false);
+      setError('');
+    }, (err) => {
+      setError(err.message || 'No se pudo cargar el mapa interactivo.');
+      setLoading(false);
+    });
 
-        const collectionRef = query(collection(db, 'propiedades'));
-        unsubscribe = onSnapshot(collectionRef, (snapshot) => {
-          const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-          setPropiedades(docs);
+    return () => unsubscribe();
+  }, []);
 
-          const map = mapRef.current;
-          if (!map) return;
+  useEffect(() => {
+    const map = mapRef.current;
+    const markerLayer = markersLayerRef.current;
+    if (!map || !markerLayer) return;
 
-          markersRef.current.forEach((marker) => {
-            marker.map = null;
-          });
-          markersRef.current.clear();
+    markerLayer.clearLayers();
 
-          if (clusterRef.current) {
-            clusterRef.current.clearMarkers();
-            clusterRef.current = null;
-          }
+    if (markerClusterLayerRef.current) {
+      markerClusterLayerRef.current.clearLayers();
+      map.removeLayer(markerClusterLayerRef.current);
+      markerClusterLayerRef.current = null;
+    }
 
-          if (activePreviewRef.current) {
-            activePreviewRef.current.classList.remove('is-visible');
-            activePreviewRef.current = null;
-          }
+    const bounds = L.latLngBounds([]);
+    const markerInstances = [];
 
-          const nextMarkers = [];
-          const bounds = new window.google.maps.LatLngBounds();
+    const renderMarkers = async () => {
+      for (const property of propertiesWithCoordinates) {
+        const lat = Number(property.lat);
+        const lng = Number(property.lng);
+        const rawImage = getPropertyImageUrl(property);
+        const imageUrl = isPotentiallyFragileExternalImage(rawImage)
+          ? await preloadImage(rawImage)
+          : rawImage;
 
-          docs.filter(hasValidCoordinates).forEach((property) => {
-            const position = { lat: Number(property.lat), lng: Number(property.lng) };
-            bounds.extend(position);
-
-            const markerElement = document.createElement('button');
-            markerElement.type = 'button';
-            markerElement.className = 'property-map-marker';
-            markerElement.textContent = formatPrice(property.price ?? property.precio);
-
-            const previewElement = document.createElement('article');
-            previewElement.className = 'property-map-preview';
-            previewElement.innerHTML = `
-              <img src="${property.image || property.imagenes?.[0] || '/logo.png'}" alt="${property.title || property.titulo || 'Propiedad'}" class="property-map-preview__image" />
-              <div class="property-map-preview__body">
-                <h4 class="property-map-preview__title">${property.title || property.titulo || 'Propiedad disponible'}</h4>
-                <p class="property-map-preview__price">${formatPrice(property.price ?? property.precio)}</p>
-                <p class="property-map-preview__area">Área: ${property.area || 'N/D'}</p>
-              </div>
-            `;
-
-            markerElement.appendChild(previewElement);
-
-            const marker = new AdvancedMarkerElement({
-              map,
-              position,
-              content: markerElement,
-              title: property.title || property.titulo || 'Propiedad',
-            });
-
-            let mobileTapCount = 0;
-
-            const openPreview = () => {
-              if (activePreviewRef.current && activePreviewRef.current !== previewElement) {
-                activePreviewRef.current.classList.remove('is-visible');
-              }
-              previewElement.classList.add('is-visible');
-              activePreviewRef.current = previewElement;
-            };
-
-            const closePreview = () => {
-              previewElement.classList.remove('is-visible');
-              if (activePreviewRef.current === previewElement) activePreviewRef.current = null;
-            };
-
-            markerElement.addEventListener('mouseenter', openPreview);
-            markerElement.addEventListener('mouseleave', closePreview);
-            markerElement.addEventListener('click', () => {
-              const isMobile = window.matchMedia('(hover: none)').matches;
-              if (!isMobile) {
-                navigate(`/propiedad/${property.id}`);
-                return;
-              }
-
-              mobileTapCount += 1;
-              if (mobileTapCount === 1) {
-                openPreview();
-                setTimeout(() => {
-                  mobileTapCount = 0;
-                }, 1400);
-              } else {
-                navigate(`/propiedad/${property.id}`);
-              }
-            });
-
-            markersRef.current.set(property.id, marker);
-            nextMarkers.push(marker);
-          });
-
-          if (nextMarkers.length > 100 && clusterCtorRef.current) {
-            clusterRef.current = new clusterCtorRef.current({ map, markers: nextMarkers });
-          }
-
-          if (nextMarkers.length === 1) {
-            map.setCenter(nextMarkers[0].position);
-            map.setZoom(13);
-          } else if (nextMarkers.length > 1) {
-            map.fitBounds(bounds, 80);
-          } else {
-            map.setCenter(DEFAULT_CENTER_NICARAGUA);
-            map.setZoom(7);
-          }
-
-          setLoading(false);
-          setError('');
+        const markerHtml = `<button type="button" class="property-map-marker">${formatPrice(property.price ?? property.precio)}</button>`;
+        const markerIcon = L.divIcon({
+          html: markerHtml,
+          className: 'property-map-marker-wrapper',
+          iconSize: [100, 34],
+          iconAnchor: [50, 34],
         });
-      } catch (err) {
-        setError(err.message || 'No se pudo inicializar el mapa interactivo.');
-        setLoading(false);
+
+        const marker = L.marker([lat, lng], { icon: markerIcon, keyboard: true });
+
+        const popupHtml = `
+          <article class="property-map-preview-card" data-property-id="${property.id}">
+            <img src="${imageUrl}" alt="${property.title || property.titulo || 'Propiedad'}" class="property-map-preview__image" />
+            <div class="property-map-preview__body">
+              <h4 class="property-map-preview__title">${property.title || property.titulo || 'Propiedad disponible'}</h4>
+              <p class="property-map-preview__price">${formatPrice(property.price ?? property.precio)}</p>
+              <p class="property-map-preview__area">Área: ${property.area || 'N/D'}</p>
+            </div>
+          </article>
+        `;
+
+        marker.bindPopup(popupHtml, {
+          closeButton: false,
+          autoClose: true,
+          className: 'property-map-preview-popup',
+          offset: [0, -30],
+        });
+
+        marker.on('mouseover', () => {
+          if (!window.matchMedia('(hover: hover)').matches) return;
+          marker.openPopup();
+        });
+
+        marker.on('mouseout', () => {
+          if (!window.matchMedia('(hover: hover)').matches) return;
+          marker.closePopup();
+        });
+
+        marker.on('click', () => {
+          if (window.matchMedia('(hover: hover)').matches) {
+            navigate(`/propiedad/${property.id}`);
+            return;
+          }
+
+          if (marker.isPopupOpen()) {
+            navigate(`/propiedad/${property.id}`);
+          } else {
+            marker.openPopup();
+          }
+        });
+
+        marker.on('popupopen', (event) => {
+          const imageElement = event.popup.getElement()?.querySelector('.property-map-preview__image');
+          if (!imageElement) return;
+          imageElement.onerror = () => {
+            imageElement.src = FALLBACK_IMAGE;
+          };
+        });
+
+        markerLayer.addLayer(marker);
+        markerInstances.push(marker);
+        bounds.extend([lat, lng]);
+      }
+
+      if (markerInstances.length > 1) {
+        map.fitBounds(bounds, { padding: [80, 80] });
+      } else if (markerInstances.length === 1) {
+        map.setView(markerInstances[0].getLatLng(), 13);
+      } else {
+        map.setView(DEFAULT_CENTER_NICARAGUA, 7);
       }
     };
 
-    startRealtimeSync();
-
-    return () => {
-      unsubscribe();
-      markersRef.current.forEach((marker) => {
-        marker.map = null;
-      });
-      markersRef.current.clear();
-      if (clusterRef.current) clusterRef.current.clearMarkers();
-    };
-  }, [navigate]);
+    renderMarkers();
+  }, [navigate, propertiesWithCoordinates]);
 
   return (
     <section className="section-container">
