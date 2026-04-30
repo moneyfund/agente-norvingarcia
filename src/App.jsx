@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './admin/components/ProtectedRoute';
 import AdminLayout from './admin/layouts/AdminLayout';
+import PrivateRoute from './components/PrivateRoute';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const PropertiesPage = lazy(() => import('./pages/PropertiesPage'));
@@ -12,6 +13,7 @@ const MapPage = lazy(() => import('./pages/MapPage'));
 const SellPage = lazy(() => import('./pages/SellPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const AIPropertyDesignPage = lazy(() => import('./pages/AIPropertyDesignPage'));
+const ListadoPage = lazy(() => import('./pages/ListadoPage'));
 
 const AdminLoginPage = lazy(() => import('./admin/pages/AdminLoginPage'));
 const AdminDashboardPage = lazy(() => import('./admin/pages/AdminDashboardPage'));
@@ -28,6 +30,13 @@ function App() {
             <Route index element={<AdminDashboardPage />} />
             <Route path="propiedades" element={<AdminPropertiesPage />} />
             <Route path="perfil" element={<AdminProfilePage />} />
+          </Route>
+        </Route>
+
+
+        <Route element={<PrivateRoute />}>
+          <Route element={<MainLayout />}>
+            <Route path="/listado" element={<ListadoPage />} />
           </Route>
         </Route>
 
