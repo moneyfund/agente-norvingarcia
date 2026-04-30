@@ -4,7 +4,7 @@ const social = [
   { icon: MessageCircle, href: 'https://wa.me/50587446657', label: 'WhatsApp' },
   { icon: Facebook, href: 'https://www.facebook.com/profile.php?id=100092228811002', label: 'Facebook' },
   { icon: Instagram, href: 'https://www.instagram.com/norgarciabr?igsh=cWZobXN6eWtuaWJq', label: 'Instagram' },
-  { icon: Music2, href: 'https://www.tiktok.com/@norvin.garca.br?_r=1&_t=ZS-94ydmdWwrxd', label: 'TikTok' },
+  { icon: Music2, href: 'https://www.tiktok.com/@agentenorvingarcia', label: 'TikTok' },
 ];
 
 function Footer() {
