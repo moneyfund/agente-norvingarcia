@@ -215,3 +215,15 @@
   transform: translateY(-3px);
   box-shadow: 0 15px 35px rgba(0,0,0,0.2);
 }
+
+
+@media (min-width: 1024px) {
+  .cta-property-banner {
+    max-height: 220px;
+  }
+
+  .cta-property-banner img {
+    height: 100%;
+    object-fit: cover;
+  }
+}
