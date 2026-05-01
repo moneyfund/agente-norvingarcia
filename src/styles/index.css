@@ -36,6 +36,25 @@
     border-radius: 9999px;
     background: rgba(148, 163, 184, 0.45);
   }
+
+  .terrenos-fincas-highlight {
+    position: relative;
+    overflow: hidden;
+    background-image: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1800&q=80');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    isolation: isolate;
+  }
+
+  .terrenos-fincas-highlight::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+    z-index: -1;
+  }
 }
 
 @layer components {
