@@ -112,6 +112,8 @@ Ubicación: ${property.ubicacion || 'No especificada'}
 
 Estoy contactando desde la web.`;
   const whatsappUrl = `https://wa.me/50587446657?text=${encodeURIComponent(whatsappMessage)}`;
+  const ctaBannerMessage = 'Hola, quiero más información sobre esta propiedad';
+  const ctaBannerWhatsappUrl = `https://wa.me/50587446657?text=${encodeURIComponent(ctaBannerMessage)}`;
 
   const goToPrevious = () => {
     setCurrentMediaIndex((prevIndex) => (prevIndex - 1 + gallery.length) % gallery.length);
@@ -228,6 +230,26 @@ Estoy contactando desde la web.`;
           </Marker>
         </MapContainer>
       </div>
+
+      <section className="cta-property-banner mt-8" aria-label="Contáctanos para más información de esta propiedad">
+        <div className="cta-property-banner__visual">
+          <img
+            src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=420&q=80"
+            alt="Mano sosteniendo un teléfono con el logo de Diamantes Realty Group"
+            loading="lazy"
+            className="cta-property-banner__phone-image"
+          />
+        </div>
+        <div className="cta-property-banner__content">
+          <p>¿DESEAS MÁS INFORMACIÓN DE ESTA PROPIEDAD?</p>
+        </div>
+        <div className="cta-property-banner__actions">
+          <img src="/logo.png" alt="Logo Diamantes Realty Group" className="cta-property-banner__logo" loading="lazy" />
+          <a href={ctaBannerWhatsappUrl} target="_blank" rel="noopener noreferrer" className="cta-property-banner__button">
+            Contáctanos ahora
+          </a>
+        </div>
+      </section>
 
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
         <PropertyCommentsSection
