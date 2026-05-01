@@ -222,14 +222,14 @@ function HomePage() {
 
       {featuredLandProperties.length > 0 && (
         <section className="section-container pt-0">
-          <div className="rounded-[2rem] border border-emerald-200/70 bg-gradient-to-br from-emerald-50 via-white to-brand-50 p-6 shadow-premium dark:border-emerald-900/70 dark:from-emerald-950/40 dark:via-slate-900 dark:to-slate-900 md:p-8">
+          <div className="terrenos-fincas-highlight rounded-[2rem] border border-emerald-200/70 p-6 shadow-premium dark:border-emerald-900/70 md:p-8">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <span className="inline-flex rounded-full border border-emerald-500/40 bg-emerald-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-200">
+                <span className="inline-flex rounded-full border border-white/50 bg-white/20 px-4 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white">
                   Categoría especial
                 </span>
-                <h2 className="mt-3 font-display text-3xl font-semibold md:text-4xl">TERRENOS Y FINCAS DESTACADAS</h2>
-                <p className="mt-3 max-w-3xl text-slate-600 dark:text-slate-300">
+                <h2 className="mt-3 font-display text-3xl font-semibold text-white md:text-4xl">TERRENOS Y FINCAS DESTACADAS</h2>
+                <p className="mt-3 max-w-3xl text-white/90">
                   Descubre oportunidades ideales para invertir, construir o desarrollar en ubicaciones estratégicas.
                 </p>
               </div>
