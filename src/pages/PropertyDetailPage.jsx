@@ -105,12 +105,9 @@ function PropertyDetailPage() {
   const unitLabel = measurementLabelByUnit[unit] || 'unidad';
   const calculatedPrecioPorArea = areaValue && areaValue > 0 ? Number(property.precio || 0) / areaValue : null;
   const precioPorAreaValue = property.precioPorArea ?? calculatedPrecioPorArea;
-  const whatsappMessage = `Hola, estoy interesado en esta propiedad:
-${property.titulo || 'Sin título'}
-Precio: ${money.format(Number(property.precio || 0))}
-Ubicación: ${property.ubicacion || 'No especificada'}
-
-Estoy contactando desde la web.`;
+  const propertyName = property?.titulo || property?.title || property?.name || 'Propiedad';
+  const propertyId = property?.id || property?.propertyId || 'N/A';
+  const whatsappMessage = `Hola, quiero información sobre la propiedad: ${propertyName} (ID: ${propertyId})`;
   const whatsappUrl = `https://wa.me/50587446657?text=${encodeURIComponent(whatsappMessage)}`;
 
   const goToPrevious = () => {
@@ -229,7 +226,7 @@ Estoy contactando desde la web.`;
         </MapContainer>
       </div>
 
-      <a href="https://wa.me/50587446657?text=Hola%20quiero%20informaci%C3%B3n%20sobre%20esta%20propiedad" target="_blank" className="cta-property-banner">
+      <a id="cta-whatsapp" href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="cta-property-banner">
         <img src="/llamadoaccion.png" alt="Contáctanos" />
       </a>
 
