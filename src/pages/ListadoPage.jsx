@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import {
+  createPublicProperty,
   createListadoPropiedad,
   getListadoPropiedades,
   updateListadoPropiedad,
@@ -141,9 +142,25 @@ function ListadoPage() {
     setSaving(true);
     setError('');
     setSuccess('');
+    console.log('[Publicar propiedad] Iniciando guardado', {
+      hasFirebaseApiKey: Boolean(import.meta.env.VITE_FIREBASE_API_KEY),
+      hasProjectId: Boolean(import.meta.env.VITE_FIREBASE_PROJECT_ID),
+      userUid: user?.uid || null,
+    });
     try {
       validate();
       if (!user?.uid) throw new Error('No hay usuario autenticado. Inicia sesión para guardar.');
+
+      const payload = {
+        tipo: form.tipoPropiedad,
+        precio: Number(form.precioSolicitado),
+        descripcion: form.observacionesLegales || form.necesitaMejoras || 'Sin descripción adicional',
+        telefono: form.asesorResponsable || 'No especificado',
+        ubicacion: `${form.departamento}, ${form.municipio}, ${form.zona}`,
+      };
+      console.log('[Publicar propiedad] Payload para colección properties', payload);
+      const createdPublic = await createPublicProperty(payload);
+      console.log('[Publicar propiedad] Documento creado en properties', createdPublic);
 
       let propertyId = editingId;
       if (editingId) {
@@ -159,11 +176,13 @@ function ListadoPage() {
       }
 
       setSuccess('Propiedad guardada correctamente');
+      alert('✅ Propiedad guardada correctamente en Firestore.');
       await loadItems();
       setForm(initialForm);
       setFiles([]);
       setEditingId(null);
     } catch (submitError) {
+      console.error('[Publicar propiedad] Error guardando en Firestore', submitError);
       setError(submitError.message || 'No se pudo guardar la propiedad en Firestore.');
     } finally {
       setSaving(false);

@@ -14,6 +14,7 @@ import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { db, storage } from '../firebase/config';
 
 const COLLECTION = 'captaciones';
+const PUBLIC_PROPERTIES_COLLECTION = 'properties';
 
 const buildSearchConstraints = ({ zona, tipoPropiedad }) => {
   const constraints = [where('source', '==', 'listado-interno')];
@@ -70,4 +71,21 @@ export async function uploadListadoImages(files, propertyId) {
   });
 
   return Promise.all(uploads);
+}
+
+export async function createPublicProperty(payload) {
+  const ref = collection(db, PUBLIC_PROPERTIES_COLLECTION);
+  const docRef = await addDoc(ref, {
+    tipo: payload.tipo,
+    precio: payload.precio,
+    descripcion: payload.descripcion,
+    telefono: payload.telefono,
+    ubicacion: payload.ubicacion,
+    status: 'pendiente',
+    source: 'publicar-propiedad',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+
+  return { id: docRef.id };
 }
