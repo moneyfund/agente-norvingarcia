@@ -1,9 +1,10 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './admin/components/ProtectedRoute';
 import AdminLayout from './admin/layouts/AdminLayout';
 import PrivateRoute from './components/PrivateRoute';
+import Preloader from './components/Preloader';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const PropertiesPage = lazy(() => import('./pages/PropertiesPage'));
@@ -22,6 +23,12 @@ const AdminProfilePage = lazy(() => import('./admin/pages/AdminProfilePage'));
 const AdminListadosPage = lazy(() => import('./admin/pages/AdminListadosPage'));
 
 function App() {
+  const [showPreloader, setShowPreloader] = useState(true);
+
+  if (showPreloader) {
+    return <Preloader onFinish={() => setShowPreloader(false)} />;
+  }
+
   return (
     <Suspense fallback={<div className="flex min-h-screen items-center justify-center text-lg">Cargando...</div>}>
       <Routes>
