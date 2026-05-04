@@ -254,6 +254,8 @@
   letter-spacing: 0.11em;
   font-size: clamp(0.72rem, 2.1vw, 0.92rem);
   font-weight: 600;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
   opacity: 0;
   animation: preloader-text-fade 800ms ease-in-out 350ms forwards;
 }
