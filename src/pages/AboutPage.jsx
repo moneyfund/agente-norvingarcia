@@ -55,9 +55,9 @@ const valueProps = [
 ];
 
 const trustStats = [
-  { value: '+120', label: 'propiedades gestionadas' },
-  { value: '+85', label: 'clientes satisfechos' },
-  { value: '+18', label: 'zonas cubiertas en Nicaragua' },
+  { value: '+30', label: 'propiedades gestionadas' },
+  { value: '+30', label: 'clientes satisfechos' },
+  { value: '+6', label: 'departamentos cubiertos' },
 ];
 
 function AboutPage() {
