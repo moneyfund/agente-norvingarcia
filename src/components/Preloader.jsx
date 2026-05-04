@@ -28,7 +28,7 @@ function Preloader({ onFinish }) {
     >
       <div className="preloader__content">
         <img src="/logo.png" alt="Norvin García" className="preloader__logo" />
-        <p className="preloader__text">VISITA, CONOCE E INVIERTE EN NICARAGUA</p>
+        <p className="preloader__text">¡VISITA, CONOCE E INVIERTE EN NICARAGUA!</p>
       </div>
     </div>
   );
