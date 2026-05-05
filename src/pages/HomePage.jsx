@@ -263,10 +263,6 @@ function HomePage() {
               )}
             </div>
 
-            <div className="mt-5 rounded-2xl border border-emerald-200/60 bg-white/75 p-4 text-sm text-slate-700 shadow-sm dark:border-emerald-900/70 dark:bg-slate-900/70 dark:text-slate-200">
-              Inversiones con alto potencial para construir, desarrollar o expandir tu patrimonio.
-            </div>
-
             <div
               ref={landSliderRef}
               className="property-slider mt-8 flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth pb-3"
