@@ -11,6 +11,7 @@ const navItems = [
   { to: '/sobre-mi', label: 'Sobre mí' },
   { to: '/mapa', label: 'Mapa' },
   { to: '/edicion-propiedades', label: 'Edición IA' },
+  { to: '/educacion', label: 'Educación' },
   { to: '/quieres-vender', label: '¿Quieres vender?' },
   { to: '/contacto', label: 'Contacto' },
 ];
