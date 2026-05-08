@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, BookOpen, ChartNoAxesCombined, CircleCheckBig, FileBadge2, Gavel, Rocket, Sparkles } from 'lucide-react';
+import { ArrowRight, BookOpen, CircleCheckBig, Compass, FileBadge2, FileText, Gavel, Layers3, Map, Rocket, SearchCheck, Sparkles, TrendingUp } from 'lucide-react';
 
 const reveal = {
   hidden: { opacity: 0, y: 40 },
@@ -21,6 +21,18 @@ const particles = Array.from({ length: 26 }).map((_, i) => ({
 
 function EducationPage() {
   const [mouse, setMouse] = useState({ x: 50, y: 50 });
+  const adviceSliderRef = useRef(null);
+
+  const adviceCards = [
+    { title: 'Verificación legal completa', description: 'Confirma historial registral, gravámenes y legitimidad del propietario antes de entregar cualquier anticipo.', icon: SearchCheck },
+    { title: 'Evita errores al comprar terrenos', description: 'Valida topografía, uso de suelo, accesos y situación municipal para prevenir costos ocultos.', icon: Compass },
+    { title: 'Eleva el valor antes de vender', description: 'Aplica mejoras estratégicas de fachada, distribución e iluminación para aumentar percepción y precio.', icon: TrendingUp },
+    { title: 'Checklist antes de la compraventa', description: 'Revisa cláusulas, tiempos de entrega, penalizaciones y soporte legal previo a la firma definitiva.', icon: FileText },
+    { title: 'Acceso y servicios básicos', description: 'Evalúa agua, energía, drenaje, conectividad y vías de ingreso como factores críticos de plusvalía.', icon: Map },
+    { title: 'Detecta oportunidades reales', description: 'Cruza ubicación, crecimiento comercial y demanda para identificar propiedades con potencial sostenido.', icon: Layers3 },
+    { title: 'Posesión vs escritura', description: 'Diferencia tenencia informal de titularidad legal para proteger tu inversión a largo plazo.', icon: BookOpen },
+    { title: 'Invertir en zonas en expansión', description: 'Prioriza corredores con infraestructura proyectada y dinámica económica activa en Nicaragua.', icon: CircleCheckBig },
+  ];
 
   const radialStyle = useMemo(
     () => ({
@@ -28,6 +40,13 @@ function EducationPage() {
     }),
     [mouse],
   );
+
+  const handleAdviceWheel = (event) => {
+    if (!adviceSliderRef.current) return;
+    if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+    event.preventDefault();
+    adviceSliderRef.current.scrollBy({ left: event.deltaY, behavior: 'smooth' });
+  };
 
   return (
     <div
@@ -111,20 +130,53 @@ function EducationPage() {
         </div>
       </section>
 
-      <section className="relative z-10 mx-auto max-w-7xl px-4 py-20 sm:px-6">
-        <div className="rounded-3xl border border-violet-300/20 bg-[linear-gradient(130deg,rgba(15,23,42,0.88),rgba(8,47,73,0.6),rgba(91,33,182,0.45))] p-7 md:p-12">
-          <h2 className="text-3xl font-semibold md:text-5xl">Inversión inteligente</h2>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {[['+18%', 'ROI medio anual'], ['92', 'Proyectos analizados'], ['4.8/5', 'Índice de confianza']].map(([value, label]) => (
-              <motion.div key={label} whileInView={{ scale: [0.95, 1], opacity: [0, 1] }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="rounded-2xl border border-white/20 bg-black/25 p-5 backdrop-blur">
-                <p className="text-3xl font-semibold text-cyan-200">{value}</p>
-                <p className="text-sm text-slate-300">{label}</p>
-              </motion.div>
-            ))}
-          </div>
-          <div className="mt-8 h-40 rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(56,189,248,0.15),transparent)] p-4">
-            <ChartNoAxesCombined className="mb-2 text-cyan-200" />
-            <p className="text-sm text-slate-300">Panel de señales: plusvalía, liquidez por zona y riesgo regulatorio con lectura visual tipo plataforma financiera.</p>
+      <section className="relative z-10 py-24">
+        <div className="mx-auto max-w-[92rem] px-4 sm:px-6">
+          <div className="relative overflow-hidden rounded-[2.2rem] border border-cyan-200/20 bg-[radial-gradient(circle_at_20%_15%,rgba(56,189,248,0.2),transparent_35%),radial-gradient(circle_at_80%_35%,rgba(147,51,234,0.22),transparent_35%),linear-gradient(160deg,rgba(2,6,23,0.92),rgba(15,23,42,0.88))] p-8 shadow-[0_40px_120px_rgba(8,47,73,0.45)] backdrop-blur-3xl md:p-12">
+            <div className="pointer-events-none absolute inset-0 opacity-40 [mask-image:linear-gradient(to_bottom,black,transparent)]">
+              <div className="h-full w-full bg-[linear-gradient(to_right,rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.08)_1px,transparent_1px)] bg-[size:48px_48px]" />
+            </div>
+            <motion.div initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.9 }} className="relative z-10">
+              <p className="inline-flex items-center gap-2 rounded-full border border-cyan-200/30 bg-cyan-300/10 px-4 py-1 text-xs uppercase tracking-[0.24em] text-cyan-100">
+                <Sparkles size={13} /> Experiencia Premium
+              </p>
+              <h2 className="mt-4 max-w-4xl text-3xl font-semibold leading-tight md:text-6xl">Consejos Inmobiliarios Profesionales en Nicaragua</h2>
+              <p className="mt-5 max-w-3xl text-sm text-slate-300 md:text-lg">
+                Desliza horizontalmente para explorar recomendaciones estratégicas con enfoque legal, comercial y de plusvalía real.
+              </p>
+            </motion.div>
+
+            <div
+              ref={adviceSliderRef}
+              onWheel={handleAdviceWheel}
+              className="advice-slider relative z-10 mt-10 flex snap-x snap-mandatory gap-6 overflow-x-auto pb-6 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
+              {adviceCards.map((card, index) => {
+                const Icon = card.icon;
+                return (
+                  <motion.article
+                    key={card.title}
+                    initial={{ opacity: 0, y: 46, filter: 'blur(10px)' }}
+                    whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                    viewport={{ once: true, amount: 0.35 }}
+                    transition={{ duration: 0.85, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+                    whileHover={{ y: -10, scale: 1.015 }}
+                    className="group relative min-h-[22rem] w-[89%] shrink-0 snap-center overflow-hidden rounded-[1.8rem] border border-white/15 bg-[linear-gradient(150deg,rgba(15,23,42,0.7),rgba(30,41,59,0.45),rgba(15,23,42,0.75))] p-7 shadow-[0_24px_60px_rgba(2,6,23,0.55)] backdrop-blur-2xl sm:w-[68%] lg:w-[44%] xl:w-[36%]"
+                  >
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(300px_circle_at_10%_5%,rgba(56,189,248,0.18),transparent_48%),radial-gradient(280px_circle_at_90%_90%,rgba(147,51,234,0.2),transparent_50%)] opacity-80 transition duration-500 group-hover:opacity-100" />
+                    <div className="pointer-events-none absolute inset-[1px] rounded-[1.7rem] border border-white/20" />
+                    <motion.div animate={{ y: [0, -6, 0] }} transition={{ repeat: Infinity, duration: 6 + (index % 3), ease: 'easeInOut' }} className="relative">
+                      <span className="inline-flex rounded-2xl border border-cyan-200/40 bg-cyan-400/15 p-3 text-cyan-100 shadow-[0_0_40px_rgba(34,211,238,0.35)]">
+                        <Icon size={22} />
+                      </span>
+                    </motion.div>
+                    <h3 className="relative mt-7 text-2xl font-semibold leading-tight text-white md:text-3xl">{card.title}</h3>
+                    <p className="relative mt-4 text-sm leading-relaxed text-slate-200 md:text-base">{card.description}</p>
+                    <div className="pointer-events-none absolute bottom-5 left-7 right-7 h-16 rounded-full bg-[radial-gradient(circle,rgba(56,189,248,0.22),transparent_65%)] opacity-60 blur-2xl transition group-hover:opacity-100" />
+                  </motion.article>
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>
