@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, BookOpen, BriefcaseBusiness, ChartNoAxesCombined, CircleCheckBig, FileBadge2, Gavel, Rocket, Sparkles } from 'lucide-react';
+import { ArrowRight, BookOpen, ChartNoAxesCombined, CircleCheckBig, FileBadge2, Gavel, Rocket, Sparkles } from 'lucide-react';
 
 const reveal = {
   hidden: { opacity: 0, y: 40 },
@@ -129,27 +129,28 @@ function EducationPage() {
         </div>
       </section>
 
-      <section className="relative z-10 mx-auto max-w-7xl px-4 py-20 sm:px-6">
-        <h2 className="mb-8 text-3xl font-semibold md:text-5xl">Guías y recursos</h2>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {['Compra', 'Venta', 'Legal', 'Créditos', 'Inversión', 'Marketing inmobiliario'].map((cat) => (
-            <motion.article key={cat} whileHover={{ y: -6 }} className="group rounded-2xl border border-white/15 bg-white/[0.06] p-6 backdrop-blur-xl">
-              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-violet-300/35 bg-violet-300/15 text-violet-100">
-                <BriefcaseBusiness size={18} />
-              </div>
-              <h3 className="text-xl font-medium">{cat}</h3>
-              <p className="mt-2 text-sm text-slate-300">Contenido en formato playbook con casos reales, plantillas y checklist descargables.</p>
-              <span className="mt-5 inline-flex items-center text-sm text-cyan-200">Explorar <ArrowRight className="ml-1 h-4 w-4 transition group-hover:translate-x-1" /></span>
-            </motion.article>
-          ))}
-        </div>
-      </section>
-
       <section className="relative z-10 mx-auto max-w-7xl px-4 pb-28 pt-14 sm:px-6">
         <motion.div initial={{ opacity: 0, scale: 0.96 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} className="rounded-[2rem] border border-cyan-200/20 bg-gradient-to-r from-cyan-400/15 via-violet-500/20 to-sky-500/15 p-10 text-center backdrop-blur-2xl md:p-16">
           <Rocket className="mx-auto mb-6 text-cyan-200" />
           <h2 className="text-3xl font-semibold md:text-6xl">La información correcta cambia decisiones</h2>
-          <button className="mt-8 rounded-2xl border border-cyan-200/45 bg-black/25 px-6 py-3 text-sm font-semibold text-cyan-100 transition hover:shadow-[0_0_45px_rgba(34,211,238,0.35)]">Entrar al centro de aprendizaje</button>
+          <motion.a
+            href="https://wa.me/TUNUMERO?text=Hola,%20quiero%20asesoramiento%20profesional."
+            target="_blank"
+            rel="noreferrer"
+            whileHover={{ y: -3, scale: 1.015 }}
+            whileTap={{ scale: 0.985 }}
+            className="group relative mt-8 inline-flex overflow-hidden rounded-2xl border border-cyan-200/45 bg-black/20 px-7 py-3.5 text-sm font-semibold text-cyan-50 backdrop-blur-2xl transition-all duration-500 hover:border-cyan-100/80 hover:shadow-[0_0_25px_rgba(34,211,238,0.35),0_0_65px_rgba(147,51,234,0.25)]"
+            style={{
+              backgroundImage: `radial-gradient(180px circle at ${mouse.x}% ${mouse.y}%, rgba(56,189,248,0.34), transparent 55%), linear-gradient(130deg, rgba(8,47,73,0.65), rgba(76,29,149,0.55), rgba(15,23,42,0.7))`,
+            }}
+          >
+            <span className="pointer-events-none absolute -left-1/3 top-0 h-full w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/35 to-transparent opacity-0 blur-[1px] transition-all duration-700 group-hover:left-[115%] group-hover:opacity-100" />
+            <span className="pointer-events-none absolute inset-[1px] rounded-2xl border border-white/15" />
+            <span className="relative inline-flex items-center gap-2 tracking-[0.02em]">
+              Contáctame para asesoría profesional
+              <ArrowRight size={15} className="transition-transform duration-500 group-hover:translate-x-1.5" />
+            </span>
+          </motion.a>
         </motion.div>
       </section>
     </div>
