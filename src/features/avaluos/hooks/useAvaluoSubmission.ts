@@ -13,20 +13,21 @@ export const useAvaluoSubmission = (usuarioId?: string) => {
   const submit = async (data: Record<string, unknown>, tipoPropiedad: PropertyType) => {
     setLoading(true); setErrors({});
     try {
-      let payload: Record<string, unknown> = data;
-      let resultCalc: ResultadoAvaluo | null = null;
+      const ciudad = data.ciudad as TerrenoInput['ciudad'];
+      if (!ciudad || !ZONAS_POR_CIUDAD[ciudad]) return setErrors({ ciudad: 'Selecciona una ciudad válida.' });
+      const zona = ZONAS_POR_CIUDAD[ciudad].find((z) => z.zona === String(data.zona ?? '')) as ZonaData | undefined;
+      if (!zona) return setErrors({ zona: 'Zona no disponible para la ciudad seleccionada.' });
+
       if (tipoPropiedad === 'terreno') {
         const foundErrors = validateTerreno(data as Partial<TerrenoInput>);
         if (Object.keys(foundErrors).length > 0) return setErrors(foundErrors as Record<string, string>);
-        const safeData = data as TerrenoInput;
-        const zona = ZONAS_POR_CIUDAD[safeData.ciudad].find((z) => z.zona === safeData.zona) as ZonaData | undefined;
-        if (!zona) return setErrors({ zona: 'Zona no disponible para la ciudad seleccionada.' });
-        resultCalc = calcularAvaluo(tipoPropiedad, safeData, zona); setResult(resultCalc); payload = safeData;
-      } else {
-        setResult(null);
       }
+
+      const resultCalc = calcularAvaluo(tipoPropiedad, data, zona);
+      setResult(resultCalc);
+
       if (usuarioId) {
-        await createAvaluo({ tipoPropiedad, ciudad: String(payload.ciudad ?? ''), zona: String(payload.zona ?? payload.zonaComunidad ?? ''), createdAt: new Date().toISOString(), usuarioId, caracteristicas: payload, coeficientesAplicados: resultCalc?.coeficientesAplicados ?? null, valorTerreno: resultCalc?.valorTerreno ?? null, valorFinal: resultCalc?.valorFinalEstimado ?? null, rangoMercado: resultCalc?.rangoMercado ?? null, nivelConfianza: resultCalc?.nivelConfianza ?? 'Base', zonaSnapshot: null });
+        await createAvaluo({ tipoPropiedad, ciudad: String(data.ciudad ?? ''), zona: String(data.zona ?? data.zonaComunidad ?? ''), createdAt: new Date().toISOString(), usuarioId, caracteristicas: data, coeficientesAplicados: resultCalc.coeficientesAplicados, valorTerreno: resultCalc.valorTerreno, valorFinal: resultCalc.valorFinalEstimado, rangoMercado: resultCalc.rangoMercado, nivelConfianza: resultCalc.nivelConfianza, zonaSnapshot: null });
       }
     } finally { setLoading(false); }
   };

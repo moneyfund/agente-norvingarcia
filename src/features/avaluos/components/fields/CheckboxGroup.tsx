@@ -1,0 +1,3 @@
+export function CheckboxGroup({ title, options, value, onChange }: { title: string; options: Array<{ key: string; label: string }>; value: Record<string, unknown>; onChange: (k: string, v: unknown) => void }) {
+  return <div className='md:col-span-2'><p className='mb-2 text-xs uppercase tracking-wide text-slate-400'>{title}</p><div className='flex flex-wrap gap-2'>{options.map((option)=><label key={option.key} className='rounded-xl border border-slate-700 bg-slate-900/70 px-3 py-2 text-slate-200'><input type='checkbox' className='mr-2' checked={Boolean(value[option.key])} onChange={(e)=>onChange(option.key, e.target.checked)} />{option.label}</label>)}</div></div>;
+}
