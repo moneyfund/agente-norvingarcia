@@ -16,6 +16,7 @@ const ContactPage = lazy(() => import('./pages/ContactPage'));
 const AIPropertyDesignPage = lazy(() => import('./pages/AIPropertyDesignPage'));
 const ListadoPage = lazy(() => import('./pages/ListadoPage'));
 const EducationPage = lazy(() => import('./pages/EducationPage'));
+const AvaluosPage = lazy(() => import('./pages/AvaluosPage'));
 
 const AdminLoginPage = lazy(() => import('./admin/pages/AdminLoginPage'));
 const AdminDashboardPage = lazy(() => import('./admin/pages/AdminDashboardPage'));
@@ -47,6 +48,7 @@ function App() {
         <Route element={<PrivateRoute />}>
           <Route element={<MainLayout />}>
             <Route path="/listado" element={<ListadoPage />} />
+            <Route path="/avaluos" element={<AvaluosPage />} />
           </Route>
         </Route>
 
