@@ -17,7 +17,7 @@ export default function AvaluosWorkspace() {
   const { user } = useAuth();
   const [propertyType, setPropertyType] = useState<PropertyType | null>(null);
   const [form, setForm] = useState<Partial<TerrenoInput> & Record<string, unknown>>({ servicios: [] });
-  const { loading, result, errors, submit } = useAvaluoSubmission(user?.uid);
+  const { loading, result, errors, submit: handleCalculate } = useAvaluoSubmission(user?.uid);
   const { items } = useAvaluosHistory(user?.uid);
 
   return <main className='min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-[#0b1320] px-4 py-10'>
@@ -27,12 +27,12 @@ export default function AvaluosWorkspace() {
       <div className='mt-8 rounded-2xl border border-amber-500/30 bg-slate-900/50 p-6'>
         <PropertyTypeCards value={propertyType} onChange={(t)=>{ setPropertyType(t); setForm({ servicios: [] }); }} />
         <div className='mt-2 min-h-[320px] transition-all duration-300'>
-          {propertyType === 'terreno' && <TerrenoForm value={form as Partial<TerrenoInput>} errors={errors} onChange={(k,v)=>setForm((p)=>({ ...p, [k]: v }))} onSubmit={() => submit(form, propertyType)} loading={loading} />}
-          {propertyType === 'casa' && <CasaForm value={form as Record<string, unknown>} onChange={(k,v)=>setForm((p)=>({ ...p, [k]: v }))} onSubmit={() => submit(form as Record<string, unknown>, propertyType)} loading={loading} />}
-          {propertyType === 'quinta' && <QuintaForm value={form as Record<string, unknown>} onChange={(k,v)=>setForm((p)=>({ ...p, [k]: v }))} onSubmit={() => submit(form as Record<string, unknown>, propertyType)} loading={loading} />}
-          {propertyType === 'finca' && <FincaForm value={form as Record<string, unknown>} onChange={(k,v)=>setForm((p)=>({ ...p, [k]: v }))} onSubmit={() => submit(form as Record<string, unknown>, propertyType)} loading={loading} />}
-          {propertyType === 'bodega' && <BodegaForm value={form as Record<string, unknown>} onChange={(k,v)=>setForm((p)=>({ ...p, [k]: v }))} onSubmit={() => submit(form as Record<string, unknown>, propertyType)} loading={loading} />}
-          {propertyType === 'comercial' && <ComercialForm value={form as Record<string, unknown>} onChange={(k,v)=>setForm((p)=>({ ...p, [k]: v }))} onSubmit={() => submit(form as Record<string, unknown>, propertyType)} loading={loading} />}
+          {propertyType === 'terreno' && <TerrenoForm value={form as Partial<TerrenoInput>} errors={errors} onChange={(k,v)=>setForm((p)=>({ ...p, [k]: v }))} onSubmit={() => handleCalculate(form, propertyType)} loading={loading} />}
+          {propertyType === 'casa' && <CasaForm value={form as Record<string, unknown>} onChange={(k,v)=>setForm((p)=>({ ...p, [k]: v }))} onSubmit={() => handleCalculate(form as Record<string, unknown>, propertyType)} loading={loading} />}
+          {propertyType === 'quinta' && <QuintaForm value={form as Record<string, unknown>} onChange={(k,v)=>setForm((p)=>({ ...p, [k]: v }))} onSubmit={() => handleCalculate(form as Record<string, unknown>, propertyType)} loading={loading} />}
+          {propertyType === 'finca' && <FincaForm value={form as Record<string, unknown>} onChange={(k,v)=>setForm((p)=>({ ...p, [k]: v }))} onSubmit={() => handleCalculate(form as Record<string, unknown>, propertyType)} loading={loading} />}
+          {propertyType === 'bodega' && <BodegaForm value={form as Record<string, unknown>} onChange={(k,v)=>setForm((p)=>({ ...p, [k]: v }))} onSubmit={() => handleCalculate(form as Record<string, unknown>, propertyType)} loading={loading} />}
+          {propertyType === 'comercial' && <ComercialForm value={form as Record<string, unknown>} onChange={(k,v)=>setForm((p)=>({ ...p, [k]: v }))} onSubmit={() => handleCalculate(form as Record<string, unknown>, propertyType)} loading={loading} />}
         </div>
       </div>
       <AvaluoTerrenoResultCard result={result} />
