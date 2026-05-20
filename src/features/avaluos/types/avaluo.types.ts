@@ -1,68 +1,67 @@
-export type TipoPropiedad = 'terreno' | 'casa' | 'finca' | 'comercial';
+export type PropertyType = 'terreno' | 'casa' | 'finca' | 'quinta' | 'bodega' | 'comercial';
 
 export type CiudadObjetivo = 'Matagalpa' | 'Estelí';
-
 export type Topografia = 'plano' | 'semiPlano' | 'inclinado' | 'quebrado';
 export type Acceso = 'pavimentado' | 'adoquinado' | 'macadan' | 'tierra';
-export type ServicioBasico = 'agua' | 'energia' | 'internet' | 'drenaje';
-export type UsoPotencial = 'residencial' | 'comercial' | 'industrial' | 'agricola' | 'turistico';
+export type ServicioBasico = 'agua' | 'energia' | 'internet' | 'drenaje' | 'callePavimentada';
+export type UsoPotencial = 'residencial' | 'comercial' | 'industrial' | 'turistico' | 'agricola';
 
 export interface ZonaData {
-  ciudad: string;
+  ciudad: CiudadObjetivo;
   zona: string;
-  clasificacion: string;
+  clasificacion: 'Prime' | 'Alta' | 'Media' | 'Emergente';
   valorTerrenoM2: number;
-  valorConstruccionM2: number;
   factorPlusvalia: number;
 }
 
 export interface ZonaSnapshot {
-  clasificacion: string;
+  clasificacion: ZonaData['clasificacion'];
   valorTerrenoM2: number;
-  valorConstruccionM2: number;
   factorPlusvalia: number;
 }
 
-export interface CaracteristicasTerreno {
+export interface TerrenoInput {
   ciudad: CiudadObjetivo;
-  municipio: string;
   zona: string;
   areaTerreno: number;
   topografia: Topografia;
   acceso: Acceso;
   servicios: ServicioBasico[];
   usoPotencial: UsoPotencial;
-  observaciones?: string;
 }
 
-export interface CaracteristicasConstruccion {
-  areaConstruccion: number;
-  estadoConstruccion: 'excelente' | 'bueno' | 'regular' | 'malo';
-  acabados: 'premium' | 'alto' | 'medio' | 'basico' | 'obraGris';
-}
-
-export interface Coeficientes {
+export interface CoeficientesAplicados {
   topografia: number;
   acceso: number;
   servicios: number;
+  usoPotencial: number;
   plusvalia: number;
   factorGlobal: number;
 }
 
 export interface ResultadoAvaluo {
   valorTerreno: number;
-  valorConstruccion: number;
-  valorFinal: number;
-  rangoEstimado: { minimo: number; maximo: number };
+  valorPorM2Final: number;
   clasificacionUrbana: string;
-  nivelPlusvalia: number;
-  coeficientesAplicados: Coeficientes;
-  observacionesTecnicas: string[];
+  factorPlusvalia: number;
+  coeficientesAplicados: CoeficientesAplicados;
+  valorFinalEstimado: number;
+  rangoMercado: { minimo: number; maximo: number };
+  nivelConfianza: 'Alto' | 'Medio' | 'Base';
 }
 
-export interface AvaluoInput {
-  tipoPropiedad: TipoPropiedad;
+export interface AvaluoRecord {
+  id?: string;
+  tipoPropiedad: PropertyType;
+  ciudad: CiudadObjetivo;
+  zona: string;
   usuarioId: string;
-  zonaData: ZonaData;
-  caracteristicas: CaracteristicasTerreno;
+  createdAt: string;
+  caracteristicas: TerrenoInput;
+  coeficientesAplicados: CoeficientesAplicados;
+  valorTerreno: number;
+  valorFinal: number;
+  rangoMercado: { minimo: number; maximo: number };
+  nivelConfianza: ResultadoAvaluo['nivelConfianza'];
+  zonaSnapshot: ZonaSnapshot;
 }
