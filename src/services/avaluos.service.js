@@ -12,7 +12,7 @@ export const createAvaluo = async (payload) => {
 };
 
 export const getAvaluosByUser = async (usuarioId) => {
-  const q = query(avaluosCollection, where('usuarioId', '==', usuarioId), orderBy('createdAt', 'desc'));
+  const q = query(avaluosCollection, where('usuarioId', '==', usuarioId), orderBy('createdAtServer', 'desc'));
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };
