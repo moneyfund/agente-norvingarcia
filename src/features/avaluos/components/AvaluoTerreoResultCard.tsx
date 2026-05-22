@@ -1,18 +1,2 @@
-import type { ResultadoAvaluo } from '../types/avaluo.types';
-
-export default function AvaluoTerrenoResultCard({ result }: { result: ResultadoAvaluo | null }) {
-  if (!result) return null;
-  return <section className='mt-6 rounded-2xl border border-slate-700 bg-slate-900 p-6'>
-    <h3 className='text-xl font-bold text-white'>Dashboard técnico de resultado</h3>
-    <div className='mt-4 grid gap-3 md:grid-cols-4'>
-      <Metric label='Valor terreno' value={result.valorTerreno} />
-      <Metric label='Valor por m²' value={result.valorPorM2Final} />
-      <Metric label='Plusvalía' value={result.factorPlusvalia} suffix='x' />
-      <Metric label='Valor final estimado' value={result.valorFinalEstimado} />
-    </div>
-    <p className='text-slate-300 mt-4'>Clasificación urbana: <strong>{result.clasificacionUrbana}</strong> · Confianza: <strong>{result.nivelConfianza}</strong></p>
-    <p className='text-slate-300'>Rango de mercado: US$ {result.rangoMercado.minimo.toLocaleString()} - US$ {result.rangoMercado.maximo.toLocaleString()}</p>
-  </section>;
-}
-
-function Metric({ label, value, suffix='' }: { label: string; value: number; suffix?: string }) { return <div className='rounded-xl bg-slate-950/80 p-3'><p className='text-slate-400 text-xs'>{label}</p><p className='text-amber-300 text-xl font-semibold'>US$ {value.toLocaleString()}{suffix}</p></div>; }
+export default function AvaluoTerrenoResultCard({ result, onSave, canSave }) { if(!result) return null; return <section className='mt-8 rounded-2xl border border-blue-900 bg-slate-900 p-6 text-slate-200'><h3 className='text-xl font-bold text-blue-200'>Dashboard técnico de avalúo</h3><div className='mt-4 grid md:grid-cols-3 gap-3'>{item('Valor terreno',result.valorTerreno)}{item('Valor construcción',result.valorConstruccion)}{item('Valor final estimado',result.valorFinalEstimado)}{item('Valor/m²',result.valorM2)}{item('Clasificación zona',result.clasificacionZona,false)}{item('Plusvalía aplicada',result.plusvaliaAplicada,false)}{item('Rango mercado',`${result.rangoMercado.minimo.toFixed(0)} - ${result.rangoMercado.maximo.toFixed(0)}`,false)}{item('Nivel confianza',result.nivelConfianza,false)}</div><details className='mt-3'><summary>Coeficientes aplicados</summary><pre className='text-xs mt-2'>{JSON.stringify(result.coeficientesAplicados,null,2)}</pre></details>{canSave && <button onClick={onSave} className='mt-4 rounded-xl bg-amber-500 px-4 py-2 text-slate-900 font-semibold'>Guardar avalúo</button>}</section>}
+const item=(label,val,m=true)=><div className='rounded-xl border border-slate-700 bg-slate-800 p-3'><p className='text-slate-400 text-xs'>{label}</p><p className='text-lg font-semibold'>{m&&typeof val==='number'?`$${val.toFixed(2)}`:val}</p></div>;

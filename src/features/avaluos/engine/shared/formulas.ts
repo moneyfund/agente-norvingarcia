@@ -1,13 +1,5 @@
-import { MARKET_RANGE_BY_CONFIDENCE } from './ranges';
-import { round2 } from './normalizers';
+import { SERVICIO_PESO } from './weights';
 
-export const calcValorBaseTerreno = (areaTerreno: number, valorTerrenoM2: number) => round2(areaTerreno * valorTerrenoM2);
-export const calcValorConstruccion = (areaConstruccion: number, valorConstruccionM2: number) => round2(areaConstruccion * valorConstruccionM2);
-
-export const calcRangoMercado = (valorFinal: number, nivelConfianza: keyof typeof MARKET_RANGE_BY_CONFIDENCE) => {
-  const band = MARKET_RANGE_BY_CONFIDENCE[nivelConfianza];
-  return {
-    minimo: round2(valorFinal * (1 - band)),
-    maximo: round2(valorFinal * (1 + band)),
-  };
-};
+export const sumServicios = (servicios: string[]) => 1 + servicios.reduce((a, s) => a + (SERVICIO_PESO[s as keyof typeof SERVICIO_PESO] ?? 0), 0);
+export const range = (v: number) => ({ minimo: v * 0.93, maximo: v * 1.08 });
+export const confidence = (coefCount: number) => coefCount >= 10 ? 'Alto' : coefCount >= 7 ? 'Medio' : 'Base';
