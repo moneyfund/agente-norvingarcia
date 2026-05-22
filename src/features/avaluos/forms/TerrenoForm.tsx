@@ -1,10 +1,70 @@
-import { CIUDAD_UNICA, ZONAS_MATAGALPA } from '../constants/locations';
-const topografias = ['Plano','Semi plano','Inclinado','Quebrado']; const accesos=['Pavimentado','Adoquinado','Macadán','Tierra']; const usos=['Residencial','Comercial','Mixto','Turístico']; const formas=['Regular','Irregular','Esquinero','Fondo amplio']; const niveles=['Alto','Medio','Bajo'];
-const exposiciones=['Alta','Media','Baja']; const entornos=['Residencial premium','Residencial media','Comercial','Mixto','Popular']; const desarrollo=['Consolidado','Crecimiento','Emergente','Bajo desarrollo'];
-export default function TerrenoForm({ value, onChange, onSubmit, loading, showSubmit = true }) { return <div className='grid gap-4 md:grid-cols-2 text-slate-200'>{field('Título del avalúo','titulo',value,onChange)}<selectField label='Ciudad' val={CIUDAD_UNICA} opts={[CIUDAD_UNICA]} onChange={()=>{}} disabled/><selectField label='Zona Matagalpa' val={value.zona||''} opts={ZONAS_MATAGALPA.map(z=>z.zona)} onChange={(v)=>onChange('zona',v)}/>{num('Área terreno m²','areaTerreno',value,onChange)}{num('Frente terreno (m)','frenteTerreno',value,onChange)}{num('Fondo terreno (m)','fondoTerreno',value,onChange)}{selectField({label:'Topografía',val:value.topografia||'',opts:topografias,onChange:(v)=>onChange('topografia',v)})}{selectField({label:'Acceso',val:value.acceso||'',opts:accesos,onChange:(v)=>onChange('acceso',v)})}{selectField({label:'Uso potencial',val:value.usoPotencial||'',opts:usos,onChange:(v)=>onChange('usoPotencial',v)})}{selectField({label:'Forma terreno',val:value.formaTerreno||'',opts:formas,onChange:(v)=>onChange('formaTerreno',v)})}{selectField({label:'Nivel comercial',val:value.nivelComercial||'',opts:niveles,onChange:(v)=>onChange('nivelComercial',v)})}{selectField({label:'Exposición comercial',val:value.exposicionComercial||'',opts:exposiciones,onChange:(v)=>onChange('exposicionComercial',v)})}{selectField({label:'Tipo entorno',val:value.tipoEntorno||'',opts:entornos,onChange:(v)=>onChange('tipoEntorno',v)})}{selectField({label:'Desarrollo urbano',val:value.desarrolloUrbano||'',opts:desarrollo,onChange:(v)=>onChange('desarrolloUrbano',v)})}{selectField({label:'Densidad urbana',val:value.densidadUrbana||'',opts:niveles,onChange:(v)=>onChange('densidadUrbana',v)})}<checks title='Servicios' items={[['agua','Agua'],['energia','Energía'],['internet','Internet'],['drenaje','Drenaje'],['callePavimentada','Calle pavimentada']]} value={value.servicios||[]} onChange={(s)=>onChange('servicios',s)}/><tog label='Esquina' val={!!value.esquina} onChange={(v)=>onChange('esquina',v)}/><tog label='Cercanía principal' val={!!value.cercaniaPrincipal} onChange={(v)=>onChange('cercaniaPrincipal',v)}/><tog label='Cercanía comercial' val={!!value.cercaniaComercial} onChange={(v)=>onChange('cercaniaComercial',v)}/><tog label='Pendiente fuerte' val={!!value.pendiente} onChange={(v)=>onChange('pendiente',v)}/><tog label='Riesgo inundación' val={!!value.riesgoInundacion} onChange={(v)=>onChange('riesgoInundacion',v)}/><tog label='Potencial subdivisión' val={!!value.potencialSubdivision} onChange={(v)=>onChange('potencialSubdivision',v)}/>{selectField({label:'Seguridad zona',val:value.seguridadZona||'',opts:niveles,onChange:(v)=>onChange('seguridadZona',v)})}{selectField({label:'Nivel tráfico',val:value.nivelTrafico||'',opts:niveles,onChange:(v)=>onChange('nivelTrafico',v)})}{showSubmit && <button onClick={onSubmit} disabled={loading} className='md:col-span-2 rounded-xl bg-amber-500 px-4 py-3 font-semibold text-slate-900'>{loading?'Calculando...':'Calcular avalúo técnico'}</button>}</div>; }
-const base='rounded-xl border border-slate-700 bg-slate-900 p-3';
-function field(label,key,v,onChange){return <label className={base}><span>{label}</span><input className='mt-2 w-full bg-slate-800 p-2 rounded' value={v[key]||''} onChange={e=>onChange(key,e.target.value)} /></label>}
-function num(label,key,v,onChange){return <label className={base}><span>{label}</span><input type='number' className='mt-2 w-full bg-slate-800 p-2 rounded' value={v[key]||''} onChange={e=>onChange(key,Number(e.target.value))} /></label>}
-function selectField({label,val,opts,onChange,disabled=false}){return <label className={base}><span>{label}</span><select disabled={disabled} className='mt-2 w-full bg-slate-800 p-2 rounded' value={val} onChange={e=>onChange(e.target.value)}><option value=''>Seleccionar</option>{opts.map(o=><option key={o} value={o}>{o}</option>)}</select></label>}
-function checks({title,items,value,onChange}){return <div className={base}><p>{title}</p><div className='mt-2 grid grid-cols-2 gap-2'>{items.map(([k,l])=><label key={k}><input type='checkbox' checked={value.includes(k)} onChange={(e)=>onChange(e.target.checked?[...value,k]:value.filter((x)=>x!==k))}/> {l}</label>)}</div></div>}
-function tog({label,val,onChange}){return <label className={base}><span>{label}</span><input type='checkbox' className='ml-3' checked={val} onChange={(e)=>onChange(e.target.checked)} /></label>}
+import { ZONAS_POR_CIUDAD } from '../constants/locations';
+
+const ciudades = Object.keys(ZONAS_POR_CIUDAD);
+const topografias = ['Plano', 'Semi plano', 'Inclinado', 'Quebrado'];
+const accesos = ['Pavimentado', 'Adoquinado', 'Macadán', 'Tierra'];
+const usos = ['Residencial', 'Comercial', 'Mixto', 'Turístico'];
+const formas = ['Regular', 'Irregular', 'Esquinero', 'Fondo amplio'];
+const niveles = ['Alto', 'Medio', 'Bajo'];
+const exposiciones = ['Alta', 'Media', 'Baja'];
+const entornos = ['Residencial premium', 'Residencial media', 'Comercial', 'Mixto', 'Popular'];
+const desarrollo = ['Consolidado', 'Crecimiento', 'Emergente', 'Bajo desarrollo'];
+
+export default function TerrenoForm({ value, onChange, onSubmit, loading, showSubmit = true }) {
+  const ciudadSeleccionada = value.ciudad || ciudades[0] || '';
+  const zonasDisponibles = ZONAS_POR_CIUDAD[ciudadSeleccionada] || [];
+
+  return <div className='grid gap-4 md:grid-cols-2 text-slate-200'>
+    {field('Título del avalúo', 'titulo', value, onChange)}
+    {selectField({
+      label: 'Ciudad',
+      val: ciudadSeleccionada,
+      opts: ciudades,
+      onChange: (ciudad) => {
+        const primeraZona = (ZONAS_POR_CIUDAD[ciudad] || [])[0];
+        onChange('ciudad', ciudad);
+        onChange('zona', '');
+        onChange('zonaData', primeraZona || null);
+      },
+    })}
+    {selectField({
+      label: 'Zona',
+      val: value.zona || '',
+      opts: zonasDisponibles.map((z) => z.zona),
+      onChange: (zonaNombre) => {
+        const zonaCompleta = zonasDisponibles.find((z) => z.zona === zonaNombre) || null;
+        onChange('zona', zonaNombre);
+        onChange('zonaData', zonaCompleta);
+      },
+    })}
+    {num('Área terreno m²', 'areaTerreno', value, onChange)}
+    {num('Frente terreno (m)', 'frenteTerreno', value, onChange)}
+    {num('Fondo terreno (m)', 'fondoTerreno', value, onChange)}
+    {selectField({ label: 'Topografía', val: value.topografia || '', opts: topografias, onChange: (v) => onChange('topografia', v) })}
+    {selectField({ label: 'Acceso', val: value.acceso || '', opts: accesos, onChange: (v) => onChange('acceso', v) })}
+    {selectField({ label: 'Uso potencial', val: value.usoPotencial || '', opts: usos, onChange: (v) => onChange('usoPotencial', v) })}
+    {selectField({ label: 'Forma terreno', val: value.formaTerreno || '', opts: formas, onChange: (v) => onChange('formaTerreno', v) })}
+    {selectField({ label: 'Nivel comercial', val: value.nivelComercial || '', opts: niveles, onChange: (v) => onChange('nivelComercial', v) })}
+    {selectField({ label: 'Exposición comercial', val: value.exposicionComercial || '', opts: exposiciones, onChange: (v) => onChange('exposicionComercial', v) })}
+    {selectField({ label: 'Tipo entorno', val: value.tipoEntorno || '', opts: entornos, onChange: (v) => onChange('tipoEntorno', v) })}
+    {selectField({ label: 'Desarrollo urbano', val: value.desarrolloUrbano || '', opts: desarrollo, onChange: (v) => onChange('desarrolloUrbano', v) })}
+    {selectField({ label: 'Densidad urbana', val: value.densidadUrbana || '', opts: niveles, onChange: (v) => onChange('densidadUrbana', v) })}
+    <checks title='Servicios' items={[['agua', 'Agua'], ['energia', 'Energía'], ['internet', 'Internet'], ['drenaje', 'Drenaje'], ['callePavimentada', 'Calle pavimentada']]} value={value.servicios || []} onChange={(s) => onChange('servicios', s)} />
+    <tog label='Esquina' val={!!value.esquina} onChange={(v) => onChange('esquina', v)} />
+    <tog label='Cercanía principal' val={!!value.cercaniaPrincipal} onChange={(v) => onChange('cercaniaPrincipal', v)} />
+    <tog label='Cercanía comercial' val={!!value.cercaniaComercial} onChange={(v) => onChange('cercaniaComercial', v)} />
+    <tog label='Pendiente fuerte' val={!!value.pendiente} onChange={(v) => onChange('pendiente', v)} />
+    <tog label='Riesgo inundación' val={!!value.riesgoInundacion} onChange={(v) => onChange('riesgoInundacion', v)} />
+    <tog label='Potencial subdivisión' val={!!value.potencialSubdivision} onChange={(v) => onChange('potencialSubdivision', v)} />
+    {selectField({ label: 'Seguridad zona', val: value.seguridadZona || '', opts: niveles, onChange: (v) => onChange('seguridadZona', v) })}
+    {selectField({ label: 'Nivel tráfico', val: value.nivelTrafico || '', opts: niveles, onChange: (v) => onChange('nivelTrafico', v) })}
+    {showSubmit && <button onClick={onSubmit} disabled={loading} className='md:col-span-2 rounded-xl bg-amber-500 px-4 py-3 font-semibold text-slate-900'>{loading ? 'Calculando...' : 'Calcular avalúo técnico'}</button>}
+  </div>;
+}
+
+const base = 'rounded-xl border border-slate-700 bg-slate-900 p-3';
+function field(label, key, v, onChange) { return <label className={base}><span>{label}</span><input className='mt-2 w-full bg-slate-800 p-2 rounded' value={v[key] || ''} onChange={e => onChange(key, e.target.value)} /></label>; }
+function num(label, key, v, onChange) { return <label className={base}><span>{label}</span><input type='number' className='mt-2 w-full bg-slate-800 p-2 rounded' value={v[key] || ''} onChange={e => onChange(key, Number(e.target.value))} /></label>; }
+function selectField({ label, val, opts, onChange, disabled = false }) { return <label className={base}><span>{label}</span><select disabled={disabled} className='mt-2 w-full bg-slate-800 p-2 rounded' value={val} onChange={e => onChange(e.target.value)}><option value=''>Seleccionar</option>{opts.map(o => <option key={o} value={o}>{o}</option>)}</select></label>; }
+function checks({ title, items, value, onChange }) { return <div className={base}><p>{title}</p><div className='mt-2 grid grid-cols-2 gap-2'>{items.map(([k, l]) => <label key={k}><input type='checkbox' checked={value.includes(k)} onChange={(e) => onChange(e.target.checked ? [...value, k] : value.filter((x) => x !== k))} /> {l}</label>)}</div></div>; }
+function tog({ label, val, onChange }) { return <label className={base}><span>{label}</span><input type='checkbox' className='ml-3' checked={val} onChange={(e) => onChange(e.target.checked)} /></label>; }
