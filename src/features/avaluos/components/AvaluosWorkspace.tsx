@@ -12,7 +12,7 @@ export default function AvaluosWorkspace() {
   const { user } = useAuth();
   const [propertyType, setPropertyType] = useState<any>(null);
   const [form, setForm] = useState<any>({ ciudad: 'Matagalpa', servicios: [] });
-  const { loading, result, submit, save } = useAvaluoSubmission(user?.uid);
+  const { loading, result, error, submit, save } = useAvaluoSubmission(user?.uid);
   const { items, refresh } = useAvaluosHistory(user?.uid);
 
   const handleCalculate = async () => {
@@ -33,6 +33,7 @@ export default function AvaluosWorkspace() {
         <PropertyTypeCards value={propertyType} onChange={(t)=>{ setPropertyType(t); setForm({ ciudad: 'Matagalpa', servicios: [] }); }} />
         <div className='mt-6'>{propertyType==='terreno'&&<TerrenoForm value={form} onChange={(k,v)=>setForm((p)=>({ ...p,[k]:v }))} onSubmit={handleCalculate} loading={loading} />}{propertyType==='casa'&&<CasaForm value={form} onChange={(k,v)=>setForm((p)=>({ ...p,[k]:v }))} onSubmit={handleCalculate} loading={loading} />}</div>
       </div>
+      {!!error && <p className='mt-4 rounded-xl border border-red-500/40 bg-red-900/30 p-3 text-red-100'>{error}</p>}
       <AvaluoTerrenoResultCard result={result} canSave={!!user} onSave={handleSave} />
       <AvaluoHistoryPanel items={items} />
     </div>

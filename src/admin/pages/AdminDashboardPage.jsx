@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getPropiedades } from '../../services/propiedadesService';
+import { subscribeAvaluos } from '../../services/avaluos.service';
 
 function AdminDashboardPage() {
   const [propiedades, setPropiedades] = useState([]);
+  const [avaluos, setAvaluos] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,6 +20,11 @@ function AdminDashboardPage() {
     };
 
     load();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = subscribeAvaluos(setAvaluos, console.error);
+    return () => unsubscribe();
   }, []);
 
   const metrics = useMemo(() => ({
@@ -35,6 +42,24 @@ function AdminDashboardPage() {
         <article className="rounded-2xl bg-white p-5 shadow-sm"><p className="text-sm text-slate-500">Total propiedades</p><p className="text-3xl font-bold">{metrics.total}</p></article>
         <article className="rounded-2xl bg-white p-5 shadow-sm"><p className="text-sm text-slate-500">Premium</p><p className="text-3xl font-bold">{metrics.premium}</p></article>
         <article className="rounded-2xl bg-white p-5 shadow-sm"><p className="text-sm text-slate-500">Últimas agregadas</p><p className="text-3xl font-bold">{metrics.recientes.length}</p></article>
+      </div>
+
+      <div className="rounded-2xl bg-white p-5 shadow-sm">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Avalúos</h2>
+          <p className="text-sm text-slate-500">Total: {avaluos.length}</p>
+        </div>
+        <ul className="space-y-2">
+          {avaluos.slice(0, 10).map((avaluo) => (
+            <li key={avaluo.id} className="rounded-xl bg-slate-50 p-3">
+              <p className="font-medium">{avaluo.titulo}</p>
+              <p className="text-sm text-slate-500">{avaluo.tipoPropiedad} · {avaluo.zona}</p>
+              <p className="text-sm text-slate-500">{avaluo.createdAt ? new Date(avaluo.createdAt).toLocaleString() : 'Sin fecha'}</p>
+              <p className="text-sm font-semibold text-emerald-700">${Number(avaluo.valorFinal || 0).toFixed(2)}</p>
+            </li>
+          ))}
+          {!avaluos.length && <li className="text-sm text-slate-500">Aún no hay avalúos guardados.</li>}
+        </ul>
       </div>
 
       <div className="rounded-2xl bg-white p-5 shadow-sm">
