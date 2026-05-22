@@ -1,18 +1,1 @@
-export const TERRAIN_WEIGHTS = {
-  UBICACION: 0.35,
-  TOPOGRAFIA: 0.1,
-  ACCESO: 0.1,
-  SERVICIOS: 0.1,
-  USO_POTENCIAL: 0.15,
-  PLUSVALIA: 0.2,
-} as const;
-
-export const HOUSE_WEIGHTS = {
-  TERRENO: 0.3,
-  CONSTRUCCION: 0.25,
-  ESTADO: 0.1,
-  ACABADOS: 0.1,
-  ANTIGUEDAD: 0.1,
-  TIPO_CONSTRUCCION: 0.1,
-  AJUSTE_COMERCIAL: 0.05,
-} as const;
+export const SERVICIO_PESO = { agua: 0.03, energia: 0.03, internet: 0.02, drenaje: 0.025, callePavimentada: 0.03 } as const;

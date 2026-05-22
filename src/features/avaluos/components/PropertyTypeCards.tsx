@@ -1,18 +1,1 @@
-import type { PropertyType } from '../types/avaluo.types';
-
-const ITEMS: { key: PropertyType; label: string; icon: string }[] = [
-  { key: 'terreno', label: 'Terreno', icon: '🧭' },
-  { key: 'casa', label: 'Casa', icon: '🏠' },
-  { key: 'finca', label: 'Finca', icon: '🌾' },
-  { key: 'quinta', label: 'Quinta', icon: '🏡' },
-  { key: 'bodega', label: 'Bodega', icon: '🏭' },
-  { key: 'comercial', label: 'Comercial', icon: '🏢' },
-];
-
-export function PropertyTypeCards({ value, onChange }: { value: PropertyType | null; onChange: (t: PropertyType) => void }) {
-  return <section className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
-    {ITEMS.map((item) => <button key={item.key} onClick={() => onChange(item.key)} className={`rounded-2xl border p-5 text-left transition-all hover:-translate-y-1 hover:shadow-xl ${value===item.key ? 'border-amber-400 bg-slate-800 ring-1 ring-amber-400' : 'border-slate-700 bg-slate-900/80'}`}>
-      <div className='text-3xl'>{item.icon}</div><div className='mt-3 text-lg font-semibold text-slate-100'>{item.label}</div>
-    </button>)}
-  </section>;
-}
+export function PropertyTypeCards({ value, onChange }) { const types=[['terreno','Terreno'],['casa','Casa']]; return <div className='grid grid-cols-2 gap-4'>{types.map(([k,l])=><button key={k} onClick={()=>onChange(k)} className={`rounded-2xl border p-5 text-left ${value===k?'border-amber-400 bg-slate-800':'border-slate-700 bg-slate-900'}`}><p className='text-slate-100 text-lg font-semibold'>{l}</p><p className='text-slate-400 text-sm'>Análisis técnico profesional</p></button>)}</div>; }

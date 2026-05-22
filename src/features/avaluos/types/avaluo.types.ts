@@ -1,67 +1,17 @@
-export type PropertyType = 'terreno' | 'casa' | 'finca' | 'quinta' | 'bodega' | 'comercial';
+export type PropertyType = 'terreno' | 'casa';
+export type CiudadObjetivo = 'Matagalpa';
 
-export type CiudadObjetivo = 'Matagalpa' | 'Estelí';
-export type Topografia = 'plano' | 'semiPlano' | 'inclinado' | 'quebrado';
-export type Acceso = 'pavimentado' | 'adoquinado' | 'macadan' | 'tierra';
+export type Topografia = 'Plano' | 'Semi plano' | 'Inclinado' | 'Quebrado';
+export type Acceso = 'Pavimentado' | 'Adoquinado' | 'Macadán' | 'Tierra';
 export type ServicioBasico = 'agua' | 'energia' | 'internet' | 'drenaje' | 'callePavimentada';
-export type UsoPotencial = 'residencial' | 'comercial' | 'industrial' | 'turistico' | 'agricola';
+export type UsoPotencial = 'Residencial' | 'Comercial' | 'Mixto' | 'Turístico';
+export type FormaTerreno = 'Regular' | 'Irregular' | 'Esquinero' | 'Fondo amplio';
+export type NivelComercial = 'Alto' | 'Medio' | 'Bajo';
 
-export interface ZonaData {
-  ciudad: CiudadObjetivo;
-  zona: string;
-  clasificacion: 'Prime' | 'Alta' | 'Media' | 'Emergente';
-  valorTerrenoM2: number;
-  factorPlusvalia: number;
-}
+export interface TerrenoInput { titulo: string; ciudad: CiudadObjetivo; zona: string; areaTerreno: number; topografia: Topografia; acceso: Acceso; servicios: ServicioBasico[]; usoPotencial: UsoPotencial; formaTerreno: FormaTerreno; nivelComercial: NivelComercial; esquina: boolean; cercaniaPrincipal: boolean; }
+export interface CasaInput extends TerrenoInput { areaConstruccion: number; habitaciones: '1'|'2'|'3'|'4'|'5'|'6+'; banos: '1'|'2'|'3'|'4'|'5+'; niveles: '1'|'2'|'3'|'4+'; garaje: boolean; patio: boolean; jardin: boolean; estadoConstruccion: 'Excelente'|'Bueno'|'Regular'|'Malo'; acabados: 'Premium'|'Alto'|'Medio'|'Básico'; antiguedad: '0-5'|'6-10'|'11-20'|'20+'; tipoConstruccion: 'Lujo moderno'|'Residencial alta'|'Residencial media'|'Económica'; }
 
-export interface ZonaSnapshot {
-  clasificacion: ZonaData['clasificacion'];
-  valorTerrenoM2: number;
-  factorPlusvalia: number;
-}
+export interface ZonaData { ciudad: CiudadObjetivo; zona: string; clasificacion: 'Prime'|'Alta'|'Media'|'Emergente'; valorTerrenoM2: number; plusvalia: number; }
+export interface ResultadoAvaluo { valorTerreno: number; valorConstruccion: number; valorM2: number; clasificacionZona: string; plusvaliaAplicada: number; coeficientesAplicados: Record<string, number>; rangoMercado: { minimo: number; maximo: number }; nivelConfianza: 'Alto'|'Medio'|'Base'; valorFinalEstimado: number; }
 
-export interface TerrenoInput {
-  ciudad: CiudadObjetivo;
-  zona: string;
-  areaTerreno: number;
-  topografia: Topografia;
-  acceso: Acceso;
-  servicios: ServicioBasico[];
-  usoPotencial: UsoPotencial;
-}
-
-export interface CoeficientesAplicados {
-  topografia: number;
-  acceso: number;
-  servicios: number;
-  usoPotencial: number;
-  plusvalia: number;
-  factorGlobal: number;
-}
-
-export interface ResultadoAvaluo {
-  valorTerreno: number;
-  valorPorM2Final: number;
-  clasificacionUrbana: string;
-  factorPlusvalia: number;
-  coeficientesAplicados: CoeficientesAplicados;
-  valorFinalEstimado: number;
-  rangoMercado: { minimo: number; maximo: number };
-  nivelConfianza: 'Alto' | 'Medio' | 'Base';
-}
-
-export interface AvaluoRecord {
-  id?: string;
-  tipoPropiedad: PropertyType;
-  ciudad: CiudadObjetivo;
-  zona: string;
-  usuarioId: string;
-  createdAt: string;
-  caracteristicas: TerrenoInput;
-  coeficientesAplicados: CoeficientesAplicados;
-  valorTerreno: number;
-  valorFinal: number;
-  rangoMercado: { minimo: number; maximo: number };
-  nivelConfianza: ResultadoAvaluo['nivelConfianza'];
-  zonaSnapshot: ZonaSnapshot;
-}
+export interface AvaluoRecord { id?: string; titulo: string; tipoPropiedad: PropertyType; ciudad: CiudadObjetivo; zona: string; createdAt: string; usuarioId: string; caracteristicas: TerrenoInput | CasaInput; coeficientesAplicados: Record<string, number>; valorTerreno: number; valorConstruccion: number; valorFinal: number; rangoMercado: { minimo: number; maximo: number }; nivelConfianza: ResultadoAvaluo['nivelConfianza']; zonaSnapshot: ZonaData; }

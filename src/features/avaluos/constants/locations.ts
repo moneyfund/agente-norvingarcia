@@ -1,18 +1,18 @@
-import type { CiudadObjetivo, ZonaData } from '../types/avaluo.types';
+import type { ZonaData } from '../types/avaluo.types';
 
-export const ZONAS_POR_CIUDAD: Record<CiudadObjetivo, ZonaData[]> = {
-  Matagalpa: [
-    { ciudad: 'Matagalpa', zona: 'Molino Norte', clasificacion: 'Prime', valorTerrenoM2: 240, factorPlusvalia: 1.18 },
-    { ciudad: 'Matagalpa', zona: 'Molino Sur', clasificacion: 'Alta', valorTerrenoM2: 210, factorPlusvalia: 1.14 },
-    { ciudad: 'Matagalpa', zona: 'Guanuca', clasificacion: 'Alta', valorTerrenoM2: 190, factorPlusvalia: 1.11 },
-    { ciudad: 'Matagalpa', zona: 'Las Tejas', clasificacion: 'Media', valorTerrenoM2: 165, factorPlusvalia: 1.07 },
-    { ciudad: 'Matagalpa', zona: 'Apante', clasificacion: 'Media', valorTerrenoM2: 145, factorPlusvalia: 1.04 },
-    { ciudad: 'Matagalpa', zona: 'Walter Mendoza', clasificacion: 'Emergente', valorTerrenoM2: 130, factorPlusvalia: 1.02 },
-  ],
-  Estelí: [
-    { ciudad: 'Estelí', zona: 'Las Colinas', clasificacion: 'Prime', valorTerrenoM2: 260, factorPlusvalia: 1.22 },
-    { ciudad: 'Estelí', zona: 'Boris Vega', clasificacion: 'Alta', valorTerrenoM2: 220, factorPlusvalia: 1.16 },
-    { ciudad: 'Estelí', zona: 'Bella Vista', clasificacion: 'Alta', valorTerrenoM2: 205, factorPlusvalia: 1.13 },
-    { ciudad: 'Estelí', zona: 'Alfredo Lazo', clasificacion: 'Media', valorTerrenoM2: 175, factorPlusvalia: 1.08 },
-  ],
-};
+export const CIUDAD_UNICA = 'Matagalpa' as const;
+
+export const ZONAS_MATAGALPA: ZonaData[] = [
+  { ciudad: 'Matagalpa', zona: 'Molino Norte', clasificacion: 'Prime', valorTerrenoM2: 180, plusvalia: 1.18 },
+  { ciudad: 'Matagalpa', zona: 'Molino Sur', clasificacion: 'Alta', valorTerrenoM2: 150, plusvalia: 1.12 },
+  { ciudad: 'Matagalpa', zona: 'Guanuca', clasificacion: 'Alta', valorTerrenoM2: 145, plusvalia: 1.1 },
+  { ciudad: 'Matagalpa', zona: 'Las Tejas', clasificacion: 'Media', valorTerrenoM2: 125, plusvalia: 1.05 },
+  { ciudad: 'Matagalpa', zona: 'Apante', clasificacion: 'Media', valorTerrenoM2: 120, plusvalia: 1.03 },
+  { ciudad: 'Matagalpa', zona: 'Walter Mendoza', clasificacion: 'Alta', valorTerrenoM2: 140, plusvalia: 1.09 },
+  { ciudad: 'Matagalpa', zona: 'Santa Teresita', clasificacion: 'Media', valorTerrenoM2: 118, plusvalia: 1.02 },
+  { ciudad: 'Matagalpa', zona: 'Totolate', clasificacion: 'Emergente', valorTerrenoM2: 102, plusvalia: 0.98 },
+  { ciudad: 'Matagalpa', zona: 'Linda Vista', clasificacion: 'Media', valorTerrenoM2: 116, plusvalia: 1.01 },
+  { ciudad: 'Matagalpa', zona: 'Las Marías', clasificacion: 'Alta', valorTerrenoM2: 148, plusvalia: 1.11 },
+  { ciudad: 'Matagalpa', zona: 'El Castillo', clasificacion: 'Media', valorTerrenoM2: 114, plusvalia: 1.0 },
+  { ciudad: 'Matagalpa', zona: 'Sor María Romero', clasificacion: 'Emergente', valorTerrenoM2: 100, plusvalia: 0.97 }
+];
