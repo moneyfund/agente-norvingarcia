@@ -9,7 +9,7 @@ export const calcularCasa = (data: CasaInput, zona: ZonaData): ResultadoAvaluo =
   const terrenoBase = data.areaTerreno * zona.valorTerrenoM2;
   const construccionBase = data.areaConstruccion * COSTO_CONSTRUCCION_M2[data.tipoConstruccion];
   const coef = {
-    plusvalia: zona.plusvalia,
+    plusvalia: zona.factorPlusvalia,
     topografia: FACTOR_TOPOGRAFIA[data.topografia],
     acceso: FACTOR_ACCESO[data.acceso],
     servicios: sumServicios(data.servicios),
@@ -23,5 +23,5 @@ export const calcularCasa = (data: CasaInput, zona: ZonaData): ResultadoAvaluo =
   const valorTerreno = terrenoBase * coef.plusvalia * coef.topografia * coef.acceso;
   const valorConstruccion = construccionBase * coef.estado * coef.acabados * coef.antiguedad * coef.funcionalidad * coef.servicios * coef.nivelComercial;
   const final = (valorTerreno + valorConstruccion) * (coef.plusvalia + 0.02);
-  return { valorTerreno, valorConstruccion, valorM2: final / data.areaConstruccion, clasificacionZona: zona.clasificacion, plusvaliaAplicada: zona.plusvalia, coeficientesAplicados: { ...coef, factorGlobal }, rangoMercado: range(final), nivelConfianza: confidence(Object.keys(coef).length), valorFinalEstimado: final };
+  return { valorTerreno, valorConstruccion, valorM2: final / data.areaConstruccion, clasificacionZona: zona.clasificacion, plusvaliaAplicada: zona.factorPlusvalia, coeficientesAplicados: { ...coef, factorGlobal }, rangoMercado: range(final), nivelConfianza: confidence(Object.keys(coef).length), valorFinalEstimado: final };
 };
