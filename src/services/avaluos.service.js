@@ -1,4 +1,4 @@
-import { addDoc, collection, getDocs, onSnapshot, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
 import { auth, db } from '../firebase/config';
 
 const avaluosCollection = collection(db, 'avaluos');
@@ -32,6 +32,13 @@ export const getAllAvaluos = async () => {
   const q = query(avaluosCollection, orderBy('createdAtServer', 'desc'));
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+};
+
+export const getAvaluoById = async (id) => {
+  const docRef = doc(db, 'avaluos', id);
+  const snapshot = await getDoc(docRef);
+  if (!snapshot.exists()) return null;
+  return { id: snapshot.id, ...snapshot.data() };
 };
 
 export const subscribeAvaluos = (onData, onError, usuarioId) => {
