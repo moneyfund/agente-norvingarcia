@@ -4,7 +4,7 @@ import type { TerrenoInput, ZonaData, ResultadoAvaluo } from '../types/avaluo.ty
 
 export const calcularTerreno = (data: TerrenoInput, zona: ZonaData): ResultadoAvaluo => {
   const coef = {
-    plusvalia: zona.plusvalia,
+    plusvalia: zona.factorPlusvalia,
     topografia: FACTOR_TOPOGRAFIA[data.topografia],
     acceso: FACTOR_ACCESO[data.acceso],
     servicios: sumServicios(data.servicios),
@@ -28,5 +28,5 @@ export const calcularTerreno = (data: TerrenoInput, zona: ZonaData): ResultadoAv
   const factorGlobal = Object.values(coef).reduce((a, v) => a * v, 1);
   const valorBase = data.areaTerreno * zona.valorTerrenoM2;
   const valorFinal = valorBase * factorGlobal;
-  return { valorTerreno: valorFinal, valorConstruccion: 0, valorM2: valorFinal / data.areaTerreno, clasificacionZona: zona.clasificacion, plusvaliaAplicada: zona.plusvalia, coeficientesAplicados: { ...coef, factorGlobal }, rangoMercado: range(valorFinal), nivelConfianza: confidence(Object.keys(coef).length), valorFinalEstimado: valorFinal };
+  return { valorTerreno: valorFinal, valorConstruccion: 0, valorM2: valorFinal / data.areaTerreno, clasificacionZona: zona.clasificacion, plusvaliaAplicada: zona.factorPlusvalia, coeficientesAplicados: { ...coef, factorGlobal }, rangoMercado: range(valorFinal), nivelConfianza: confidence(Object.keys(coef).length), valorFinalEstimado: valorFinal };
 };

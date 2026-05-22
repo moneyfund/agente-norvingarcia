@@ -8,7 +8,7 @@ import { ToggleField } from '../components/fields/ToggleField';
 
 type Props = { value: Record<string, unknown>; onChange: (k: string, v: unknown) => void; onSubmit: () => void; loading: boolean; title: string; children: ReactNode; };
 
-const CITY_OPTIONS: CiudadObjetivo[] = ['Matagalpa', 'Estelí'];
+const CITY_OPTIONS: CiudadObjetivo[] = ['Matagalpa'];
 
 function BaseForm({ value, onChange, onSubmit, loading, title, children }: Props) {
   const zonas = value.ciudad ? ZONAS_POR_CIUDAD[value.ciudad as CiudadObjetivo] : [];
