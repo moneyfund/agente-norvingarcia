@@ -17,6 +17,8 @@ const AIPropertyDesignPage = lazy(() => import('./pages/AIPropertyDesignPage'));
 const ListadoPage = lazy(() => import('./pages/ListadoPage'));
 const EducationPage = lazy(() => import('./pages/EducationPage'));
 const AvaluosPage = lazy(() => import('./pages/AvaluosPage'));
+const AvaluoDetailPage = lazy(() => import('./pages/AvaluoDetailPage'));
+const AdminAvaluoDetailPage = lazy(() => import('./admin/pages/AdminAvaluoDetailPage'));
 
 const AdminLoginPage = lazy(() => import('./admin/pages/AdminLoginPage'));
 const AdminDashboardPage = lazy(() => import('./admin/pages/AdminDashboardPage'));
@@ -41,6 +43,7 @@ function App() {
             <Route path="propiedades" element={<AdminPropertiesPage />} />
             <Route path="perfil" element={<AdminProfilePage />} />
             <Route path="listados" element={<AdminListadosPage />} />
+            <Route path="avaluos/:id" element={<AdminAvaluoDetailPage />} />
           </Route>
         </Route>
 
@@ -49,6 +52,7 @@ function App() {
           <Route element={<MainLayout />}>
             <Route path="/listado" element={<ListadoPage />} />
             <Route path="/avaluos" element={<AvaluosPage />} />
+            <Route path="/avaluos/:id" element={<AvaluoDetailPage />} />
           </Route>
         </Route>
 
