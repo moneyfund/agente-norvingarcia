@@ -1,12 +1,22 @@
 import { addDoc, collection, getDocs, onSnapshot, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
-import { db } from '../firebase/config';
+import { auth, db } from '../firebase/config';
 
 const avaluosCollection = collection(db, 'avaluos');
 
 export const createAvaluo = async (payload) => {
+  const authUser = auth.currentUser;
+  if (!authUser?.uid) {
+    throw new Error('Debes iniciar sesión para guardar un avalúo.');
+  }
+
+  if (payload?.usuarioId !== authUser.uid) {
+    throw new Error('No tienes permisos para guardar avalúos de otro usuario.');
+  }
+
   const docRef = await addDoc(avaluosCollection, {
     id: crypto.randomUUID(),
     ...payload,
+    usuarioId: authUser.uid,
     createdAtServer: serverTimestamp(),
   });
   return docRef.id;

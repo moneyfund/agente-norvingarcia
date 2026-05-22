@@ -140,5 +140,16 @@ service cloud.firestore {
       allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isAllowedAdmin());
       allow update, delete: if false;
     }
+
+    match /avaluos/{avaluoId} {
+      allow create: if isSignedIn()
+        && request.resource.data.usuarioId is string
+        && request.resource.data.usuarioId == request.auth.uid;
+      allow read: if isSignedIn() && (
+        (resource.data.usuarioId is string && resource.data.usuarioId == request.auth.uid)
+        || isAllowedAdmin()
+      );
+      allow update, delete: if false;
+    }
   }
 }
