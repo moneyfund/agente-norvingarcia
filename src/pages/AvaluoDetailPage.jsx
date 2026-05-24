@@ -10,6 +10,8 @@ export default function AvaluoDetailPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    console.log('PARAM ID', id);
+
     let isMounted = true;
 
     const fetchAvaluo = async () => {

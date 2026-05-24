@@ -52,7 +52,14 @@ function AdminDashboardPage() {
         <ul className="space-y-2">
           {avaluos.slice(0, 10).map((avaluo) => (
             <li key={avaluo.id} className="rounded-xl bg-slate-50 p-3">
-              <Link to={`/admin/avaluos/${avaluo.id}`} className="block">
+              <Link
+                to={`/admin/avaluos/${avaluo.id}`}
+                className="block"
+                onClick={() => {
+                  console.log('AVALUO CLICK', avaluo);
+                  console.log('ID ENVIADO', avaluo.id);
+                }}
+              >
               <p className="font-medium">{avaluo.titulo}</p>
               <p className="text-sm text-slate-500">{avaluo.tipoPropiedad} · {avaluo.zona}</p>
               <p className="text-sm text-slate-500">{avaluo.createdAt ? new Date(avaluo.createdAt).toLocaleString() : 'Sin fecha'}</p>

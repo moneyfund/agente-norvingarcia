@@ -14,7 +14,6 @@ export const createAvaluo = async (payload) => {
   }
 
   const docRef = await addDoc(avaluosCollection, {
-    id: crypto.randomUUID(),
     ...payload,
     usuarioId: authUser.uid,
     createdAtServer: serverTimestamp(),
@@ -25,13 +24,13 @@ export const createAvaluo = async (payload) => {
 export const getAvaluosByUser = async (usuarioId) => {
   const q = query(avaluosCollection, where('usuarioId', '==', usuarioId), orderBy('createdAtServer', 'desc'));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  return snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
 };
 
 export const getAllAvaluos = async () => {
   const q = query(avaluosCollection, orderBy('createdAtServer', 'desc'));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  return snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
 };
 
 export const getAvaluoById = async (id) => {
@@ -42,7 +41,7 @@ export const getAvaluoById = async (id) => {
   const docRef = doc(db, 'avaluos', id);
   const snapshot = await getDoc(docRef);
   if (!snapshot.exists()) return null;
-  return { id: snapshot.id, ...snapshot.data() };
+  return { ...snapshot.data(), id: snapshot.id };
 };
 
 export const subscribeAvaluos = (onData, onError, usuarioId) => {
@@ -52,7 +51,7 @@ export const subscribeAvaluos = (onData, onError, usuarioId) => {
 
   return onSnapshot(
     q,
-    (snapshot) => onData(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))),
+    (snapshot) => onData(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))),
     onError,
   );
 };
