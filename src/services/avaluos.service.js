@@ -35,6 +35,10 @@ export const getAllAvaluos = async () => {
 };
 
 export const getAvaluoById = async (id) => {
+  if (!id || typeof id !== 'string') {
+    throw new Error('ID de avalúo inválido para consulta en Firestore.');
+  }
+
   const docRef = doc(db, 'avaluos', id);
   const snapshot = await getDoc(docRef);
   if (!snapshot.exists()) return null;
