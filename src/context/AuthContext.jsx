@@ -55,6 +55,7 @@ export function AuthProvider({ children }) {
       loading,
       isAuthenticated: Boolean(user),
       isAdmin: isAllowedAdminEmail(user?.email),
+      role: user ? 'tester' : null,
       loginWithGoogle: handleGoogleLogin,
       logout: handleLogout,
     }),

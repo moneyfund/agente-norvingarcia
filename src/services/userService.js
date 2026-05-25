@@ -13,6 +13,7 @@ export async function upsertUserProfile(firebaseUser) {
       email: firebaseUser.email || '',
       photoURL: firebaseUser.photoURL || '',
       provider: firebaseUser.providerData?.[0]?.providerId || 'google.com',
+      role: 'tester',
       createdAt: serverTimestamp(),
       lastLoginAt: serverTimestamp(),
     },

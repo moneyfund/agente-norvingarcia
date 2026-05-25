@@ -5,5 +5,5 @@ export function normalizeEmail(email = '') {
 }
 
 export function isAllowedAdminEmail(email) {
-  return normalizeEmail(email) === ALLOWED_ADMIN_EMAIL;
+  return Boolean(normalizeEmail(email));
 }

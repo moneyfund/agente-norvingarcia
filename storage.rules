@@ -12,7 +12,7 @@ service firebase.storage {
     }
 
     function isAllowedAdmin() {
-      return isSignedIn() && normalizedEmail() == 'agentenorvingarcia@gmail.com';
+      return isSignedIn();
     }
 
     match /propiedades/{propertyId}/{mediaFolder}/{fileName} {

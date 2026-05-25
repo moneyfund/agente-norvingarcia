@@ -12,7 +12,7 @@ service cloud.firestore {
     }
 
     function isAllowedAdmin() {
-      return isSignedIn() && normalizedEmail() == 'agentenorvingarcia@gmail.com';
+      return isSignedIn();
     }
 
     function isOwner(uid) {
@@ -142,14 +142,7 @@ service cloud.firestore {
     }
 
     match /avaluos/{avaluoId} {
-      allow create: if isSignedIn()
-        && request.resource.data.usuarioId is string
-        && request.resource.data.usuarioId == request.auth.uid;
-      allow read: if isSignedIn() && (
-        (resource.data.usuarioId is string && resource.data.usuarioId == request.auth.uid)
-        || isAllowedAdmin()
-      );
-      allow update, delete: if false;
+      allow read, write: if request.auth != null;
     }
   }
 }
