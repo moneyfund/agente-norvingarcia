@@ -1,6 +1,5 @@
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import Button from '../../components/Button';
-import { ALLOWED_ADMIN_EMAIL } from '../../config/admin';
 import { useAuth } from '../../hooks/useAuth';
 
 function AdminLoginPage() {
@@ -32,7 +31,7 @@ function AdminLoginPage() {
           <p className="text-sm text-slate-500">Inicia sesión únicamente con Google para entrar al panel.</p>
           {showUnauthorized && (
             <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-              Acceso denegado: solo el correo {ALLOWED_ADMIN_EMAIL} puede entrar al panel admin.
+              Acceso denegado: necesitas una cuenta autenticada con Google para entrar al panel admin.
             </p>
           )}
           <Button type="button" className="w-full" onClick={loginWithGoogle}>
@@ -52,7 +51,7 @@ function AdminLoginPage() {
       <div className="w-full max-w-md space-y-5 rounded-2xl bg-white p-8 shadow-premium">
         <h1 className="text-3xl font-bold">Acceso denegado</h1>
         <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          Tu cuenta ({user.email}) no está autorizada para administrar. Solo {ALLOWED_ADMIN_EMAIL} tiene acceso.
+          Tu cuenta ({user.email}) no está autorizada para administrar. Debes iniciar sesión con Google.
         </p>
         <div className="rounded-xl border border-slate-200 p-4">
           <div className="flex items-center gap-3">
