@@ -11,15 +11,20 @@ export default function AvaluoTerrenoResultCard({ result, onSave, canSave }) {
       {item('Unidad seleccionada', result.unidadArea === 'manzana' ? 'Manzanas' : 'Metros cuadrados', false)}
       {item('Área convertida a m²', `${toSafeNumber(result.areaM2Convertida).toLocaleString('es-NI', { maximumFractionDigits: 2 })} m²`, false)}
       {item('Valor base del terreno', result.valorBase)}
-      {item('Valor final estimado', result.valorFinalEstimado)}
-      {item('Valor/m²', result.valorM2)}
+      {item('Valor bajo', result.lowValue ?? result.rangoMercado?.minimo)}
+      {item('Valor estimado', result.estimatedValue ?? result.valorFinalEstimado)}
+      {item('Valor alto', result.highValue ?? result.rangoMercado?.maximo)}
+      {item('Precio efectivo por m² usado', result.adjustedPriceM2 ?? result.valorM2)}
       {item('Clasificación zona', result.clasificacionZona, false)}
       {item('Plusvalía aplicada', impactText(result.plusvaliaAplicada), false)}
       {item('Factor global', toSafeNumber(result.factorGlobal, 1).toFixed(3), false)}
-      {item('Rango mercado', `${toMoney(result.rangoMercado?.minimo, 0)} - ${toMoney(result.rangoMercado?.maximo, 0)}`, false)}
+      {item('Multiplicador de escala', toSafeNumber(result.scaleMultiplier, 1).toFixed(2), false)}
+      {item('Rango estimado de valor', `${toMoney(result.rangoMercado?.minimo, 0)} - ${toMoney(result.rangoMercado?.maximo, 0)}`, false)}
       {item('Nivel confianza', result.nivelConfianza, false)}
-      {item('Valor terreno m² zona', result.valorTerrenoM2)}
+      {item('Precio base m² zona', result.basePriceM2 ?? result.valorTerrenoM2)}
+      {item('Área equivalente en manzanas', toSafeNumber(result.areaManzanas).toLocaleString('es-NI', { maximumFractionDigits: 2 }), false)}
     </div>
+    {result.notaNormalizacion && <p className='mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-100'>{result.notaNormalizacion}</p>}
 
     <div className='mt-5 overflow-hidden rounded-xl border border-slate-700'>
       <div className='bg-slate-800 px-4 py-3 font-semibold text-slate-100'>Coeficientes aplicados</div>

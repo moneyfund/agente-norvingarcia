@@ -18,6 +18,8 @@ const entornos = ['Residencial premium', 'Residencial medio', 'Comercial', 'Mixt
 const usos = ['Residencial', 'Comercial', 'Mixto', 'Lotificación', 'Agrícola', 'Ganadero', 'Turístico', 'Industrial liviano', 'Reserva natural'];
 const desarrollo = ['Consolidado', 'En crecimiento', 'Emergente', 'Bajo desarrollo', 'Sin desarrollo urbano'];
 const deforestacion = ['Sin deforestación', 'Baja', 'Media', 'Alta', 'Muy alta'];
+const proximidades = ['Cerca de ciudad principal', 'Cerca de comunidad', 'Remoto'];
+const estadosLegales = ['Documentación completa', 'Documentación revisable', 'Problemas legales'];
 const recursos = ['Fuente de agua', 'Río o quebrada', 'Pozo', 'Árboles maderables', 'Vista panorámica', 'Área cultivable', 'Ninguno'];
 const servicios = ['Agua potable', 'Energía eléctrica', 'Internet', 'Drenaje', 'Alumbrado público', 'Transporte cercano', 'Ninguno'];
 const riesgos = ['Riesgo de inundación', 'Riesgo de deslizamiento', 'Zona de difícil acceso', 'Conflicto de servidumbre', 'Ninguno'];
@@ -107,7 +109,7 @@ export default function TerrenoForm({ value, onChange, onSubmit, loading, showSu
       })}
       {selectField({ label: 'Unidad de área', val: unidadArea, opts: unidadesArea, onChange: (v) => setArea(areaOriginal, v) })}
       {num(unidadArea === 'manzana' ? 'Área original (manzanas)' : 'Área original (m²)', 'areaOriginal', { ...value, areaOriginal }, (k, v) => setArea(v))}
-      <div className={base}><span>Área convertida a m²</span><p className='mt-2 rounded bg-slate-800 p-2 font-semibold text-emerald-200'>{areaM2Convertida ? areaM2Convertida.toLocaleString('es-NI', { maximumFractionDigits: 2 }) : '0'} m²</p></div>
+      <div className={base}><span>Área convertida a m²</span><p className='mt-2 rounded bg-slate-800 p-2 font-semibold text-emerald-200'>{areaM2Convertida ? areaM2Convertida.toLocaleString('es-NI', { maximumFractionDigits: 2 }) : '0'} m²</p>{unidadArea === 'manzana' && <p className='mt-2 text-xs text-amber-100'>Para terrenos grandes, el precio por m² disminuye según la extensión de la propiedad.</p>}</div>
     </div>
 
     <Section title='Clasificación territorial y suelo'>
@@ -128,7 +130,9 @@ export default function TerrenoForm({ value, onChange, onSubmit, loading, showSu
       {selectField({ label: 'Entorno', val: value.entorno || '', opts: entornos, onChange: (v) => onChange('entorno', v) })}
       {selectField({ label: 'Uso potencial', val: value.usoPotencial || '', opts: usos, onChange: (v) => onChange('usoPotencial', v) })}
       {selectField({ label: 'Desarrollo urbano', val: value.desarrolloUrbano || '', opts: desarrollo, onChange: (v) => onChange('desarrolloUrbano', v) })}
+      {selectField({ label: 'Cercanía', val: value.proximity || '', opts: proximidades, onChange: (v) => onChange('proximity', v) })}
       {selectField({ label: 'Nivel de deforestación', val: value.nivelDeforestacion || '', opts: deforestacion, onChange: (v) => onChange('nivelDeforestacion', v) })}
+      {selectField({ label: 'Seguridad jurídica', val: value.legalStatus || 'Documentación completa', opts: estadosLegales, onChange: (v) => onChange('legalStatus', v) })}
     </Section>
 
     <div className='mt-4 grid gap-4 md:grid-cols-3'>
