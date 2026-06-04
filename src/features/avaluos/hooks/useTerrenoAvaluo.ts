@@ -30,13 +30,20 @@ export const useTerrenoAvaluo = (usuarioId?: string) => {
           zona: safeData.zona,
           createdAt: new Date().toISOString(),
           usuarioId,
+          titulo: safeData.titulo || `Avalúo de ${tipoPropiedad}`,
+          unidadArea: resultCalc.unidadArea,
+          areaOriginal: resultCalc.areaOriginal,
+          areaM2Convertida: resultCalc.areaM2Convertida,
           caracteristicas: safeData,
           coeficientesAplicados: resultCalc.coeficientesAplicados,
+          valorBase: resultCalc.valorBase,
           valorTerreno: resultCalc.valorTerreno,
+          valorConstruccion: resultCalc.valorConstruccion,
           valorFinal: resultCalc.valorFinalEstimado,
+          valorM2: resultCalc.valorM2,
           rangoMercado: resultCalc.rangoMercado,
           nivelConfianza: resultCalc.nivelConfianza,
-          zonaSnapshot: { clasificacion: zona.clasificacion, valorTerrenoM2: zona.valorTerrenoM2, factorPlusvalia: zona.factorPlusvalia },
+          zonaSnapshot: zona,
         });
       }
     } finally {

@@ -29,7 +29,7 @@ export const useAvaluoSubmission = (usuarioId?: string) => {
     if (!usuarioId || !result || !snapshot) return null;
     setError('');
     try {
-      return await createAvaluo({ titulo: snapshot.data.titulo, tipoPropiedad: snapshot.tipoPropiedad, ciudad: snapshot.data.ciudad || 'Matagalpa', zona: snapshot.data.zona, createdAt: new Date().toISOString(), usuarioId, caracteristicas: snapshot.data, coeficientesAplicados: result.coeficientesAplicados, valorTerreno: result.valorTerreno, valorConstruccion: result.valorConstruccion, valorFinal: result.valorFinalEstimado, rangoMercado: result.rangoMercado, nivelConfianza: result.nivelConfianza, zonaSnapshot: snapshot.zona });
+      return await createAvaluo({ titulo: snapshot.data.titulo || `Avalúo de ${snapshot.tipoPropiedad}`, tipoPropiedad: snapshot.tipoPropiedad, ciudad: snapshot.data.ciudad || 'Matagalpa', zona: snapshot.data.zona, unidadArea: result.unidadArea ?? snapshot.data.unidadArea, areaOriginal: result.areaOriginal ?? snapshot.data.areaOriginal, areaM2Convertida: result.areaM2Convertida ?? snapshot.data.areaM2Convertida, createdAt: new Date().toISOString(), usuarioId, caracteristicas: snapshot.data, zonaSnapshot: snapshot.zona, coeficientesAplicados: result.coeficientesAplicados, valorBase: result.valorBase, valorTerreno: result.valorTerreno, valorConstruccion: result.valorConstruccion, valorFinal: result.valorFinalEstimado, valorM2: result.valorM2, rangoMercado: result.rangoMercado, nivelConfianza: result.nivelConfianza });
     } catch (err: any) {
       setError(err?.message || 'No se pudo guardar el avalúo.');
       return null;
