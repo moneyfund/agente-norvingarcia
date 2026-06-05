@@ -1,7 +1,7 @@
 import { safeDivide, toSafeNumber } from './shared/formulas';
 import type { CoeficienteAplicado, TerrenoInput, ZonaData, ResultadoAvaluo } from '../types/avaluo.types';
 
-export const M2_POR_MANZANA = 7026;
+export const M2_POR_MANZANA = 7042.25;
 const FACTOR_MINIMO = 0.35;
 const FACTOR_MAXIMO = 1.45;
 
@@ -45,17 +45,29 @@ const impactText = (coeficiente: number) => {
 };
 const coefRow = (factor: string, valorAplicado: string, coeficiente: number): CoeficienteAplicado => ({ factor, valorAplicado, coeficiente: toSafeNumber(coeficiente, 1), impacto: impactText(coeficiente) });
 
-export const getScaleMultiplier = (areaM2: number) => {
-  const manzanas = safeDivide(areaM2, M2_POR_MANZANA, 0);
-  if (areaM2 <= 500) return 1;
-  if (areaM2 <= 1000) return 0.9;
-  if (areaM2 <= 3000) return 0.8;
-  if (areaM2 <= M2_POR_MANZANA) return 0.65;
-  if (manzanas <= 3) return 0.5;
-  if (manzanas <= 10) return 0.35;
-  if (manzanas <= 30) return 0.25;
-  if (manzanas <= 100) return 0.18;
-  return 0.12;
+export function getFactorEscala(areaM2Convertida: number): number {
+  const areaM2 = Math.max(0, toSafeNumber(areaM2Convertida, 0));
+  if (areaM2 <= 500) return 1.00;
+  if (areaM2 <= 1000) return 0.96;
+  if (areaM2 <= 2500) return 0.92;
+  if (areaM2 <= 5000) return 0.86;
+  if (areaM2 <= M2_POR_MANZANA) return 0.78;
+  if (areaM2 <= M2_POR_MANZANA * 5) return 0.62;
+  if (areaM2 <= M2_POR_MANZANA * 10) return 0.50;
+  if (areaM2 <= M2_POR_MANZANA * 50) return 0.36;
+  return 0.25;
+}
+
+export const getScaleMultiplier = getFactorEscala;
+
+const getScaleExplanation = (areaM2Convertida: number, areaManzanas: number, factorEscala: number) => {
+  if (factorEscala >= 1) return 'Solar pequeño urbano: se mantiene el valor por m² de referencia de la zona.';
+  const areaLabel = areaManzanas >= 1
+    ? `${areaManzanas.toFixed(2)} manzanas equivalentes`
+    : `${areaM2Convertida.toFixed(0)} m²`;
+  if (areaM2Convertida <= 2500) return `Terreno mediano (${areaLabel}): se aplica reducción moderada al valor por m² por economía de escala.`;
+  if (areaM2Convertida <= M2_POR_MANZANA * 10) return `Área grande (${areaLabel}): se aplica reducción al valor por m² por economía de escala.`;
+  return `Gran extensión rural (${areaLabel}): se aplica reducción fuerte al valor por m² por economía de escala.`;
 };
 
 const inferZoneType = (zona: ZonaData, data: TerrenoInput): 'urbana' | 'semiurbana' | 'rural' => {
@@ -126,7 +138,8 @@ const confianza = (data: TerrenoInput, areaM2Convertida: number, zona?: ZonaData
 export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): ResultadoAvaluo => {
   const { areaOriginal, unidadArea, areaM2Convertida, areaManzanas } = normalizeArea(data);
   const basePriceM2 = getBasePriceM2(zona, data, areaManzanas);
-  const scaleMultiplier = getScaleMultiplier(areaM2Convertida);
+  const factorEscala = getFactorEscala(areaM2Convertida);
+  const scaleMultiplier = factorEscala;
   const riesgos = data.riesgos || (data.riesgoInundacion ? ['Riesgo de inundación'] : ['Ninguno']);
   const entorno = data.entorno || data.tipoEntorno;
   const zoneType = inferZoneType(zona, data);
@@ -152,17 +165,21 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
 
   const factorSinLimite = Object.values(coefNumericos).reduce((a, v) => a * v, 1);
   const factorGlobal = clamp(factorSinLimite, FACTOR_MINIMO, FACTOR_MAXIMO);
-  const valorBase = areaM2Convertida * basePriceM2 * scaleMultiplier;
-  let adjustedPriceM2 = basePriceM2 * scaleMultiplier * factorGlobal;
-  let normalizacionAplicada = false;
+  const valorBase = areaM2Convertida * basePriceM2;
+  let adjustedPriceM2 = basePriceM2 * factorGlobal * factorEscala;
+  const priceM2BeforeTechnicalCaps = adjustedPriceM2;
+  let normalizacionAplicada = factorEscala < 1;
+  let topeTecnicoAplicado = false;
 
   if (zoneType === 'rural' && areaManzanas > 1 && !isHighValueException(data) && adjustedPriceM2 > 15) {
     adjustedPriceM2 = 15;
     normalizacionAplicada = true;
+    topeTecnicoAplicado = true;
   }
   if (zoneType === 'rural' && areaManzanas > 10 && !isHighValueException(data)) {
     const normalized = clamp(adjustedPriceM2, 1, 10);
-    normalizacionAplicada = normalizacionAplicada || normalized !== adjustedPriceM2;
+    topeTecnicoAplicado = topeTecnicoAplicado || normalized !== adjustedPriceM2;
+    normalizacionAplicada = normalizacionAplicada || topeTecnicoAplicado;
     adjustedPriceM2 = normalized;
   }
 
@@ -176,7 +193,7 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
   const coeficientesAplicados: CoeficienteAplicado[] = [
     coefRow('Zona / plusvalía', zona.zona, coefNumericos.factorZona),
     coefRow('Precio base por m²', `${basePriceM2.toFixed(2)} USD/m²`, 1),
-    coefRow('Descuento por escala', `${areaManzanas.toFixed(2)} manzanas equivalentes`, scaleMultiplier),
+    coefRow('Normalización por escala', `Factor ${factorEscala.toFixed(2)} — ${getScaleExplanation(areaM2Convertida, areaManzanas, factorEscala)}`, factorEscala),
     coefRow('Categoría territorial', data.tipoTerritorio || 'No definido', coefNumericos.factorTipoTerritorio),
     coefRow('Tipo de suelo', data.tipoSuelo || 'No definido', coefNumericos.factorTipoSuelo),
     coefRow('Topografía', data.topografia || 'No definido', coefNumericos.factorTopografia),
@@ -193,8 +210,8 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
     coefRow('Factor global limitado', factorSinLimite === factorGlobal ? 'Dentro de rango técnico' : `Limitado de ${factorSinLimite.toFixed(3)} a ${factorGlobal.toFixed(3)}`, factorGlobal),
   ];
 
-  if (normalizacionAplicada) {
-    coeficientesAplicados.push(coefRow('Normalización por escala', 'El valor fue ajustado por escala de terreno para evitar sobrevaloración.', safeDivide(adjustedPriceM2, basePriceM2 * scaleMultiplier * factorGlobal, 1)));
+  if (topeTecnicoAplicado) {
+    coeficientesAplicados.push(coefRow('Tope técnico rural', 'Se limitó el precio efectivo por m² para evitar sobrevaloración en grandes extensiones rurales.', safeDivide(adjustedPriceM2, priceM2BeforeTechnicalCaps, 1)));
   }
 
   return {
@@ -223,7 +240,7 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
     highValue: toSafeNumber(rangoMercado.maximo),
     appliedFactors: coeficientesAplicados,
     normalizacionAplicada,
-    notaNormalizacion: normalizacionAplicada ? 'El valor fue ajustado por escala de terreno para evitar sobrevaloración.' : undefined,
+    notaNormalizacion: normalizacionAplicada ? getScaleExplanation(areaM2Convertida, areaManzanas, factorEscala) : undefined,
   };
 };
 
