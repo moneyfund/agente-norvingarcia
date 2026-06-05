@@ -5,9 +5,17 @@ const impactText = (coeficiente: unknown) => {
   if (Math.abs(pct) < 0.1) return '0%';
   return `${pct > 0 ? '+' : ''}${pct.toFixed(1)}%`;
 };
-const normalizeCoeficientes = (coeficientesAplicados: any) => Array.isArray(coeficientesAplicados)
+const isScaleOrRuralCap = (factor: unknown) => /escala|grandes extensiones|tope técnico|normalización|manzana/i.test(String(factor));
+const normalizeImpactSign = (coef: any) => {
+  const numericCoef = Number(coef.coeficiente || 1);
+  if (!isScaleOrRuralCap(coef.factor) || numericCoef <= 1) return { ...coef, coeficiente: numericCoef, impacto: coef.impacto || impactText(numericCoef) };
+  const correctedCoef = numericCoef > 0 ? Math.min(1, 1 / numericCoef) : 1;
+  return { ...coef, coeficiente: correctedCoef, impacto: impactText(correctedCoef) };
+};
+const normalizeCoeficientes = (coeficientesAplicados: any) => (Array.isArray(coeficientesAplicados)
   ? coeficientesAplicados
-  : Object.entries(coeficientesAplicados || {}).map(([factor, coeficiente]) => ({ factor, valorAplicado: Number(coeficiente).toFixed(3), coeficiente, impacto: impactText(coeficiente) }));
+  : Object.entries(coeficientesAplicados || {}).map(([factor, coeficiente]) => ({ factor, valorAplicado: Number(coeficiente).toFixed(3), coeficiente: Number(coeficiente), impacto: impactText(coeficiente) }))
+).map(normalizeImpactSign);
 const list = (value: any) => Array.isArray(value) ? value.join(', ') : (value || 'N/D');
 
 export const exportAvaluoToPdf = (avaluo: any) => {

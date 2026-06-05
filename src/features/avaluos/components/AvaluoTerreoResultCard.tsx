@@ -1,8 +1,6 @@
 export default function AvaluoTerrenoResultCard({ result, onSave, canSave }) {
   if (!result) return null;
-  const coeficientes = Array.isArray(result.coeficientesAplicados)
-    ? result.coeficientesAplicados
-    : Object.entries(result.coeficientesAplicados || {}).map(([factor, coeficiente]) => ({ factor, valorAplicado: Number(coeficiente).toFixed(3), coeficiente: Number(coeficiente), impacto: impactText(Number(coeficiente)) }));
+  const coeficientes = normalizeCoeficientes(result.coeficientesAplicados);
 
   return <section className='mt-8 rounded-2xl border border-blue-900 bg-slate-900 p-6 text-slate-200'>
     <h3 className='text-xl font-bold text-blue-200'>Dashboard técnico de avalúo</h3>
@@ -48,4 +46,15 @@ const impactText = (coeficiente) => {
   if (Math.abs(pct) < 0.1) return '0%';
   return `${pct > 0 ? '+' : ''}${pct.toFixed(1)}%`;
 };
+const isScaleOrRuralCap = (factor) => /escala|grandes extensiones|tope técnico|normalización|manzana/i.test(String(factor));
+const normalizeImpactSign = (coef) => {
+  const numericCoef = toSafeNumber(coef.coeficiente, 1);
+  if (!isScaleOrRuralCap(coef.factor) || numericCoef <= 1) return { ...coef, coeficiente: numericCoef, impacto: coef.impacto || impactText(numericCoef) };
+  const correctedCoef = numericCoef > 0 ? Math.min(1, 1 / numericCoef) : 1;
+  return { ...coef, coeficiente: correctedCoef, impacto: impactText(correctedCoef) };
+};
+const normalizeCoeficientes = (coeficientesAplicados) => (Array.isArray(coeficientesAplicados)
+  ? coeficientesAplicados
+  : Object.entries(coeficientesAplicados || {}).map(([factor, coeficiente]) => ({ factor, valorAplicado: Number(coeficiente).toFixed(3), coeficiente: Number(coeficiente), impacto: impactText(Number(coeficiente)) }))
+).map(normalizeImpactSign);
 const item = (label, val, money = true) => <div className='rounded-xl border border-slate-700 bg-slate-800 p-3'><p className='text-xs text-slate-400'>{label}</p><p className='text-lg font-semibold'>{money ? toMoney(val) : toText(val)}</p></div>;
