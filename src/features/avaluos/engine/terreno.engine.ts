@@ -44,6 +44,11 @@ const impactText = (coeficiente: number) => {
   return `${pct > 0 ? '+' : ''}${pct.toFixed(1)}%`;
 };
 const coefRow = (factor: string, valorAplicado: string, coeficiente: number): CoeficienteAplicado => ({ factor, valorAplicado, coeficiente: toSafeNumber(coeficiente, 1), impacto: impactText(coeficiente) });
+const reductionCoef = (valorDespuesTope: number, valorAntesTope: number) => {
+  const before = toSafeNumber(valorAntesTope, 0);
+  if (before <= 0) return 1;
+  return Math.min(1, safeDivide(valorDespuesTope, before, 1));
+};
 
 export function getFactorEscala(areaM2Convertida: number): number {
   const areaM2 = Math.max(0, toSafeNumber(areaM2Convertida, 0));
@@ -171,16 +176,18 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
   let normalizacionAplicada = factorEscala < 1;
   let topeTecnicoAplicado = false;
 
-  if (zoneType === 'rural' && areaManzanas > 1 && !isHighValueException(data) && adjustedPriceM2 > 15) {
-    adjustedPriceM2 = 15;
+  const limiteRuralM2 = zoneType === 'rural' && !isHighValueException(data)
+    ? areaManzanas > 10
+      ? 10
+      : areaManzanas > 1
+        ? 15
+        : undefined
+    : undefined;
+
+  if (limiteRuralM2 !== undefined && adjustedPriceM2 > limiteRuralM2) {
+    adjustedPriceM2 = limiteRuralM2;
     normalizacionAplicada = true;
     topeTecnicoAplicado = true;
-  }
-  if (zoneType === 'rural' && areaManzanas > 10 && !isHighValueException(data)) {
-    const normalized = clamp(adjustedPriceM2, 1, 10);
-    topeTecnicoAplicado = topeTecnicoAplicado || normalized !== adjustedPriceM2;
-    normalizacionAplicada = normalizacionAplicada || topeTecnicoAplicado;
-    adjustedPriceM2 = normalized;
   }
 
   const valorFinal = areaM2Convertida * adjustedPriceM2;
@@ -211,7 +218,7 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
   ];
 
   if (topeTecnicoAplicado) {
-    coeficientesAplicados.push(coefRow('Tope técnico rural', 'Se limitó el precio efectivo por m² para evitar sobrevaloración en grandes extensiones rurales.', safeDivide(adjustedPriceM2, priceM2BeforeTechnicalCaps, 1)));
+    coeficientesAplicados.push(coefRow('Tope técnico rural', 'Se redujo el valor efectivo por m² para evitar sobrevaloración en grandes extensiones.', reductionCoef(adjustedPriceM2, priceM2BeforeTechnicalCaps)));
   }
 
   return {
