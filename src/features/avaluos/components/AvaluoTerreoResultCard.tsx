@@ -16,7 +16,7 @@ export default function AvaluoTerrenoResultCard({ result, onSave, canSave }) {
       {item('Precio efectivo por m² usado', result.adjustedPriceM2 ?? result.valorM2)}
       {item('Clasificación zona', result.clasificacionZona, false)}
       {item('Plusvalía aplicada', impactText(result.plusvaliaAplicada), false)}
-      {item('Factor global', toSafeNumber(result.factorGlobal, 1).toFixed(3), false)}
+      {item('Factor total aplicado', toSafeNumber(result.factorGlobal, 1).toFixed(3), false)}
       {item('Multiplicador de escala', toSafeNumber(result.scaleMultiplier, 1).toFixed(2), false)}
       {item('Rango estimado de valor', `${toMoney(result.rangoMercado?.minimo, 0)} - ${toMoney(result.rangoMercado?.maximo, 0)}`, false)}
       {item('Nivel confianza', result.nivelConfianza, false)}
