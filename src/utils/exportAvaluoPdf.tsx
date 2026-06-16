@@ -5,6 +5,9 @@ import { imageUrlToDataUrlViaProxy } from './imageProxy';
 const IMAGE_TIMEOUT_MS = 8000;
 const HTML2CANVAS_TIMEOUT_MS = 30000;
 const TRANSPARENT_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+const PDF_IMAGE_QUALITY = 0.75;
+const PDF_IMAGE_MAX_WIDTH = 1600;
+const PDF_IMAGE_MAX_HEIGHT = 1200;
 
 const slug = (value: string) => String(value || 'sin-titulo').replace(/[^a-z0-9áéíóúñ]+/gi, '-').replace(/^-|-$/g, '');
 
@@ -23,10 +26,49 @@ const withTimeout = async <T,>(promise: Promise<T>, ms: number, message: string)
 
 const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
-const asBase64IfPossible = async (url?: string) => {
-  if (!url || url.startsWith('data:')) return url || '';
+const compressImageDataUrlForPdf = async (dataUrl?: string) => {
+  if (!dataUrl) return '';
+
   try {
-    return await withTimeout(imageUrlToDataUrlViaProxy(url), IMAGE_TIMEOUT_MS, 'Tiempo agotado cargando imagen para PDF.');
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error('No se pudo cargar la imagen para comprimirla.'));
+      img.src = dataUrl;
+    });
+
+    const ratio = Math.min(
+      1,
+      PDF_IMAGE_MAX_WIDTH / Math.max(img.naturalWidth, 1),
+      PDF_IMAGE_MAX_HEIGHT / Math.max(img.naturalHeight, 1),
+    );
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(img.naturalWidth * ratio));
+    canvas.height = Math.max(1, Math.round(img.naturalHeight * ratio));
+
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('No se pudo crear el contexto para comprimir la imagen.');
+
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    return canvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
+  } catch (error) {
+    console.warn('No se pudo comprimir una imagen para el PDF. Se usará placeholder.', error);
+    return '';
+  }
+};
+
+const asBase64IfPossible = async (url?: string) => {
+  if (!url) return '';
+  try {
+    const dataUrl = url.startsWith('data:')
+      ? url
+      : await withTimeout(imageUrlToDataUrlViaProxy(url), IMAGE_TIMEOUT_MS, 'Tiempo agotado cargando imagen para PDF.');
+    return await withTimeout(compressImageDataUrlForPdf(dataUrl), IMAGE_TIMEOUT_MS, 'Tiempo agotado comprimiendo imagen para PDF.');
   } catch (error) {
     console.warn('No se pudo preparar una imagen para el PDF. Se usará placeholder.', { url, error });
     return '';
@@ -36,7 +78,7 @@ const asBase64IfPossible = async (url?: string) => {
 const prepareAvaluoImagesForPdf = async (avaluo: any) => ({
   ...avaluo,
   imagenPrincipalBase64: await asBase64IfPossible(avaluo?.imagenPrincipalUrl),
-  imagenesAdicionalesBase64: await Promise.all((avaluo?.imagenesAdicionales || []).map(asBase64IfPossible)),
+  imagenesAdicionalesBase64: await Promise.all((avaluo?.imagenesAdicionales || []).slice(0, 5).map(asBase64IfPossible)),
 });
 
 const waitForImage = async (img: HTMLImageElement) => {
@@ -122,21 +164,17 @@ export async function exportAvaluoToPdf(avaluo: any) {
       windowHeight: 1123,
     };
 
-    const pageImages: string[] = [];
-    for (const page of pages) {
+    const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4', compress: true });
+    for (const [index, page] of pages.entries()) {
       const canvas = await withTimeout(
         html2canvas(page, canvasOptions),
         HTML2CANVAS_TIMEOUT_MS,
         'Tiempo agotado generando el canvas del PDF.',
       );
-      pageImages.push(canvas.toDataURL('image/png'));
-    }
-
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    pageImages.forEach((imgData, index) => {
+      const imgData = canvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
       if (index > 0) pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    });
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+    }
 
     pdf.save(`Informe-Avaluo-${slug(preparedAvaluo?.titulo || preparedAvaluo?.id)}.pdf`);
   } finally {
