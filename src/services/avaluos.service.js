@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, orderBy, query, serverTimestamp, updateDoc, where } from 'firebase/firestore';
 import { auth, db } from '../firebase/config';
 
 const avaluosCollection = collection(db, 'avaluos');
@@ -19,6 +19,12 @@ export const createAvaluo = async (payload) => {
     createdAtServer: serverTimestamp(),
   });
   return docRef.id;
+};
+
+export const updateAvaluo = async (id, payload) => {
+  if (!id) throw new Error('ID de avalúo inválido para actualización.');
+  const docRef = doc(db, 'avaluos', id);
+  await updateDoc(docRef, payload);
 };
 
 export const getAvaluosByUser = async (usuarioId) => {

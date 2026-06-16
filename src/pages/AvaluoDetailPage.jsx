@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import AvaluoReportView from '../components/avaluos/AvaluoReportView';
+import DownloadAvaluoPdfButton from '../components/avaluos/DownloadAvaluoPdfButton';
 import { getAvaluoById } from '../services/avaluos.service';
 
 export default function AvaluoDetailPage() {
@@ -65,5 +66,5 @@ export default function AvaluoDetailPage() {
     return <main className='min-h-screen bg-slate-900 p-10 text-white'>{error}</main>;
   }
 
-  return <main className='min-h-screen bg-slate-900 px-4 py-10'><AvaluoReportView avaluo={item} /></main>;
+  return <main className='min-h-screen bg-slate-900 px-4 py-10'><div className='mx-auto mb-4 max-w-4xl text-right'><DownloadAvaluoPdfButton avaluo={item} /></div><AvaluoReportView avaluo={item} /></main>;
 }
