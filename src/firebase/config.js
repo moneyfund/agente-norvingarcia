@@ -28,11 +28,11 @@ if (firebaseConfig.storageBucket && !firebaseConfig.storageBucket.includes('.'))
 
 const app = initializeApp(firebaseConfig);
 
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-export { app, auth, db, storage, googleProvider, firebaseConfig };
+export { app, googleProvider, firebaseConfig };

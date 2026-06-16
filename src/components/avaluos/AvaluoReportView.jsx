@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 const formatMoney = (value) => new Intl.NumberFormat('es-NI', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(Number(value || 0));
 const formatNumber = (value) => new Intl.NumberFormat('es-NI', { maximumFractionDigits: 2 }).format(Number(value || 0));
@@ -9,7 +9,7 @@ const toDate = (value) => {
   return date.toLocaleDateString('es-NI', { year: 'numeric', month: 'long', day: 'numeric' });
 };
 
-const hiddenFields = new Set(['zonaData', 'titulo', 'ciudad', 'zona', 'areaTerreno']);
+const hiddenFields = new Set(['zonaData', 'titulo', 'ciudad', 'zona', 'areaTerreno', 'imagenPrincipalFile', 'imagenesAdicionalesFiles']);
 const terrainPriority = ['unidadArea', 'areaOriginal', 'areaM2Convertida', 'tipoTerritorio', 'tipoSuelo', 'topografia', 'accesoGeneral', 'tipoVia', 'nivelTrafico', 'seguridadZona', 'formaTerreno', 'entorno', 'usoPotencial', 'desarrolloUrbano', 'recursosNaturales', 'riesgos', 'serviciosBasicos', 'nivelDeforestacion'];
 const labels = {
   unidadArea: 'Unidad de área usada',
@@ -96,6 +96,18 @@ export default function AvaluoReportView({ avaluo }) {
         </div>
       </header>
 
+
+      <Section title="Registro fotográfico">
+        <ReportImage src={avaluo?.imagenPrincipalUrl} alt="Imagen principal del avalúo" className="h-80 w-full rounded-2xl object-cover shadow-sm" />
+        {!!avaluo?.imagenesAdicionales?.length && (
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
+            {avaluo.imagenesAdicionales.slice(0, 5).map((src, index) => (
+              <ReportImage key={src || index} src={src} alt={`Imagen adicional ${index + 1}`} className="h-40 w-full rounded-xl object-cover shadow-sm" />
+            ))}
+          </div>
+        )}
+      </Section>
+
       <section className="mt-8 grid gap-4 md:grid-cols-2">
         <Field label="Título" value={avaluo?.titulo || 'Avalúo inmobiliario'} />
         <Field label="Tipo de propiedad" value={avaluo?.tipoPropiedad} />
@@ -151,3 +163,13 @@ export default function AvaluoReportView({ avaluo }) {
 function Section({ title, children }) { return <section className="mt-8"><h2 className="mb-4 text-lg font-semibold uppercase tracking-wide text-slate-600">{title}</h2>{children}</section>; }
 function Field({ label, value }) { return <div className="rounded-xl border border-slate-200 bg-slate-50 p-3"><p className="text-xs uppercase text-slate-500">{label}</p><p className="font-medium">{value || 'N/D'}</p></div>; }
 function Highlight({ label, value }) { return <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4"><p className="text-xs uppercase text-emerald-700">{label}</p><p className="text-xl font-bold text-emerald-900">{value}</p></div>; }
+
+function ReportImage({ src, alt, className }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!src || failed) {
+    return <div className={`${className} flex flex-col items-center justify-center border border-dashed border-slate-300 bg-gradient-to-br from-slate-50 to-slate-100 text-center text-slate-500`}><span className="text-3xl">🏡</span><span className="mt-2 text-sm font-medium">Imagen no disponible</span></div>;
+  }
+
+  return <img src={src} alt={alt} className={className} onError={() => setFailed(true)} />;
+}

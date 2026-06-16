@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Award, BadgeDollarSign, BarChart3, Building2, Calendar, CheckCircle2, Home, MapPin, Phone, Ruler, ShieldCheck, UserRound } from 'lucide-react';
 import { generateAvaluoAnalysis } from '../../utils/generateAvaluoAnalysis';
 
@@ -10,7 +11,9 @@ const text = (v: any): string => Array.isArray(v) ? v.join(', ') : typeof v === 
 const impact = (c: any) => { const n = Number(c || 1); const p = (n - 1) * 100; return `${p > 0 ? '+' : ''}${p.toFixed(1)}%`; };
 
 function Img({ src, className }: { src?: string, className?: string }) {
-  return src ? <img crossOrigin='anonymous' src={src} className={className} onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} /> : <div className={`${className} grid place-items-center bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400`}>Imagen no disponible</div>;
+  const [failed, setFailed] = useState(false);
+  if (!src || failed) return <div className={`${className} grid place-items-center border border-dashed border-slate-300 bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400`}>Imagen no disponible</div>;
+  return <img crossOrigin='anonymous' src={src} className={className} onError={() => setFailed(true)} />;
 }
 function Page({ children, title }: any) { return <section className='avaluo-pdf-page relative mx-auto mb-6 h-[1123px] w-[794px] overflow-hidden bg-white p-12 text-slate-800 shadow-xl'><div className='absolute right-0 top-0 h-40 w-40 rounded-bl-full bg-amber-100/70' /><div className='relative z-10'>{title && <h2 className='mb-6 text-2xl font-bold text-[#0b1f3a]'>{title}</h2>}{children}</div><Footer /></section>; }
 function Footer() { return <div className='absolute bottom-8 left-12 right-12 flex items-center justify-between border-t border-slate-200 pt-3 text-xs text-slate-500'><span>Norvin García · Real Estate</span><span>Informe técnico preliminar</span></div>; }

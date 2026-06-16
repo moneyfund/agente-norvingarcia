@@ -2,12 +2,32 @@ import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { storage } from '../firebase/config.js';
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
+const MAX_GALLERY_IMAGES = 5;
 const MAX_WIDTH = 1800;
 const QUALITY = 0.82;
 
-export const isValidAvaluoImage = (file: File) => ALLOWED_IMAGE_TYPES.includes(file.type);
+export const isValidAvaluoImage = (file: File) => ALLOWED_IMAGE_TYPES.includes(file.type) && file.size <= MAX_IMAGE_SIZE_BYTES;
 
 const safeName = (name: string) => `${Date.now()}-${name.toLowerCase().replace(/[^a-z0-9.]+/g, '-')}`;
+
+const validateAvaluoImage = (file: File) => {
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    throw new Error(`Formato no permitido en ${file.name}. Usa JPG, JPEG, PNG o WEBP.`);
+  }
+
+  if (file.size > MAX_IMAGE_SIZE_BYTES) {
+    throw new Error(`La imagen ${file.name} supera el máximo de 10 MB.`);
+  }
+};
+
+export const validateAvaluoGallery = (files: File[]) => {
+  if (files.length > MAX_GALLERY_IMAGES) {
+    throw new Error(`La galería permite máximo ${MAX_GALLERY_IMAGES} imágenes.`);
+  }
+
+  files.forEach(validateAvaluoImage);
+};
 
 const optimizeImage = async (file: File): Promise<Blob> => {
   if (!file.type.startsWith('image/') || typeof document === 'undefined') return file;
@@ -32,7 +52,7 @@ const optimizeImage = async (file: File): Promise<Blob> => {
 };
 
 export const uploadAvaluoImage = async (file: File, avaluoId: string): Promise<string> => {
-  if (!isValidAvaluoImage(file)) throw new Error(`Formato no permitido: ${file.name}`);
+  validateAvaluoImage(file);
   const blob = await optimizeImage(file);
   const imageRef = ref(storage, `avaluos/${avaluoId}/principal/${safeName(file.name)}`);
   await uploadBytes(imageRef, blob, { contentType: file.type });
@@ -40,12 +60,12 @@ export const uploadAvaluoImage = async (file: File, avaluoId: string): Promise<s
 };
 
 export const uploadAvaluoGallery = async (files: File[], avaluoId: string): Promise<string[]> => {
-  const selected = files.slice(0, 5).filter(isValidAvaluoImage);
-  const results = await Promise.allSettled(selected.map(async (file) => {
+  validateAvaluoGallery(files);
+  const results = await Promise.all(files.map(async (file) => {
     const blob = await optimizeImage(file);
     const imageRef = ref(storage, `avaluos/${avaluoId}/galeria/${safeName(file.name)}`);
     await uploadBytes(imageRef, blob, { contentType: file.type });
     return getDownloadURL(imageRef);
   }));
-  return results.filter((r): r is PromiseFulfilledResult<string> => r.status === 'fulfilled').map((r) => r.value);
+  return results;
 };
