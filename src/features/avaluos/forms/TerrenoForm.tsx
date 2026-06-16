@@ -38,12 +38,28 @@ const legacyExposiciones = ['Alta', 'Media', 'Baja'];
 const legacyEntornos = ['Residencial premium', 'Residencial media', 'Comercial', 'Mixto', 'Popular'];
 const legacyDesarrollo = ['Consolidado', 'Crecimiento', 'Emergente', 'Bajo desarrollo'];
 
+
+function GeneralReportFields({ value, onChange }) {
+  const selectedGallery = value.imagenesAdicionalesFiles || [];
+  const accept = 'image/jpeg,image/jpg,image/png,image/webp';
+  return <div className='mb-5 rounded-2xl border border-amber-500/30 bg-slate-950/70 p-4'>
+    <h3 className='text-lg font-semibold text-amber-100'>Datos generales para informe PDF</h3>
+    <p className='mt-1 text-sm text-slate-300'>Estos datos se guardan en Firestore y se usan para generar el informe profesional descargable.</p>
+    <div className='mt-4 grid gap-4 md:grid-cols-2'>
+      {field('Nombre del agente evaluador *', 'agenteEvaluador', value, onChange)}
+      {field('Teléfono del agente (opcional)', 'telefonoAgente', value, onChange)}
+      <label className={base}><span>Imagen principal de la propiedad</span><input type='file' accept={accept} className='mt-2 w-full rounded bg-slate-800 p-2 text-sm' onChange={e => onChange('imagenPrincipalFile', e.target.files?.[0] || null)} /><small className='text-slate-400'>Recomendado. JPG, PNG o WEBP.</small></label>
+      <label className={base}><span>Fotografías adicionales (máximo 5)</span><input type='file' accept={accept} multiple className='mt-2 w-full rounded bg-slate-800 p-2 text-sm' onChange={e => onChange('imagenesAdicionalesFiles', Array.from(e.target.files || []).slice(0, 5))} /><small className='text-slate-400'>{selectedGallery.length}/5 seleccionadas.</small></label>
+    </div>
+  </div>;
+}
+
 export default function TerrenoForm({ value, onChange, onSubmit, loading, showSubmit = true }) {
   const zonasDisponibles = ZONAS_POR_CIUDAD[CIUDAD_UNICA] || [];
 
   if (!showSubmit) {
     const ciudadSeleccionada = value.ciudad || CIUDAD_UNICA;
-    return <div className='grid gap-4 md:grid-cols-2 text-slate-200'>
+    return <div className='text-slate-200'><GeneralReportFields value={value} onChange={onChange} /><div className='grid gap-4 md:grid-cols-2'>
       {field('Título del avalúo', 'titulo', value, onChange)}
       {selectField({ label: 'Ciudad', val: ciudadSeleccionada, opts: [CIUDAD_UNICA], onChange: (ciudad) => onChange('ciudad', ciudad) })}
       {selectField({
@@ -77,7 +93,7 @@ export default function TerrenoForm({ value, onChange, onSubmit, loading, showSu
       <tog label='Potencial subdivisión' val={!!value.potencialSubdivision} onChange={(v) => onChange('potencialSubdivision', v)} />
       {selectField({ label: 'Seguridad zona', val: value.seguridadZona || '', opts: legacyNiveles, onChange: (v) => onChange('seguridadZona', v) })}
       {selectField({ label: 'Nivel tráfico', val: value.nivelTrafico || '', opts: legacyNiveles, onChange: (v) => onChange('nivelTrafico', v) })}
-    </div>;
+    </div></div>;
   }
 
   const unidadArea = value.unidadArea || 'm2';
@@ -94,6 +110,7 @@ export default function TerrenoForm({ value, onChange, onSubmit, loading, showSu
   };
 
   return <div className='text-slate-200'>
+    <GeneralReportFields value={value} onChange={onChange} />
     <div className='mb-5 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4'>
       <h2 className='text-lg font-semibold text-amber-100'>Ficha técnica profesional de terreno</h2>
       <p className='mt-1 text-sm text-amber-50/80'>Campos cerrados, cuantificables y conectados al motor técnico para solares urbanos, áreas semiurbanas y terrenos rurales de Matagalpa.</p>

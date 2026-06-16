@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getPropiedades } from '../../services/propiedadesService';
 import { subscribeAvaluos } from '../../services/avaluos.service';
+import DownloadAvaluoPdfButton from '../../components/avaluos/DownloadAvaluoPdfButton';
 
 function AdminDashboardPage() {
   const [propiedades, setPropiedades] = useState([]);
@@ -65,6 +66,7 @@ function AdminDashboardPage() {
               <p className="text-sm text-slate-500">{avaluo.createdAt ? new Date(avaluo.createdAt).toLocaleString() : 'Sin fecha'}</p>
               <p className="text-sm font-semibold text-emerald-700">${Number(avaluo.valorFinal || 0).toFixed(2)}</p>
               </Link>
+              <div className="mt-2"><DownloadAvaluoPdfButton avaluo={avaluo} /></div>
             </li>
           ))}
           {!avaluos.length && <li className="text-sm text-slate-500">Aún no hay avalúos guardados.</li>}
