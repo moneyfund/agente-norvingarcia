@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { calcularAvaluo } from '../engine/avaluo.engine';
 import { ZONAS_POR_CIUDAD } from '../constants/locations';
 import { createAvaluo, updateAvaluo } from '../../../services/avaluos.service';
-import { uploadAvaluoGallery, uploadAvaluoImage } from '../../../services/avaluosStorage.service';
+import { uploadAvaluoGallery, uploadAvaluoImage, validateAvaluoGallery } from '../../../services/avaluosStorage.service';
 import { generateAvaluoAnalysis } from '../../../utils/generateAvaluoAnalysis';
 
 export const useAvaluoSubmission = (usuarioId?: string) => {
@@ -14,7 +14,8 @@ export const useAvaluoSubmission = (usuarioId?: string) => {
     setError('');
     try {
       if (!String(data.agenteEvaluador || '').trim()) throw new Error('Ingresa el nombre del agente evaluador.');
-      if ((data.imagenesAdicionalesFiles || []).length > 5) throw new Error('Solo puedes subir hasta 5 fotografías adicionales.');
+      if (data.imagenPrincipalFile) validateAvaluoGallery([data.imagenPrincipalFile]);
+      validateAvaluoGallery(data.imagenesAdicionalesFiles || []);
       const zonasCiudad = ZONAS_POR_CIUDAD[data.ciudad || 'Matagalpa'] || [];
       const zona = data.zonaData || zonasCiudad.find((z) => z.zona === data.zona);
       if (!zona) throw new Error('Selecciona una zona válida.');

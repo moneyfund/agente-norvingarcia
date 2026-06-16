@@ -48,8 +48,8 @@ function GeneralReportFields({ value, onChange }) {
     <div className='mt-4 grid gap-4 md:grid-cols-2'>
       {field('Nombre del agente evaluador *', 'agenteEvaluador', value, onChange)}
       {field('Teléfono del agente (opcional)', 'telefonoAgente', value, onChange)}
-      <label className={base}><span>Imagen principal de la propiedad</span><input type='file' accept={accept} className='mt-2 w-full rounded bg-slate-800 p-2 text-sm' onChange={e => onChange('imagenPrincipalFile', e.target.files?.[0] || null)} /><small className='text-slate-400'>Recomendado. JPG, PNG o WEBP.</small></label>
-      <label className={base}><span>Fotografías adicionales (máximo 5)</span><input type='file' accept={accept} multiple className='mt-2 w-full rounded bg-slate-800 p-2 text-sm' onChange={e => onChange('imagenesAdicionalesFiles', Array.from(e.target.files || []).slice(0, 5))} /><small className='text-slate-400'>{selectedGallery.length}/5 seleccionadas.</small></label>
+      <label className={base}><span>Imagen principal de la propiedad</span><input type='file' accept={accept} className='mt-2 w-full rounded bg-slate-800 p-2 text-sm' onChange={e => onChange('imagenPrincipalFile', e.target.files?.[0] || null)} /><small className='text-slate-400'>Recomendado. JPG, JPEG, PNG o WEBP. Máximo 10 MB.</small></label>
+      <label className={base}><span>Fotografías adicionales (máximo 5)</span><input type='file' accept={accept} multiple className='mt-2 w-full rounded bg-slate-800 p-2 text-sm' onChange={e => onChange('imagenesAdicionalesFiles', Array.from(e.target.files || []))} /><small className='text-slate-400'>{selectedGallery.length}/5 seleccionadas. Cada imagen debe pesar máximo 10 MB.</small></label>
     </div>
   </div>;
 }
