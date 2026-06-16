@@ -11,7 +11,12 @@ export default function DownloadAvaluoPdfButton({ avaluo, className = '' }: { av
     if (loading) return;
     setLoading(true); setError('');
     try { await exportAvaluoToPdf(avaluo); }
-    catch (err: any) { setError(err?.message?.includes('html2canvas') || err?.message?.includes('jspdf') ? 'No se pudo cargar la librería PDF. Revisa la instalación de html2canvas y jsPDF.' : 'No se pudo generar el PDF.'); }
+    catch (err: any) {
+      console.error('Error generando PDF:', err);
+      const message = err?.message?.includes('html2canvas') || err?.message?.includes('jspdf') ? 'No se pudo cargar la librería PDF. Revisa la instalación de html2canvas y jsPDF.' : 'No se pudo generar el PDF. Revisa consola.';
+      setError(message);
+      alert(message);
+    }
     finally { setLoading(false); }
   };
   return <div className='flex flex-col gap-2'>
