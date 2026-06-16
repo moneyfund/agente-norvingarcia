@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 const formatMoney = (value) => new Intl.NumberFormat('es-NI', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(Number(value || 0));
 const formatNumber = (value) => new Intl.NumberFormat('es-NI', { maximumFractionDigits: 2 }).format(Number(value || 0));
@@ -166,11 +166,9 @@ function Field({ label, value }) { return <div className="rounded-xl border bord
 function Highlight({ label, value }) { return <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4"><p className="text-xs uppercase text-emerald-700">{label}</p><p className="text-xl font-bold text-emerald-900">{value}</p></div>; }
 
 function ReportImage({ src, alt, className }) {
-  const [failed, setFailed] = useState(false);
-
-  if (!src || failed) {
+  if (!src) {
     return <div className={`${className} flex flex-col items-center justify-center border border-dashed border-slate-300 bg-gradient-to-br from-slate-50 to-slate-100 text-center text-slate-500`}><span className="text-3xl">🏡</span><span className="mt-2 text-sm font-medium">Imagen no disponible</span></div>;
   }
 
-  return <img crossOrigin="anonymous" src={src} alt={alt} className={className} onError={() => setFailed(true)} />;
+  return <img crossOrigin="anonymous" src={src} alt={alt} className={className} />;
 }

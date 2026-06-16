@@ -29,13 +29,23 @@ const prepareAvaluoImagesForPdf = async (avaluo: any) => ({
 
 const waitForImages = async (container: HTMLElement) => {
   const images = Array.from(container.querySelectorAll('img'));
-  await Promise.all(images.map((img) => {
-    if (img.complete && img.naturalWidth > 0) return Promise.resolve();
-    return new Promise<void>((resolve) => {
+  await Promise.all(images.map(async (img) => {
+    if (img.complete && img.naturalWidth > 0) return;
+    await new Promise<void>((resolve) => {
       img.onload = () => resolve();
       img.onerror = () => resolve();
     });
+    if ('decode' in img && img.naturalWidth > 0) {
+      try { await img.decode(); }
+      catch { /* La imagen ya disparó load; continuar con el render del PDF. */ }
+    }
   }));
+};
+
+const renderTemplate = async (root: ReturnType<typeof createRoot>, host: HTMLElement, avaluo: any) => {
+  root.render(<AvaluoPdfTemplate avaluo={avaluo} />);
+  await new Promise((resolve) => setTimeout(resolve, 700));
+  await waitForImages(host);
 };
 
 export async function exportAvaluoToPdf(avaluo: any) {
@@ -43,10 +53,9 @@ export async function exportAvaluoToPdf(avaluo: any) {
     try { return await import(/* @vite-ignore */ pkg); }
     catch { return import(/* @vite-ignore */ cdn); }
   };
-  const [{ default: html2canvas }, jsPdfModule, preparedAvaluo] = await Promise.all([
+  const [{ default: html2canvas }, jsPdfModule] = await Promise.all([
     load('html2canvas', 'https://esm.sh/html2canvas@1.4.1'),
     load('jspdf', 'https://esm.sh/jspdf@2.5.2'),
-    prepareAvaluoImagesForPdf(avaluo),
   ]);
   const jsPDF = jsPdfModule.default || jsPdfModule.jsPDF;
   const host = document.createElement('div');
@@ -59,29 +68,46 @@ export async function exportAvaluoToPdf(avaluo: any) {
   const root = createRoot(host);
 
   try {
-    root.render(<AvaluoPdfTemplate avaluo={preparedAvaluo} />);
-    await new Promise((resolve) => setTimeout(resolve, 700));
-    await waitForImages(host);
+    await renderTemplate(root, host, avaluo);
     const pages = Array.from(host.querySelectorAll('.avaluo-pdf-page')) as HTMLElement[];
     if (!pages.length) throw new Error('No se encontraron páginas para generar el PDF.');
 
-    const pdf = new jsPDF('p', 'mm', 'a4');
     const pdfWidth = 210;
     const pdfHeight = 297;
 
-    for (let i = 0; i < pages.length; i += 1) {
-      const canvas = await html2canvas(pages[i], {
-        scale: 2,
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: '#ffffff',
-        windowWidth: 794,
-        windowHeight: 1123,
-      });
-      const imgData = canvas.toDataURL('image/png');
-      if (i > 0) pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    const canvasOptions = {
+      scale: 2,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: '#ffffff',
+      windowWidth: 794,
+      windowHeight: 1123,
+    };
+
+    const renderPagesToImages = async () => {
+      const pageImages: string[] = [];
+      for (let i = 0; i < pages.length; i += 1) {
+        const canvas = await html2canvas(pages[i], canvasOptions);
+        pageImages.push(canvas.toDataURL('image/png'));
+      }
+      return pageImages;
+    };
+
+    let pageImages: string[];
+    try {
+      pageImages = await renderPagesToImages();
+    } catch (error) {
+      const preparedAvaluo = await prepareAvaluoImagesForPdf(avaluo);
+      await renderTemplate(root, host, preparedAvaluo);
+      pages.splice(0, pages.length, ...(Array.from(host.querySelectorAll('.avaluo-pdf-page')) as HTMLElement[]));
+      pageImages = await renderPagesToImages();
     }
+
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    pageImages.forEach((imgData, index) => {
+      if (index > 0) pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    });
 
     pdf.save(`Informe-Avaluo-${slug(avaluo?.titulo || avaluo?.id)}.pdf`);
   } finally {

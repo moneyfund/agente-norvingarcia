@@ -24,8 +24,6 @@ export default function AvaluoTerrenoResultCard({ result, onSave, canSave }) {
       {item('Área equivalente en manzanas', toSafeNumber(result.areaManzanas).toLocaleString('es-NI', { maximumFractionDigits: 2 }), false)}
       {serviciosBasicos && item('Servicios básicos', serviciosBasicos.impacto, false)}
     </div>
-    {result.notaNormalizacion && <p className='mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-100'>{result.notaNormalizacion}</p>}
-
     <div className='mt-5 overflow-hidden rounded-xl border border-slate-700'>
       <div className='bg-slate-800 px-4 py-3 font-semibold text-slate-100'>Coeficientes aplicados</div>
       <div className='overflow-x-auto'>
