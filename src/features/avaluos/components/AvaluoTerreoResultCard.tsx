@@ -1,6 +1,7 @@
 export default function AvaluoTerrenoResultCard({ result, onSave, canSave }) {
   if (!result) return null;
   const coeficientes = normalizeCoeficientes(result.coeficientesAplicados);
+  const serviciosBasicos = coeficientes.find((coef) => coef.factor === 'Servicios básicos');
 
   return <section className='mt-8 rounded-2xl border border-blue-900 bg-slate-900 p-6 text-slate-200'>
     <h3 className='text-xl font-bold text-blue-200'>Dashboard técnico de avalúo</h3>
@@ -21,6 +22,7 @@ export default function AvaluoTerrenoResultCard({ result, onSave, canSave }) {
       {item('Nivel confianza', result.nivelConfianza, false)}
       {item('Precio base m² zona', result.basePriceM2 ?? result.valorTerrenoM2)}
       {item('Área equivalente en manzanas', toSafeNumber(result.areaManzanas).toLocaleString('es-NI', { maximumFractionDigits: 2 }), false)}
+      {serviciosBasicos && item('Servicios básicos', serviciosBasicos.impacto, false)}
     </div>
     {result.notaNormalizacion && <p className='mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-100'>{result.notaNormalizacion}</p>}
 

@@ -14,7 +14,6 @@ export const validateTerreno = (data: Partial<TerrenoInput>): TerrenoFormErrors 
   if (!data.accesoGeneral) errors.accesoGeneral = 'Seleccione acceso general';
   if (!data.tipoVia) errors.tipoVia = 'Seleccione tipo de vía';
   if (!data.usoPotencial) errors.usoPotencial = 'Seleccione uso potencial';
-  if (!data.servicios || data.servicios.length === 0) errors.servicios = 'Seleccione servicios o Ninguno';
   if (!data.riesgos || data.riesgos.length === 0) errors.riesgos = 'Seleccione riesgos o Ninguno';
   return errors;
 };

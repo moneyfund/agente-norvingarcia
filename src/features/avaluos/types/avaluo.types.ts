@@ -9,8 +9,7 @@ export type AccesoGeneral = 'Excelente' | 'Bueno' | 'Regular' | 'Difícil' | 'Mu
 export type TipoVia = 'Carretera pavimentada' | 'Calle adoquinada' | 'Calle de concreto' | 'Macadán' | 'Tierra transitable' | 'Camino rural' | 'Vereda';
 export type NivelTrafico = 'Alto' | 'Medio' | 'Bajo' | 'Muy bajo';
 export type SeguridadZona = 'Alta' | 'Media alta' | 'Media' | 'Baja';
-export type ServicioBasico = 'agua' | 'energia' | 'internet' | 'drenaje' | 'callePavimentada' | 'alumbradoPublico' | 'transporteCercano' | 'ninguno';
-export type ServicioTerreno = 'Agua potable' | 'Energía eléctrica' | 'Internet' | 'Drenaje' | 'Alumbrado público' | 'Transporte cercano' | 'Ninguno';
+export interface ServiciosBasicos { agua?: boolean; energia?: boolean; drenaje?: boolean; senalTelefonica?: boolean; internet?: boolean; }
 export type UsoPotencial = 'Residencial' | 'Comercial' | 'Mixto' | 'Lotificación' | 'Agrícola' | 'Ganadero' | 'Turístico' | 'Industrial liviano' | 'Reserva natural';
 export type FormaTerreno = 'Regular' | 'Irregular' | 'Irregular leve' | 'Irregular compleja' | 'Esquinero' | 'Fondo amplio' | 'Frente amplio';
 export type NivelComercial = 'Alto' | 'Medio' | 'Bajo';
@@ -41,7 +40,7 @@ export interface TerrenoInput {
   tipoVia?: TipoVia;
   nivelTrafico?: NivelTrafico | NivelComercial;
   seguridadZona?: SeguridadZona | NivelComercial;
-  servicios: (ServicioBasico | ServicioTerreno)[];
+  serviciosBasicos: ServiciosBasicos;
   usoPotencial: UsoPotencial;
   formaTerreno: FormaTerreno;
   entorno?: EntornoTerreno;

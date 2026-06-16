@@ -10,7 +10,7 @@ const toDate = (value) => {
 };
 
 const hiddenFields = new Set(['zonaData', 'titulo', 'ciudad', 'zona', 'areaTerreno']);
-const terrainPriority = ['unidadArea', 'areaOriginal', 'areaM2Convertida', 'tipoTerritorio', 'tipoSuelo', 'topografia', 'accesoGeneral', 'tipoVia', 'nivelTrafico', 'seguridadZona', 'formaTerreno', 'entorno', 'usoPotencial', 'desarrolloUrbano', 'recursosNaturales', 'riesgos', 'servicios', 'nivelDeforestacion'];
+const terrainPriority = ['unidadArea', 'areaOriginal', 'areaM2Convertida', 'tipoTerritorio', 'tipoSuelo', 'topografia', 'accesoGeneral', 'tipoVia', 'nivelTrafico', 'seguridadZona', 'formaTerreno', 'entorno', 'usoPotencial', 'desarrolloUrbano', 'recursosNaturales', 'riesgos', 'serviciosBasicos', 'nivelDeforestacion'];
 const labels = {
   unidadArea: 'Unidad de área usada',
   areaOriginal: 'Área original',
@@ -28,12 +28,15 @@ const labels = {
   desarrolloUrbano: 'Desarrollo urbano',
   recursosNaturales: 'Recursos naturales',
   riesgos: 'Riesgos',
-  servicios: 'Servicios',
+  serviciosBasicos: 'Servicios básicos',
   nivelDeforestacion: 'Deforestación',
 };
+const serviciosBasicosLabels = { agua: 'Agua potable', energia: 'Energía eléctrica', drenaje: 'Sistema de drenaje', senalTelefonica: 'Señal telefónica', internet: 'Internet' };
+const serviciosBasicosText = (val) => Object.entries(serviciosBasicosLabels).map(([key, label]) => `${label}: ${val?.[key] ? 'Sí' : 'No'}`).join(', ');
 const labelize = (key) => labels[key] || key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').replace(/\s+/g, ' ').trim().replace(/^./, (m) => m.toUpperCase());
 const valueText = (key, val) => {
   if (Array.isArray(val)) return val.join(', ');
+  if (key === 'serviciosBasicos') return serviciosBasicosText(val);
   if (key === 'unidadArea') return val === 'manzana' ? 'Manzanas' : 'Metros cuadrados';
   if (key === 'areaOriginal' || key === 'areaM2Convertida') return `${formatNumber(val)} ${key === 'areaOriginal' ? '' : 'm²'}`.trim();
   return String(val);
