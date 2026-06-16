@@ -31,6 +31,8 @@ export default function AvaluoDetailPage() {
         }
 
         const avaluo = await getAvaluoById(id);
+        console.log('AVALUO CARGADO', avaluo);
+        console.log('IMAGEN PRINCIPAL', avaluo?.imagenPrincipalUrl);
 
         if (!isMounted) return;
 

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 const formatMoney = (value) => new Intl.NumberFormat('es-NI', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(Number(value || 0));
 const formatNumber = (value) => new Intl.NumberFormat('es-NI', { maximumFractionDigits: 2 }).format(Number(value || 0));
@@ -60,6 +60,11 @@ const normalizeCoeficientes = (coeficientesAplicados) => (Array.isArray(coeficie
 
 export default function AvaluoReportView({ avaluo }) {
   const esTerreno = avaluo?.tipoPropiedad === 'terreno';
+
+  useEffect(() => {
+    console.log('AVALUO CARGADO', avaluo);
+    console.log('IMAGEN PRINCIPAL', avaluo?.imagenPrincipalUrl);
+  }, [avaluo]);
   const caracteristicas = useMemo(() => {
     const entries = Object.entries(avaluo?.caracteristicas || {})
       .filter(([key, val]) => !hiddenFields.has(key) && val !== '' && val !== null && val !== undefined && !(Array.isArray(val) && !val.length));
@@ -99,7 +104,7 @@ export default function AvaluoReportView({ avaluo }) {
 
 
       <Section title="Registro fotográfico">
-        <ReportImage src={avaluo?.imagenPrincipalUrl} alt="Imagen principal del avalúo" className="h-80 w-full rounded-2xl object-cover shadow-sm" />
+        <ReportImage src={avaluo?.imagenPrincipalUrl} alt="Imagen principal de la propiedad" className="h-80 w-full rounded-2xl object-cover shadow-sm" />
         {!!avaluo?.imagenesAdicionales?.length && (
           <div className="mt-4 grid gap-4 md:grid-cols-3">
             {avaluo.imagenesAdicionales.slice(0, 5).map((src, index) => (
