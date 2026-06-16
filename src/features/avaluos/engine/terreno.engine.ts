@@ -2,9 +2,6 @@ import { formatServiciosBasicos, getServiciosBasicosFactor, safeDivide, toSafeNu
 import type { CoeficienteAplicado, TerrenoInput, ZonaData, ResultadoAvaluo } from '../types/avaluo.types';
 
 export const M2_POR_MANZANA = 7042.25;
-const FACTOR_MINIMO = 0.35;
-const FACTOR_MAXIMO = 1.45;
-
 type FactorMap = Record<string, number>;
 
 export const FACTORES_TERRENO = {
@@ -44,6 +41,21 @@ const impactText = (coeficiente: number) => {
   return `${pct > 0 ? '+' : ''}${pct.toFixed(1)}%`;
 };
 const coefRow = (factor: string, valorAplicado: string, coeficiente: number): CoeficienteAplicado => ({ factor, valorAplicado, coeficiente: toSafeNumber(coeficiente, 1), impacto: impactText(coeficiente) });
+
+const CATEGORY_LIMITS = {
+  topografia: { min: 0.70, max: 1.08 },
+  acceso: { min: 0.75, max: 1.12 },
+  serviciosBasicos: { min: 0.85, max: 1.12 },
+  seguridadJuridica: { min: 0.70, max: 1.08 },
+  usoPotencial: { min: 0.85, max: 1.15 },
+  entorno: { min: 0.85, max: 1.12 },
+  desarrolloUrbano: { min: 0.80, max: 1.10 },
+} as const;
+
+const limitCategoryFactor = (value: number, limits: { min: number; max: number }) => clamp(toSafeNumber(value, 1), limits.min, limits.max);
+const limitText = (raw: number, limited: number) => Math.abs(raw - limited) < 0.0005
+  ? 'Dentro del rango técnico de la categoría'
+  : `Ajustado por límite de categoría de ${raw.toFixed(3)} a ${limited.toFixed(3)}`;
 const reductionCoef = (valorDespuesTope: number, valorAntesTope: number) => {
   const before = toSafeNumber(valorAntesTope, 0);
   if (before <= 0) return 1;
@@ -158,10 +170,35 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
     factorLegal: lookup(FACTORES_TERRENO.legalStatus, data.legalStatus || 'Documentación completa'),
   };
 
-  const factorSinLimite = Object.values(coefNumericos).reduce((a, v) => a * v, 1);
-  const factorGlobal = clamp(factorSinLimite, FACTOR_MINIMO, FACTOR_MAXIMO);
+  const factorTopografiaRaw = coefNumericos.factorTopografia * coefNumericos.factorTipoSuelo * coefNumericos.factorForma;
+  const factorAccesoRaw = coefNumericos.factorAcceso * coefNumericos.factorTrafico * coefNumericos.factorProximidad;
+  const factorServiciosBasicosRaw = coefNumericos.factorServiciosBasicos;
+  const factorSeguridadRaw = coefNumericos.factorLegal * coefNumericos.factorSeguridadZona;
+  const factorUsoRaw = coefNumericos.factorUsoPotencial;
+  const factorEntornoRaw = coefNumericos.factorEntorno;
+  const factorRiesgos = coefNumericos.factorRecursosNaturales * coefNumericos.factorDeforestacion;
+  const factorDesarrolloRaw = coefNumericos.factorDesarrolloUrbano * coefNumericos.factorTipoTerritorio;
+
+  const factorTopografia = limitCategoryFactor(factorTopografiaRaw, CATEGORY_LIMITS.topografia);
+  const factorAcceso = limitCategoryFactor(factorAccesoRaw, CATEGORY_LIMITS.acceso);
+  const factorServiciosBasicos = limitCategoryFactor(factorServiciosBasicosRaw, CATEGORY_LIMITS.serviciosBasicos);
+  const factorSeguridad = limitCategoryFactor(factorSeguridadRaw, CATEGORY_LIMITS.seguridadJuridica);
+  const factorUso = limitCategoryFactor(factorUsoRaw, CATEGORY_LIMITS.usoPotencial);
+  const factorEntorno = limitCategoryFactor(factorEntornoRaw, CATEGORY_LIMITS.entorno);
+  const factorDesarrollo = limitCategoryFactor(factorDesarrolloRaw, CATEGORY_LIMITS.desarrolloUrbano);
+
+  const factorGlobal = coefNumericos.factorZona
+    * factorEscala
+    * factorTopografia
+    * factorAcceso
+    * factorServiciosBasicos
+    * factorUso
+    * factorEntorno
+    * factorSeguridad
+    * factorRiesgos
+    * factorDesarrollo;
   const valorBase = areaM2Convertida * basePriceM2;
-  let adjustedPriceM2 = basePriceM2 * factorGlobal * factorEscala;
+  let adjustedPriceM2 = basePriceM2 * factorGlobal;
   const priceM2BeforeTechnicalCaps = adjustedPriceM2;
   let normalizacionAplicada = factorEscala < 1;
   let topeTecnicoAplicado = false;
@@ -193,18 +230,15 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
     coefRow('Normalización por escala', `Factor ${factorEscala.toFixed(2)} — ${getScaleExplanation(areaM2Convertida, areaManzanas, factorEscala)}`, factorEscala),
     coefRow('Categoría territorial', data.tipoTerritorio || 'No definido', coefNumericos.factorTipoTerritorio),
     coefRow('Tipo de suelo', data.tipoSuelo || 'No definido', coefNumericos.factorTipoSuelo),
-    coefRow('Topografía', data.topografia || 'No definido', coefNumericos.factorTopografia),
-    coefRow('Acceso', data.tipoVia || data.accesoGeneral || data.acceso || 'No definido', coefNumericos.factorAcceso),
-    coefRow('Nivel de tráfico', String(data.nivelTrafico || 'No definido'), coefNumericos.factorTrafico),
-    coefRow('Seguridad de la zona', String(data.seguridadZona || 'No definido'), coefNumericos.factorSeguridadZona),
-    coefRow('Forma del terreno', data.formaTerreno || 'No definido', coefNumericos.factorForma),
-    coefRow('Entorno', String(entorno || 'No definido'), coefNumericos.factorEntorno),
-    coefRow('Uso potencial', data.usoPotencial || 'No definido', coefNumericos.factorUsoPotencial),
-    coefRow('Cercanía', data.proximity || (data.cercaniaPrincipal ? 'Cerca de ciudad principal' : 'Según desarrollo urbano'), coefNumericos.factorProximidad),
-    coefRow('Recursos naturales', (data.recursosNaturales || ['Ninguno']).join(', '), coefNumericos.factorRecursosNaturales),
-    coefRow('Servicios básicos', formatServiciosBasicos(data.serviciosBasicos), coefNumericos.factorServiciosBasicos),
-    coefRow('Seguridad jurídica', data.legalStatus || 'Documentación completa', coefNumericos.factorLegal),
-    coefRow('Factor global limitado', factorSinLimite === factorGlobal ? 'Dentro de rango técnico' : `Limitado de ${factorSinLimite.toFixed(3)} a ${factorGlobal.toFixed(3)}`, factorGlobal),
+    coefRow('Topografía', `${data.topografia || 'No definido'}; suelo: ${data.tipoSuelo || 'No definido'}; forma: ${data.formaTerreno || 'No definido'} — ${limitText(factorTopografiaRaw, factorTopografia)}`, factorTopografia),
+    coefRow('Acceso', `${data.tipoVia || data.accesoGeneral || data.acceso || 'No definido'}; tráfico: ${String(data.nivelTrafico || 'No definido')}; cercanía: ${data.proximity || (data.cercaniaPrincipal ? 'Cerca de ciudad principal' : 'Según desarrollo urbano')} — ${limitText(factorAccesoRaw, factorAcceso)}`, factorAcceso),
+    coefRow('Entorno', `${String(entorno || 'No definido')} — ${limitText(factorEntornoRaw, factorEntorno)}`, factorEntorno),
+    coefRow('Uso potencial', `${data.usoPotencial || 'No definido'} — ${limitText(factorUsoRaw, factorUso)}`, factorUso),
+    coefRow('Recursos y riesgos', `${(data.recursosNaturales || ['Ninguno']).join(', ')}; riesgos: ${riesgos.join(', ')}`, factorRiesgos),
+    coefRow('Servicios básicos', `${formatServiciosBasicos(data.serviciosBasicos)} — ${limitText(factorServiciosBasicosRaw, factorServiciosBasicos)}`, factorServiciosBasicos),
+    coefRow('Seguridad jurídica', `${data.legalStatus || 'Documentación completa'}; zona: ${String(data.seguridadZona || 'No definido')} — ${limitText(factorSeguridadRaw, factorSeguridad)}`, factorSeguridad),
+    coefRow('Desarrollo urbano', `${data.desarrolloUrbano || 'No definido'}; territorio: ${data.tipoTerritorio || 'No definido'} — ${limitText(factorDesarrolloRaw, factorDesarrollo)}`, factorDesarrollo),
+    coefRow('Factor total aplicado', 'Producto real de zona, escala y coeficientes por categoría; sin tope global final', factorGlobal),
   ];
 
   if (topeTecnicoAplicado) {
