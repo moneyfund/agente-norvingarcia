@@ -62,8 +62,8 @@ export default function AvaluoReportView({ avaluo }) {
   const esTerreno = avaluo?.tipoPropiedad === 'terreno';
 
   useEffect(() => {
-    console.log('AVALUO CARGADO', avaluo);
-    console.log('IMAGEN PRINCIPAL', avaluo?.imagenPrincipalUrl);
+    console.log('avaluo cargado', avaluo);
+    console.log('imagenPrincipalUrl', avaluo?.imagenPrincipalUrl);
   }, [avaluo]);
   const caracteristicas = useMemo(() => {
     const entries = Object.entries(avaluo?.caracteristicas || {})
