@@ -51,7 +51,7 @@ const optimizeImage = async (file: File): Promise<Blob> => {
   }
 };
 
-export const uploadAvaluoImage = async (file: File, avaluoId: string): Promise<string> => {
+export const uploadAvaluoMainImage = async (file: File, avaluoId: string): Promise<string> => {
   validateAvaluoImage(file);
   const blob = await optimizeImage(file);
   const imageRef = ref(storage, `avaluos/${avaluoId}/principal/${safeName(file.name)}`);
@@ -59,7 +59,7 @@ export const uploadAvaluoImage = async (file: File, avaluoId: string): Promise<s
   return getDownloadURL(imageRef);
 };
 
-export const uploadAvaluoGallery = async (files: File[], avaluoId: string): Promise<string[]> => {
+export const uploadAvaluoGalleryImages = async (files: File[], avaluoId: string): Promise<string[]> => {
   validateAvaluoGallery(files);
   const results = await Promise.all(files.map(async (file) => {
     const blob = await optimizeImage(file);
@@ -69,3 +69,6 @@ export const uploadAvaluoGallery = async (files: File[], avaluoId: string): Prom
   }));
   return results;
 };
+
+export const uploadAvaluoImage = uploadAvaluoMainImage;
+export const uploadAvaluoGallery = uploadAvaluoGalleryImages;
