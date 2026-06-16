@@ -9,5 +9,4 @@ export const assertZonaData = (zonaData: ZonaData | null): ZonaData => {
 export const assertTerrenoInput = (input: CaracteristicasTerreno): void => {
   if (!input.ciudad || !input.zona || !input.municipio) throw new Error('Complete ciudad, municipio y zona.');
   if (!Number.isFinite(input.areaTerreno) || input.areaTerreno <= 0 || input.areaTerreno > 500000) throw new Error('Área de terreno inválida.');
-  if (!input.servicios?.length) throw new Error('Seleccione al menos un servicio.');
 };

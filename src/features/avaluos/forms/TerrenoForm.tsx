@@ -21,7 +21,13 @@ const deforestacion = ['Sin deforestación', 'Baja', 'Media', 'Alta', 'Muy alta'
 const proximidades = ['Cerca de ciudad principal', 'Cerca de comunidad', 'Remoto'];
 const estadosLegales = ['Documentación completa', 'Documentación revisable', 'Problemas legales'];
 const recursos = ['Fuente de agua', 'Río o quebrada', 'Pozo', 'Árboles maderables', 'Vista panorámica', 'Área cultivable', 'Ninguno'];
-const servicios = ['Agua potable', 'Energía eléctrica', 'Internet', 'Drenaje', 'Alumbrado público', 'Transporte cercano', 'Ninguno'];
+const serviciosBasicos = [
+  ['agua', 'Agua potable'],
+  ['energia', 'Energía eléctrica / luz'],
+  ['drenaje', 'Sistema de drenaje'],
+  ['senalTelefonica', 'Acceso a señal telefónica'],
+  ['internet', 'Acceso a internet'],
+];
 const riesgos = ['Riesgo de inundación', 'Riesgo de deslizamiento', 'Zona de difícil acceso', 'Conflicto de servidumbre', 'Ninguno'];
 const legacyTopografias = ['Plano', 'Semi plano', 'Inclinado', 'Quebrado'];
 const legacyAccesos = ['Pavimentado', 'Adoquinado', 'Macadán', 'Tierra'];
@@ -62,7 +68,7 @@ export default function TerrenoForm({ value, onChange, onSubmit, loading, showSu
       {selectField({ label: 'Tipo entorno', val: value.tipoEntorno || '', opts: legacyEntornos, onChange: (v) => onChange('tipoEntorno', v) })}
       {selectField({ label: 'Desarrollo urbano', val: value.desarrolloUrbano || '', opts: legacyDesarrollo, onChange: (v) => onChange('desarrolloUrbano', v) })}
       {selectField({ label: 'Densidad urbana', val: value.densidadUrbana || '', opts: legacyNiveles, onChange: (v) => onChange('densidadUrbana', v) })}
-      <legacyChecks title='Servicios' items={[[ 'agua', 'Agua' ], [ 'energia', 'Energía' ], [ 'internet', 'Internet' ], [ 'drenaje', 'Drenaje' ], [ 'callePavimentada', 'Calle pavimentada' ]]} value={value.servicios || []} onChange={(s) => onChange('servicios', s)} />
+      <ServiciosBasicosChecks value={value.serviciosBasicos || {}} onChange={(s) => onChange('serviciosBasicos', s)} />
       <tog label='Esquina' val={!!value.esquina} onChange={(v) => onChange('esquina', v)} />
       <tog label='Cercanía principal' val={!!value.cercaniaPrincipal} onChange={(v) => onChange('cercaniaPrincipal', v)} />
       <tog label='Cercanía comercial' val={!!value.cercaniaComercial} onChange={(v) => onChange('cercaniaComercial', v)} />
@@ -137,7 +143,7 @@ export default function TerrenoForm({ value, onChange, onSubmit, loading, showSu
 
     <div className='mt-4 grid gap-4 md:grid-cols-3'>
       <checks title='Recursos naturales' items={recursos} value={value.recursosNaturales || []} onChange={(s) => onChange('recursosNaturales', s)} />
-      <checks title='Servicios disponibles' items={servicios} value={value.servicios || []} onChange={(s) => onChange('servicios', s)} />
+      <ServiciosBasicosChecks value={value.serviciosBasicos || {}} onChange={(s) => onChange('serviciosBasicos', s)} />
       <checks title='Riesgos' items={riesgos} value={value.riesgos || []} onChange={(s) => onChange('riesgos', s)} />
     </div>
 
@@ -160,5 +166,5 @@ function checks({ title, items, value, onChange }) {
   return <div className={base}><p className='font-medium'>{title}</p><div className='mt-2 grid gap-2'>{items.map((item) => <label key={item} className='text-sm'><input type='checkbox' checked={selected.includes(item)} onChange={(e) => toggle(item, e.target.checked)} /> {item}</label>)}</div></div>;
 }
 
-function legacyChecks({ title, items, value, onChange }) { return <div className={base}><p>{title}</p><div className='mt-2 grid grid-cols-2 gap-2'>{items.map(([k, l]) => <label key={k}><input type='checkbox' checked={value.includes(k)} onChange={(e) => onChange(e.target.checked ? [...value, k] : value.filter((x) => x !== k))} /> {l}</label>)}</div></div>; }
+function ServiciosBasicosChecks({ value, onChange }) { return <div className={base}><p className='font-medium'>Servicios básicos</p><div className='mt-2 grid gap-2'>{serviciosBasicos.map(([k, l]) => <label key={k} className='text-sm'><input type='checkbox' checked={!!value[k]} onChange={(e) => onChange({ ...value, [k]: e.target.checked })} /> {l}</label>)}</div></div>; }
 function tog({ label, val, onChange }) { return <label className={base}><span>{label}</span><input type='checkbox' className='ml-3' checked={val} onChange={(e) => onChange(e.target.checked)} /></label>; }

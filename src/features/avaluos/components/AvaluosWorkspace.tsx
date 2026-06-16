@@ -11,7 +11,7 @@ import { useAvaluosHistory } from '../hooks/useAvaluosHistory';
 export default function AvaluosWorkspace() {
   const { user } = useAuth();
   const [propertyType, setPropertyType] = useState<any>(null);
-  const initialTerrenoForm = { ciudad: 'Matagalpa', zona: '', zonaData: null, unidadArea: 'm2', areaOriginal: 0, areaM2Convertida: 0, areaTerreno: 0, servicios: [], recursosNaturales: [], riesgos: [] };
+  const initialTerrenoForm = { ciudad: 'Matagalpa', zona: '', zonaData: null, unidadArea: 'm2', areaOriginal: 0, areaM2Convertida: 0, areaTerreno: 0, serviciosBasicos: { agua: false, energia: false, drenaje: false, senalTelefonica: false, internet: false }, recursosNaturales: [], riesgos: [] };
   const [form, setForm] = useState<any>(initialTerrenoForm);
   const { loading, result, error, submit, save } = useAvaluoSubmission(user?.uid);
   const { items, refresh } = useAvaluosHistory(user?.uid);

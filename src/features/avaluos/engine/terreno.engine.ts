@@ -1,4 +1,4 @@
-import { safeDivide, toSafeNumber } from './shared/formulas';
+import { formatServiciosBasicos, getServiciosBasicosFactor, safeDivide, toSafeNumber } from './shared/formulas';
 import type { CoeficienteAplicado, TerrenoInput, ZonaData, ResultadoAvaluo } from '../types/avaluo.types';
 
 export const M2_POR_MANZANA = 7042.25;
@@ -94,16 +94,6 @@ const getBasePriceM2 = (zona: ZonaData, data: TerrenoInput, areaManzanas: number
   return clamp(listedBase, 25, 55);
 };
 
-const getServiceFactor = (servicios: unknown[] | undefined) => {
-  const selected = Array.isArray(servicios) ? servicios.map(String) : [];
-  const none = selected.length === 0 || selected.includes('Ninguno') || selected.includes('ninguno');
-  if (none) return 0.85;
-  const hasWater = selected.includes('Agua potable') || selected.includes('agua');
-  const hasPower = selected.includes('Energía eléctrica') || selected.includes('energia');
-  if (hasWater && hasPower) return 1.15;
-  if (hasWater || hasPower) return 1.07;
-  return 1;
-};
 
 const getNaturalResourcesFactor = (recursos: unknown[] | undefined, riesgos: unknown[] | undefined) => {
   const selected = Array.isArray(recursos) ? recursos.map(String) : [];
@@ -132,7 +122,7 @@ const getAccessFactor = (data: TerrenoInput) => {
 const isHighValueException = (data: TerrenoInput) => ['Turístico', 'Comercial'].includes(String(data.usoPotencial)) || ['Comercial', 'Natural/turístico'].includes(String(data.entorno || data.tipoEntorno));
 
 const confianza = (data: TerrenoInput, areaM2Convertida: number, zona?: ZonaData): ResultadoAvaluo['nivelConfianza'] => {
-  const requeridos = Boolean(zona?.zona) && areaM2Convertida > 0 && Boolean(data.usoPotencial) && Array.isArray(data.servicios) && data.servicios.length > 0;
+  const requeridos = Boolean(zona?.zona) && areaM2Convertida > 0 && Boolean(data.usoPotencial) && Boolean(data.serviciosBasicos);
   const ruralVariable = ['Rural productivo', 'Rural aislado'].includes(String(data.tipoTerritorio)) || ['Alta', 'Muy alta'].includes(String(data.nivelDeforestacion));
   const faltantesSecundarios = [data.tipoSuelo, data.topografia, data.tipoVia || data.accesoGeneral, data.seguridadZona, data.formaTerreno, data.entorno, data.desarrolloUrbano, data.nivelDeforestacion].filter((v) => !v).length;
   if (!requeridos || ruralVariable) return 'Baja';
@@ -164,7 +154,7 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
     factorProximidad: getProximityFactor(data),
     factorRecursosNaturales: getNaturalResourcesFactor(data.recursosNaturales, riesgos),
     factorDeforestacion: lookup(FACTORES_TERRENO.nivelDeforestacion, data.nivelDeforestacion),
-    factorServicios: getServiceFactor(data.servicios),
+    factorServiciosBasicos: getServiciosBasicosFactor(data.serviciosBasicos),
     factorLegal: lookup(FACTORES_TERRENO.legalStatus, data.legalStatus || 'Documentación completa'),
   };
 
@@ -212,7 +202,7 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
     coefRow('Uso potencial', data.usoPotencial || 'No definido', coefNumericos.factorUsoPotencial),
     coefRow('Cercanía', data.proximity || (data.cercaniaPrincipal ? 'Cerca de ciudad principal' : 'Según desarrollo urbano'), coefNumericos.factorProximidad),
     coefRow('Recursos naturales', (data.recursosNaturales || ['Ninguno']).join(', '), coefNumericos.factorRecursosNaturales),
-    coefRow('Servicios disponibles', (data.servicios || ['Ninguno']).join(', '), coefNumericos.factorServicios),
+    coefRow('Servicios básicos', formatServiciosBasicos(data.serviciosBasicos), coefNumericos.factorServiciosBasicos),
     coefRow('Seguridad jurídica', data.legalStatus || 'Documentación completa', coefNumericos.factorLegal),
     coefRow('Factor global limitado', factorSinLimite === factorGlobal ? 'Dentro de rango técnico' : `Limitado de ${factorSinLimite.toFixed(3)} a ${factorGlobal.toFixed(3)}`, factorGlobal),
   ];
