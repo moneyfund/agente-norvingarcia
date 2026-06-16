@@ -22,7 +22,7 @@ const withTimeout = async <T,>(promise: Promise<T>, ms: number, message: string)
 
 const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
-export async function loadImageAsBase64(url: string): Promise<string> {
+export async function imageUrlToBase64(url: string): Promise<string> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), IMAGE_TIMEOUT_MS);
 
@@ -44,7 +44,7 @@ export async function loadImageAsBase64(url: string): Promise<string> {
 const asBase64IfPossible = async (url?: string) => {
   if (!url || url.startsWith('data:')) return url || '';
   try {
-    return await withTimeout(loadImageAsBase64(url), IMAGE_TIMEOUT_MS, 'Tiempo agotado cargando imagen para PDF.');
+    return await withTimeout(imageUrlToBase64(url), IMAGE_TIMEOUT_MS, 'Tiempo agotado cargando imagen para PDF.');
   } catch (error) {
     console.warn('No se pudo preparar una imagen para el PDF. Se usará placeholder.', { url, error });
     return '';
