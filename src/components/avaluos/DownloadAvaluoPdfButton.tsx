@@ -66,8 +66,8 @@ export default function DownloadAvaluoPdfButton({ avaluo, className = '' }: { av
   };
   return <div className='flex flex-col gap-2'>
     <div className='inline-flex flex-wrap gap-2'>
-      <button type='button' onClick={handleClick} disabled={loading} className={`inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2 font-semibold text-slate-900 hover:bg-amber-400 disabled:opacity-60 ${className}`}><Download size={18}/>{loading ? 'Generando PDF...' : 'Descargar PDF'}</button>
-      <button type='button' onClick={() => setShowPreview((value) => !value)} className='inline-flex items-center gap-2 rounded-xl border border-amber-400/70 bg-slate-900/70 px-4 py-2 font-semibold text-amber-100 hover:bg-slate-800'>
+      <button type='button' onClick={handleClick} disabled={loading} className={`inline-flex items-center gap-2 rounded-xl bg-red-700 px-4 py-2 font-semibold text-white hover:bg-red-600 disabled:opacity-60 ${className}`}><Download size={18}/>{loading ? 'Generando PDF...' : 'Descargar PDF'}</button>
+      <button type='button' onClick={() => setShowPreview((value) => !value)} className='inline-flex items-center gap-2 rounded-xl border border-red-400/70 bg-slate-900/70 px-4 py-2 font-semibold text-red-100 hover:bg-slate-800'>
         {showPreview ? <EyeOff size={18}/> : <Eye size={18}/>}{showPreview ? 'Ocultar vista PDF' : 'Vista previa PDF'}
       </button>
     </div>

@@ -1,74 +1,91 @@
-.avaluo-pdf-template {
-  width: 794px;
-  background: #ffffff;
-  color: #1e293b;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
+.avaluo-pdf-template{width:794px;background:#fff;color:#171717;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.avaluo-pdf-page{position:relative;width:794px;height:1123px;background:#fff;padding:46px;box-sizing:border-box;overflow:hidden;page-break-after:always;break-after:page;color:#171717}
+.avaluo-pdf-page *{box-sizing:border-box}
+.avaluo-pdf-accent{position:absolute;right:-90px;top:-90px;width:260px;height:260px;border-radius:999px;background:rgba(185,28,28,.08)}
+.avaluo-pdf-accent:after{content:"";position:absolute;inset:52px;border:2px solid rgba(185,28,28,.14);border-radius:999px}
+.avaluo-pdf-content{position:relative;z-index:1}
+.avaluo-pdf-title{margin:0 0 22px;color:#111827;font-size:26px;line-height:1.12;font-weight:900;letter-spacing:-.03em}
+.avaluo-pdf-logo-row{display:flex;align-items:center;gap:14px}
+.avaluo-pdf-logo-row--cover{align-items:flex-start}
+.logo-pdf{max-width:170px;max-height:88px;object-fit:contain;display:block}
+.logo-pdf--round{width:64px;height:64px;border-radius:999px;object-fit:cover;border:2px solid #fee2e2}
+.logo-pdf--closing{margin:0 auto 18px;max-width:210px;max-height:110px}
+.avaluo-pdf-kicker{margin:0 0 8px;color:#b91c1c;font-size:11px;letter-spacing:.24em;text-transform:uppercase;font-weight:900}
+.avaluo-pdf-heading{margin:0;color:#111827;font-size:36px;line-height:1.04;font-weight:950;letter-spacing:-.045em;text-transform:uppercase}
+.avaluo-pdf-subheading{margin:10px 0 0;color:#6b7280;font-size:16px;font-weight:700}
+.avaluo-pdf-red-band{margin:26px 0 22px;border-radius:22px;background:linear-gradient(135deg,#991b1b,#dc2626);padding:18px 22px;color:#fff;display:flex;align-items:center;justify-content:space-between;box-shadow:0 18px 36px rgba(153,27,27,.22)}
+.avaluo-pdf-red-band span{font-size:13px;letter-spacing:.16em;text-transform:uppercase;font-weight:900}
+.avaluo-pdf-red-band strong{font-size:28px;line-height:1;font-weight:950}
+.avaluo-pdf-cover-layout{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;align-items:stretch}
+.avaluo-pdf-cover-image{height:545px;overflow:hidden;border-radius:28px;background:#e5e7eb;border:1px solid #fee2e2}
+.avaluo-pdf-cover-image img,.avaluo-pdf-cover-image .avaluo-pdf-img-placeholder{width:100%;height:100%}
+.avaluo-pdf-img{max-width:100%;display:block;object-fit:cover}
+.avaluo-pdf-img-placeholder{display:grid;place-items:center;border:1px dashed #d1d5db;background:linear-gradient(135deg,#f9fafb,#e5e7eb);color:#6b7280;font-weight:800}
+.avaluo-pdf-cover-card{border-radius:28px;border:1px solid #fee2e2;background:#fff;padding:22px;box-shadow:0 18px 46px rgba(17,24,39,.08)}
+.avaluo-pdf-cover-card h2{margin:0 0 16px;color:#111827;font-size:24px;line-height:1.15;font-weight:900}
+.avaluo-pdf-mini-fact{border-top:1px solid #f3f4f6;padding:12px 0}
+.avaluo-pdf-mini-fact span{display:block;color:#6b7280;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:900}
+.avaluo-pdf-mini-fact strong{display:block;margin-top:5px;color:#111827;font-size:15px;line-height:1.25;font-weight:850;overflow-wrap:anywhere}
+.avaluo-pdf-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.avaluo-pdf-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.avaluo-pdf-tight-grid{gap:10px}
+.avaluo-pdf-stack{display:grid;gap:12px}
+.avaluo-pdf-mt-24{margin-top:24px}
+.avaluo-pdf-mt-30{margin-top:30px}
+.avaluo-pdf-card{min-width:0;border-radius:18px;border:1px solid #e5e7eb;background:#fafafa;padding:14px}
+.avaluo-pdf-card-icon{width:19px;height:19px;color:#b91c1c;margin-bottom:8px}
+.avaluo-pdf-card-label{margin:0;color:#6b7280;font-size:9.5px;line-height:1.2;letter-spacing:.08em;text-transform:uppercase;font-weight:900}
+.avaluo-pdf-card-value{margin:6px 0 0;color:#171717;font-size:13px;line-height:1.32;font-weight:800;overflow-wrap:anywhere}
+.avaluo-pdf-executive{display:flex;gap:16px;border-radius:24px;background:linear-gradient(135deg,#fff1f2,#fff);border:1px solid #fecaca;padding:20px;margin-bottom:18px}
+.avaluo-pdf-executive svg{color:#b91c1c;min-width:28px}
+.avaluo-pdf-executive h3{margin:0 0 6px;color:#111827;font-size:19px;font-weight:900}
+.avaluo-pdf-executive p{margin:0;color:#374151;font-size:14px;line-height:1.55}
+.avaluo-pdf-section-subtitle{margin:0 0 12px;color:#111827;font-size:17px;font-weight:900}
+.avaluo-pdf-gallery-img{width:100%;height:132px;border-radius:18px;overflow:hidden;background:#e5e7eb}
+.avaluo-pdf-gallery-img img,.avaluo-pdf-gallery-img .avaluo-pdf-img-placeholder{width:100%;height:100%}
+.avaluo-pdf-feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.avaluo-pdf-feature-group{border-radius:22px;border:1px solid #e5e7eb;background:#fafafa;padding:16px}
+.avaluo-pdf-feature-group h3{margin:0 0 10px;color:#991b1b;font-size:15px;font-weight:950}
+.avaluo-pdf-feature-row{display:grid;grid-template-columns:.85fr 1.15fr;gap:10px;padding:9px 0;border-top:1px solid #e5e7eb}
+.avaluo-pdf-feature-row span{color:#6b7280;font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:900}
+.avaluo-pdf-feature-row strong{color:#111827;font-size:12px;line-height:1.35;font-weight:800;overflow-wrap:anywhere}
+.avaluo-pdf-analysis{border-radius:28px;border:1px solid #fecaca;background:#fff;padding:30px;color:#374151;font-size:18px;line-height:1.78;text-align:justify;box-shadow:inset 8px 0 0 #b91c1c}
+.avaluo-pdf-analysis p{margin:0}
+.avaluo-pdf-analysis p+p{margin-top:22px}
+.avaluo-pdf-commercial-interpretation{margin-top:22px;border-radius:24px;background:#111827;color:#fff;padding:22px}
+.avaluo-pdf-commercial-interpretation h3{margin:0 0 8px;font-size:18px;font-weight:900}
+.avaluo-pdf-commercial-interpretation p{margin:0;color:#e5e7eb;font-size:14px;line-height:1.55}
+.avaluo-pdf-value-box{border-radius:30px;background:linear-gradient(135deg,#991b1b,#dc2626);padding:36px;color:#fff;box-shadow:0 20px 42px rgba(153,27,27,.24)}
+.avaluo-pdf-value-label{margin:0;color:#fee2e2;font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:950}
+.avaluo-pdf-value{margin:16px 0 0;font-size:55px;line-height:1;font-weight:950;letter-spacing:-.04em}
+.avaluo-pdf-financial-grid{display:grid;grid-template-columns:1.35fr .65fr;gap:16px;margin-top:20px}
+.avaluo-pdf-range-card,.avaluo-pdf-meter-card{border-radius:24px;border:1px solid #e5e7eb;background:#fafafa;padding:20px}
+.avaluo-pdf-range-card h3{margin:0 0 16px;color:#111827;font-size:18px;font-weight:950}
+.avaluo-pdf-range-row{margin-top:14px}
+.avaluo-pdf-range-row div:first-child{display:flex;justify-content:space-between;color:#374151;font-size:13px;font-weight:800}
+.avaluo-pdf-range-track{height:12px;border-radius:999px;background:#e5e7eb;margin-top:8px;overflow:hidden}
+.avaluo-pdf-range-track i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#991b1b,#ef4444)}
+.avaluo-pdf-meter-card{text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px}
+.avaluo-pdf-meter-card svg{color:#b91c1c;width:34px;height:34px}
+.avaluo-pdf-meter-card span{color:#6b7280;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:900}
+.avaluo-pdf-meter-card strong{color:#111827;font-size:27px;line-height:1;font-weight:950}
+.avaluo-pdf-meter-card small{color:#6b7280;font-size:12px;line-height:1.35}
+.avaluo-pdf-method-text,.avaluo-pdf-note{margin:0 0 18px;border-radius:18px;background:#f3f4f6;padding:17px;color:#374151;font-size:13.5px;line-height:1.55}
+.avaluo-pdf-note{margin-top:20px;margin-bottom:0;border-left:5px solid #b91c1c}
+.avaluo-pdf-coef-table{display:grid;gap:10px}
+.avaluo-pdf-coef{display:grid;grid-template-columns:1.05fr .35fr 1.4fr;gap:12px;align-items:center;border-radius:18px;background:#fff;border:1px solid #e5e7eb;padding:13px 15px}
+.avaluo-pdf-coef span{font-weight:900;color:#111827;font-size:13px}
+.avaluo-pdf-coef strong{color:#b91c1c;white-space:nowrap;font-size:14px;font-weight:950}
+.avaluo-pdf-coef p{margin:0;color:#6b7280;font-size:12px;line-height:1.35}
+.avaluo-pdf-paragraph{color:#4b5563;font-size:15px;line-height:1.65}
+.avaluo-pdf-footer{position:absolute;left:46px;right:46px;bottom:30px;display:flex;align-items:center;justify-content:space-between;border-top:2px solid #fee2e2;padding-top:11px;color:#6b7280;font-size:10.5px;font-weight:800}
+.avaluo-pdf-footer span:first-child{color:#b91c1c}
+.avaluo-pdf-center{text-align:center}
+.avaluo-pdf-closing{text-align:center;padding-top:88px}
+.avaluo-pdf-closing h2{margin:0;color:#111827;font-size:30px;font-weight:950;letter-spacing:-.035em}
+.avaluo-pdf-closing>p{max-width:585px;margin:18px auto 28px;color:#374151;font-size:17px;line-height:1.65}
+.avaluo-pdf-closing-card{max-width:500px;margin:0 auto;border-radius:26px;border:1px solid #fee2e2;background:#fff;padding:10px 24px;box-shadow:0 20px 48px rgba(17,24,39,.08);text-align:left}
+.avaluo-pdf-signature{width:330px;margin:82px auto 0;border-top:2px solid #9ca3af;padding-top:12px;color:#6b7280;font-size:13px;font-weight:800}
+.avaluo-pdf-preview-panel{margin-top:16px;max-width:100%;overflow:auto;border-radius:18px;border:1px solid rgba(185,28,28,.28);background:#e5e7eb;padding:16px}
+.avaluo-pdf-preview-panel .avaluo-pdf-page{margin:0 auto 18px;box-shadow:0 18px 50px rgba(17,24,39,.22)}
 
-.avaluo-pdf-page {
-  position: relative;
-  width: 794px;
-  height: 1123px;
-  background: #ffffff;
-  padding: 48px;
-  box-sizing: border-box;
-  overflow: hidden;
-  page-break-after: always;
-  break-after: page;
-  color: #1e293b;
-}
-
-.avaluo-pdf-page * { box-sizing: border-box; }
-
-.avaluo-pdf-accent {
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 160px;
-  height: 160px;
-  border-bottom-left-radius: 160px;
-  background: rgba(251, 191, 36, 0.22);
-}
-
-.avaluo-pdf-content { position: relative; z-index: 1; }
-.avaluo-pdf-title { margin: 0 0 24px; color: #0b1f3a; font-size: 25px; line-height: 1.15; font-weight: 800; }
-.avaluo-pdf-logo-row { display: flex; align-items: center; gap: 14px; }
-.logo-pdf { max-width: 160px; max-height: 80px; object-fit: contain; display: block; }
-.logo-pdf--round { width: 58px; height: 58px; border-radius: 999px; object-fit: cover; }
-.avaluo-pdf-kicker { margin: 0 0 6px; color: #b7791f; font-size: 11px; letter-spacing: .28em; text-transform: uppercase; font-weight: 800; }
-.avaluo-pdf-heading { margin: 0; color: #0b1f3a; font-size: 38px; line-height: 1.05; font-weight: 900; }
-.avaluo-pdf-hero { margin-top: 38px; border-radius: 32px; background: #0b1f3a; padding: 32px; color: #ffffff; }
-.avaluo-pdf-hero-type { margin: 0 0 8px; color: #f6d365; font-size: 15px; font-weight: 700; }
-.avaluo-pdf-hero-title { margin: 0; font-size: 30px; line-height: 1.15; font-weight: 800; }
-.avaluo-pdf-location { display: flex; align-items: center; gap: 8px; margin-top: 14px; color: #dbe4ef; font-size: 15px; }
-.avaluo-pdf-cover-image { margin-top: 32px; height: 320px; overflow: hidden; border-radius: 24px; background: #e2e8f0; }
-.avaluo-pdf-cover-image img, .avaluo-pdf-cover-image .avaluo-pdf-img-placeholder { width: 100%; height: 100%; }
-.avaluo-pdf-img { max-width: 100%; display: block; object-fit: cover; }
-.avaluo-pdf-img-placeholder { display: grid; place-items: center; border: 1px dashed #cbd5e1; background: linear-gradient(135deg, #f1f5f9, #e2e8f0); color: #64748b; font-weight: 700; }
-.avaluo-pdf-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
-.avaluo-pdf-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-.avaluo-pdf-stack { display: grid; gap: 12px; }
-.avaluo-pdf-mt-24 { margin-top: 24px; }
-.avaluo-pdf-mt-30 { margin-top: 30px; }
-.avaluo-pdf-card { min-width: 0; border-radius: 18px; border: 1px solid #edf2f7; background: #f8fafc; padding: 15px; }
-.avaluo-pdf-card-icon { width: 20px; height: 20px; color: #b7791f; margin-bottom: 8px; }
-.avaluo-pdf-card-label { margin: 0; color: #64748b; font-size: 10px; line-height: 1.2; letter-spacing: .08em; text-transform: uppercase; font-weight: 800; }
-.avaluo-pdf-card-value { margin: 6px 0 0; color: #1e293b; font-size: 14px; line-height: 1.35; font-weight: 700; overflow-wrap: anywhere; }
-.avaluo-pdf-section-subtitle { margin: 0 0 12px; color: #0b1f3a; font-size: 18px; font-weight: 800; }
-.avaluo-pdf-gallery-img { width: 100%; height: 138px; border-radius: 18px; overflow: hidden; background: #e2e8f0; }
-.avaluo-pdf-gallery-img img, .avaluo-pdf-gallery-img .avaluo-pdf-img-placeholder { width: 100%; height: 100%; }
-.avaluo-pdf-analysis { border-radius: 28px; border: 1px solid #f3d38b; background: #fffbeb; padding: 32px; color: #334155; font-size: 19px; line-height: 1.75; text-align: justify; }
-.avaluo-pdf-analysis p { margin: 0; }
-.avaluo-pdf-analysis p + p { margin-top: 24px; }
-.avaluo-pdf-value-box { border-radius: 28px; background: #0b1f3a; padding: 38px; color: #ffffff; }
-.avaluo-pdf-value-label { margin: 0; color: #f6d365; font-size: 13px; letter-spacing: .22em; text-transform: uppercase; font-weight: 800; }
-.avaluo-pdf-value { margin: 18px 0 0; font-size: 56px; line-height: 1; font-weight: 900; }
-.avaluo-pdf-coef { display: flex; justify-content: space-between; gap: 18px; border-radius: 18px; background: #f8fafc; padding: 15px 18px; font-weight: 700; }
-.avaluo-pdf-coef-impact { color: #b7791f; white-space: nowrap; }
-.avaluo-pdf-note { margin-top: 24px; border-radius: 18px; background: #f1f5f9; padding: 18px; color: #475569; font-size: 13px; line-height: 1.55; }
-.avaluo-pdf-paragraph { color: #475569; font-size: 15px; line-height: 1.65; }
-.avaluo-pdf-footer { position: absolute; left: 48px; right: 48px; bottom: 32px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #e2e8f0; padding-top: 12px; color: #64748b; font-size: 11px; }
-.avaluo-pdf-center { text-align: center; }
-.avaluo-pdf-signature { width: 320px; margin: 78px auto 0; border-top: 1px solid #94a3b8; padding-top: 12px; color: #64748b; font-size: 13px; }
-.avaluo-pdf-preview-panel { margin-top: 16px; max-width: 100%; overflow: auto; border-radius: 18px; border: 1px solid rgba(251,191,36,.35); background: #e2e8f0; padding: 16px; }
-.avaluo-pdf-preview-panel .avaluo-pdf-page { margin: 0 auto 18px; box-shadow: 0 18px 50px rgba(15, 23, 42, .22); }
