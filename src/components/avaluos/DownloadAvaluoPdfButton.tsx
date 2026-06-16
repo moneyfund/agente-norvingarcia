@@ -1,12 +1,57 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Download, Eye, EyeOff } from 'lucide-react';
 import { exportAvaluoToPdf } from '../../utils/exportAvaluoPdf';
 import AvaluoPdfTemplate from './AvaluoPdfTemplate';
+import { imageUrlToDataUrlViaProxy } from '../../utils/imageProxy';
 
 export default function DownloadAvaluoPdfButton({ avaluo, className = '' }: { avaluo: any, className?: string }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPreview, setShowPreview] = useState(false);
+  const [previewAvaluo, setPreviewAvaluo] = useState(avaluo);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const preparePreviewImage = async () => {
+      setPreviewAvaluo({
+        ...avaluo,
+        imagenPrincipalBase64: avaluo?.imagenPrincipalBase64 || '',
+        imagenesAdicionalesBase64: avaluo?.imagenesAdicionalesBase64 || [],
+      });
+
+      try {
+        const [imagenPrincipalBase64, imagenesAdicionalesBase64] = await Promise.all([
+          imageUrlToDataUrlViaProxy(avaluo?.imagenPrincipalUrl),
+          Promise.all((avaluo?.imagenesAdicionales || []).slice(0, 5).map((url: string) => imageUrlToDataUrlViaProxy(url).catch(() => ''))),
+        ]);
+
+        if (!cancelled) {
+          setPreviewAvaluo({
+            ...avaluo,
+            imagenPrincipalBase64,
+            imagenesAdicionalesBase64: imagenesAdicionalesBase64.filter(Boolean),
+          });
+        }
+      } catch (err) {
+        console.warn('No se pudo preparar la imagen de vista previa del PDF. Se usará placeholder.', err);
+        if (!cancelled) {
+          setPreviewAvaluo({
+            ...avaluo,
+            imagenPrincipalBase64: '',
+            imagenesAdicionalesBase64: [],
+          });
+        }
+      }
+    };
+
+    if (showPreview) preparePreviewImage();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [avaluo, showPreview]);
+
   const handleClick = async () => {
     if (loading) return;
     setLoading(true); setError('');
@@ -27,6 +72,6 @@ export default function DownloadAvaluoPdfButton({ avaluo, className = '' }: { av
       </button>
     </div>
     {error && <span className='text-xs text-red-300'>{error}</span>}
-    {showPreview && <div className='avaluo-pdf-preview-panel'><AvaluoPdfTemplate avaluo={avaluo} /></div>}
+    {showPreview && <div className='avaluo-pdf-preview-panel'><AvaluoPdfTemplate avaluo={previewAvaluo} /></div>}
   </div>;
 }

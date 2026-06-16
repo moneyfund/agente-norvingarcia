@@ -175,5 +175,5 @@ function ReportImage({ src, alt, className }) {
     return <div className={`${className} flex flex-col items-center justify-center border border-dashed border-slate-300 bg-gradient-to-br from-slate-50 to-slate-100 text-center text-slate-500`}><span className="text-3xl">🏡</span><span className="mt-2 text-sm font-medium">Imagen no disponible</span></div>;
   }
 
-  return <img crossOrigin="anonymous" src={src} alt={alt} className={className} />;
+  return <img src={src} alt={alt} className={className} />;
 }

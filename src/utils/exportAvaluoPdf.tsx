@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import AvaluoPdfTemplate from '../components/avaluos/AvaluoPdfTemplate';
+import { imageUrlToDataUrlViaProxy } from './imageProxy';
 
 const IMAGE_TIMEOUT_MS = 8000;
 const HTML2CANVAS_TIMEOUT_MS = 30000;
@@ -22,29 +23,10 @@ const withTimeout = async <T,>(promise: Promise<T>, ms: number, message: string)
 
 const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
-export async function imageUrlToBase64(url: string): Promise<string> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), IMAGE_TIMEOUT_MS);
-
-  try {
-    const response = await fetch(url, { mode: 'cors', signal: controller.signal });
-    if (!response.ok) throw new Error(`No se pudo cargar la imagen: ${response.status}`);
-    const blob = await response.blob();
-    return await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(String(reader.result));
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  } finally {
-    clearTimeout(timeoutId);
-  }
-}
-
 const asBase64IfPossible = async (url?: string) => {
   if (!url || url.startsWith('data:')) return url || '';
   try {
-    return await withTimeout(imageUrlToBase64(url), IMAGE_TIMEOUT_MS, 'Tiempo agotado cargando imagen para PDF.');
+    return await withTimeout(imageUrlToDataUrlViaProxy(url), IMAGE_TIMEOUT_MS, 'Tiempo agotado cargando imagen para PDF.');
   } catch (error) {
     console.warn('No se pudo preparar una imagen para el PDF. Se usará placeholder.', { url, error });
     return '';
@@ -53,8 +35,8 @@ const asBase64IfPossible = async (url?: string) => {
 
 const prepareAvaluoImagesForPdf = async (avaluo: any) => ({
   ...avaluo,
-  imagenPrincipalUrl: await asBase64IfPossible(avaluo?.imagenPrincipalUrl),
-  imagenesAdicionales: await Promise.all((avaluo?.imagenesAdicionales || []).map(asBase64IfPossible)),
+  imagenPrincipalBase64: await asBase64IfPossible(avaluo?.imagenPrincipalUrl),
+  imagenesAdicionalesBase64: await Promise.all((avaluo?.imagenesAdicionales || []).map(asBase64IfPossible)),
 });
 
 const waitForImage = async (img: HTMLImageElement) => {
