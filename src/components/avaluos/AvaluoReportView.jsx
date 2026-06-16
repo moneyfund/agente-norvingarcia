@@ -85,13 +85,14 @@ export default function AvaluoReportView({ avaluo }) {
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="Logo" className="h-10 w-10 rounded-full object-cover" />
             <div>
-              <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Norvin García · Real Estate</p>
+              <p className="text-xs uppercase tracking-[0.25em] text-slate-500">DIAMANTES REALTY GROUP</p>
               <h1 className="text-2xl font-bold">Informe técnico de avalúo</h1>
             </div>
           </div>
           <div className="text-right text-sm text-slate-500">
             <p>Fecha: {toDate(avaluo?.createdAtServer || avaluo?.createdAt)}</p>
             <p>Código: {avaluo?.id}</p>
+            <p>www.diamantesrealtygroup.com</p>
           </div>
         </div>
       </header>
@@ -171,5 +172,5 @@ function ReportImage({ src, alt, className }) {
     return <div className={`${className} flex flex-col items-center justify-center border border-dashed border-slate-300 bg-gradient-to-br from-slate-50 to-slate-100 text-center text-slate-500`}><span className="text-3xl">🏡</span><span className="mt-2 text-sm font-medium">Imagen no disponible</span></div>;
   }
 
-  return <img src={src} alt={alt} className={className} onError={() => setFailed(true)} />;
+  return <img crossOrigin="anonymous" src={src} alt={alt} className={className} onError={() => setFailed(true)} />;
 }

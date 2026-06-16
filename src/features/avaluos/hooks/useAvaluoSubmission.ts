@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { calcularAvaluo } from '../engine/avaluo.engine';
 import { ZONAS_POR_CIUDAD } from '../constants/locations';
 import { createAvaluo, updateAvaluo } from '../../../services/avaluos.service';
-import { uploadAvaluoGallery, uploadAvaluoImage, validateAvaluoGallery } from '../../../services/avaluosStorage.service';
+import { uploadAvaluoGalleryImages, uploadAvaluoMainImage, validateAvaluoGallery } from '../../../services/avaluosStorage.service';
 import { generateAvaluoAnalysis } from '../../../utils/generateAvaluoAnalysis';
 
 export const useAvaluoSubmission = (usuarioId?: string) => {
@@ -40,8 +40,8 @@ export const useAvaluoSubmission = (usuarioId?: string) => {
       const id = await createAvaluo({ ...basePayload, analisisProfesional });
       try {
         const [imagenPrincipalUrl, imagenesAdicionales] = await Promise.all([
-          imagenPrincipalFile ? uploadAvaluoImage(imagenPrincipalFile, id).catch(() => '') : Promise.resolve(''),
-          imagenesAdicionalesFiles?.length ? uploadAvaluoGallery(imagenesAdicionalesFiles, id) : Promise.resolve([]),
+          imagenPrincipalFile ? uploadAvaluoMainImage(imagenPrincipalFile, id) : Promise.resolve(''),
+          imagenesAdicionalesFiles?.length ? uploadAvaluoGalleryImages(imagenesAdicionalesFiles, id) : Promise.resolve([]),
         ]);
         await updateAvaluo(id, { imagenPrincipalUrl, imagenesAdicionales });
       } catch {
