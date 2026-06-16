@@ -68,7 +68,8 @@ export async function exportAvaluoToPdf(avaluo: any) {
   const root = createRoot(host);
 
   try {
-    await renderTemplate(root, host, avaluo);
+    const preparedAvaluo = await prepareAvaluoImagesForPdf(avaluo);
+    await renderTemplate(root, host, preparedAvaluo);
     const pages = Array.from(host.querySelectorAll('.avaluo-pdf-page')) as HTMLElement[];
     if (!pages.length) throw new Error('No se encontraron páginas para generar el PDF.');
 
@@ -97,7 +98,6 @@ export async function exportAvaluoToPdf(avaluo: any) {
     try {
       pageImages = await renderPagesToImages();
     } catch (error) {
-      const preparedAvaluo = await prepareAvaluoImagesForPdf(avaluo);
       await renderTemplate(root, host, preparedAvaluo);
       pages.splice(0, pages.length, ...(Array.from(host.querySelectorAll('.avaluo-pdf-page')) as HTMLElement[]));
       pageImages = await renderPagesToImages();
@@ -109,7 +109,7 @@ export async function exportAvaluoToPdf(avaluo: any) {
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
     });
 
-    pdf.save(`Informe-Avaluo-${slug(avaluo?.titulo || avaluo?.id)}.pdf`);
+    pdf.save(`Informe-Avaluo-${slug(preparedAvaluo?.titulo || preparedAvaluo?.id)}.pdf`);
   } finally {
     root.unmount();
     document.body.removeChild(host);
