@@ -49,9 +49,9 @@
 .avaluo-pdf-feature-row{display:grid;grid-template-columns:.85fr 1.15fr;gap:10px;padding:9px 0;border-top:1px solid #e5e7eb}
 .avaluo-pdf-feature-row span{color:#6b7280;font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:900}
 .avaluo-pdf-feature-row strong{color:#111827;font-size:12px;line-height:1.35;font-weight:800;overflow-wrap:anywhere}
-.avaluo-pdf-analysis{border-radius:28px;border:1px solid #fecaca;background:#fff;padding:30px;color:#374151;font-size:18px;line-height:1.78;text-align:justify;box-shadow:inset 8px 0 0 #b91c1c}
-.avaluo-pdf-analysis p{margin:0}
-.avaluo-pdf-analysis p+p{margin-top:22px}
+.avaluo-pdf-analysis{background:#ffffff!important;color:#0f172a!important;border:1px solid rgba(193,18,31,.25);border-left:10px solid #c1121f;border-radius:24px;padding:32px 36px;box-shadow:none;overflow:hidden;font-size:18px;line-height:1.75;text-align:justify}
+.avaluo-pdf-analysis p{margin:0 0 18px;color:#0f172a!important;text-align:justify;line-height:1.75}
+.avaluo-pdf-analysis p:last-child{margin-bottom:0}
 .avaluo-pdf-commercial-interpretation{margin-top:22px;border-radius:24px;background:#111827;color:#fff;padding:22px}
 .avaluo-pdf-commercial-interpretation h3{margin:0 0 8px;font-size:18px;font-weight:900}
 .avaluo-pdf-commercial-interpretation p{margin:0;color:#e5e7eb;font-size:14px;line-height:1.55}
