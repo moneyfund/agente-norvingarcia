@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getPropiedades } from '../../services/propiedadesService';
 import { subscribeAvaluos } from '../../services/avaluos.service';
 import DownloadAvaluoPdfButton from '../../components/avaluos/DownloadAvaluoPdfButton';
+import DeleteAvaluoButton from '../../components/avaluos/DeleteAvaluoButton';
 
 function AdminDashboardPage() {
   const [propiedades, setPropiedades] = useState([]);
@@ -27,6 +28,10 @@ function AdminDashboardPage() {
     const unsubscribe = subscribeAvaluos(setAvaluos, console.error);
     return () => unsubscribe();
   }, []);
+
+  const handleAvaluoDeleted = (id) => {
+    setAvaluos((current) => current.filter((avaluo) => avaluo.id !== id));
+  };
 
   const metrics = useMemo(() => ({
     total: propiedades.length,
@@ -66,7 +71,7 @@ function AdminDashboardPage() {
               <p className="text-sm text-slate-500">{avaluo.createdAt ? new Date(avaluo.createdAt).toLocaleString() : 'Sin fecha'}</p>
               <p className="text-sm font-semibold text-emerald-700">${Number(avaluo.valorFinal || 0).toFixed(2)}</p>
               </Link>
-              <div className="mt-2"><DownloadAvaluoPdfButton avaluo={avaluo} /></div>
+              <div className="mt-2 flex flex-wrap gap-2"><DownloadAvaluoPdfButton avaluo={avaluo} /><DeleteAvaluoButton avaluo={avaluo} onDeleted={handleAvaluoDeleted} /></div>
             </li>
           ))}
           {!avaluos.length && <li className="text-sm text-slate-500">Aún no hay avalúos guardados.</li>}

@@ -17,5 +17,7 @@ export const useAvaluosHistory = (uid?: string) => { const [items,setItems]=useS
     return () => unsub();
   }, [uid]);
 
-  return { items, refresh };
+  const removeLocal = (id: string) => setItems((current) => current.filter((item) => item.id !== id));
+
+  return { items, refresh, removeLocal };
 };
