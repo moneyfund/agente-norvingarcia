@@ -14,7 +14,7 @@ export default function AvaluosWorkspace() {
   const initialTerrenoForm = { ciudad: 'Matagalpa', zona: '', zonaData: null, unidadArea: 'm2', areaOriginal: 0, areaM2Convertida: 0, areaTerreno: 0, serviciosBasicos: { agua: false, energia: false, drenaje: false, senalTelefonica: false, internet: false }, recursosNaturales: [], riesgos: [] };
   const [form, setForm] = useState<any>(initialTerrenoForm);
   const { loading, result, error, submit, save } = useAvaluoSubmission(user?.uid);
-  const { items, refresh } = useAvaluosHistory(user?.uid);
+  const { items, refresh, removeLocal } = useAvaluosHistory(user?.uid);
 
   const handleCalculate = async () => {
     if (!propertyType) return;
@@ -36,7 +36,7 @@ export default function AvaluosWorkspace() {
       </div>
       {!!error && <p className='mt-4 rounded-xl border border-red-500/40 bg-red-900/30 p-3 text-red-100'>{error}</p>}
       <AvaluoTerrenoResultCard result={result} canSave={!!user} onSave={handleSave} />
-      <AvaluoHistoryPanel items={items} />
+      <AvaluoHistoryPanel items={items} onDeleted={removeLocal} />
     </div>
   </main>;
 }
