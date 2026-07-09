@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { ZONAS_POR_CIUDAD } from '../constants/locations';
+import { CIUDADES_AVALUO, ZONAS_POR_CIUDAD, getZonaByCiudadAndNombre } from '../constants/locations';
 import type { CiudadObjetivo } from '../types/avaluo.types';
 import { FieldCard, inputClass } from './shared';
 import { CheckboxGroup } from '../components/fields/CheckboxGroup';
@@ -8,16 +8,16 @@ import { ToggleField } from '../components/fields/ToggleField';
 
 type Props = { value: Record<string, unknown>; onChange: (k: string, v: unknown) => void; onSubmit: () => void; loading: boolean; title: string; children: ReactNode; };
 
-const CITY_OPTIONS: CiudadObjetivo[] = ['Matagalpa'];
+const CITY_OPTIONS: CiudadObjetivo[] = CIUDADES_AVALUO;
 
 function BaseForm({ value, onChange, onSubmit, loading, title, children }: Props) {
   const zonas = value.ciudad ? ZONAS_POR_CIUDAD[value.ciudad as CiudadObjetivo] : [];
   return <form onSubmit={(e)=>{e.preventDefault(); onSubmit();}} className='mt-6 grid gap-4'>
     <FieldCard title={title} icon='📊'>
-      <select className={inputClass} value={String(value.ciudad ?? '')} onChange={(e)=>{ onChange('ciudad', e.target.value); onChange('zona', ''); }}>
+      <select className={inputClass} value={String(value.ciudad ?? '')} onChange={(e)=>{ onChange('ciudad', e.target.value); onChange('zona', ''); onChange('zonaData', null); }}>
         <option value=''>Ciudad</option>{CITY_OPTIONS.map((city)=><option key={city} value={city}>{city}</option>)}
       </select>
-      <select className={inputClass} value={String(value.zona ?? '')} onChange={(e)=>onChange('zona', e.target.value)} disabled={!value.ciudad}>
+      <select className={inputClass} value={String(value.zona ?? '')} onChange={(e)=>{ const zonaNombre = e.target.value; onChange('zona', zonaNombre); onChange('zonaData', getZonaByCiudadAndNombre(String(value.ciudad || ''), zonaNombre)); }} disabled={!value.ciudad}>
         <option value=''>Zona</option>{zonas.map((z)=><option key={z.zona} value={z.zona}>{z.zona}</option>)}
       </select>
       {children}
