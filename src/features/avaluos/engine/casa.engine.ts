@@ -1,6 +1,5 @@
 import { FACTOR_ACABADOS, FACTOR_ACCESO, FACTOR_ESTADO, FACTOR_NIVEL_COMERCIAL, FACTOR_TOPOGRAFIA } from './shared/coefficients';
 import { confidence, formatServiciosBasicos, getServiciosBasicosFactor, range, safeDivide, toSafeFactor, toSafeNumber } from './shared/formulas';
-import { COSTO_CONSTRUCCION_M2 } from './shared/ranges';
 import type { CasaInput, CoeficienteAplicado, ZonaData, ResultadoAvaluo } from '../types/avaluo.types';
 
 const impactText = (coeficiente: number) => {
@@ -16,7 +15,7 @@ export const calcularCasa = (data: CasaInput, zona: ZonaData): ResultadoAvaluo =
   const areaTerreno = toSafeNumber(data.areaTerreno);
   const areaConstruccion = toSafeNumber(data.areaConstruccion);
   const valorTerrenoM2 = toSafeNumber(zona.valorTerrenoM2);
-  const costoConstruccionM2 = toSafeNumber(COSTO_CONSTRUCCION_M2[data.tipoConstruccion], 0);
+  const costoConstruccionM2 = toSafeNumber(zona.valorConstruccionM2, 0);
   const terrenoBase = areaTerreno * valorTerrenoM2;
   const construccionBase = areaConstruccion * costoConstruccionM2;
   const coef = {
@@ -36,7 +35,7 @@ export const calcularCasa = (data: CasaInput, zona: ZonaData): ResultadoAvaluo =
   const final = (valorTerreno + valorConstruccion) * (coef.plusvalia + 0.02);
   const valorFinal = toSafeNumber(final);
   const coeficientesAplicados: CoeficienteAplicado[] = [
-    coefRow('Zona / plusvalía', zona.zona, coef.plusvalia),
+    coefRow('Zona / plusvalía', `${zona.zona} (${zona.ciudad}); terreno ${valorTerrenoM2}/m², construcción ${costoConstruccionM2}/m²`, coef.plusvalia),
     coefRow('Topografía', data.topografia || 'No definido', coef.topografia),
     coefRow('Acceso', data.acceso || data.accesoGeneral || data.tipoVia || 'No definido', coef.acceso),
     coefRow('Servicios básicos', formatServiciosBasicos(data.serviciosBasicos), coef.serviciosBasicos),

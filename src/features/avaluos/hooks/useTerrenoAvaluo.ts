@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createAvaluo } from '../../../services/avaluos.service';
 import { calcularAvaluo } from '../engine/avaluo.engine';
-import { ZONAS_POR_CIUDAD } from '../constants/locations';
+import { getZonaByCiudadAndNombre } from '../constants/locations';
 import { validateTerreno } from '../validators/terreno.validator';
 import type { PropertyType, ResultadoAvaluo, TerrenoInput, ZonaData } from '../types/avaluo.types';
 
@@ -13,7 +13,7 @@ export const useTerrenoAvaluo = (usuarioId?: string) => {
   const submitTerreno = async (data: Partial<TerrenoInput>, tipoPropiedad: PropertyType) => {
     const foundErrors = validateTerreno(data);
     if (Object.keys(foundErrors).length > 0) return setErrors(foundErrors as Record<string, string>);
-    const zona = ZONAS_POR_CIUDAD[data.ciudad!].find((z) => z.zona === data.zona) as ZonaData | undefined;
+    const zona = getZonaByCiudadAndNombre(data.ciudad, data.zona) as ZonaData | undefined;
     if (!zona) return setErrors({ zona: 'Zona no disponible para la ciudad seleccionada.' });
 
     setLoading(true);

@@ -80,7 +80,7 @@ export default function AvaluoReportView({ avaluo }) {
   const coeficientes = useMemo(() => normalizeCoeficientes(avaluo?.coeficientesAplicados), [avaluo]);
 
   const analisis = esTerreno
-    ? `El terreno evaluado en ${avaluo?.zona || 'zona no definida'}, ${avaluo?.ciudad || 'ciudad no definida'}, fue analizado con base en área convertida, zona cerrada de Matagalpa, categoría territorial, suelo, accesos, servicios, riesgos y coeficientes técnicos. La clasificación ${avaluo?.zonaSnapshot?.clasificacion || 'N/D'} y el factor de plusvalía de zona se integran al factor global para generar una referencia profesional de mercado.`
+    ? `El terreno evaluado en ${avaluo?.zona || 'zona no definida'}, ${avaluo?.ciudad || 'ciudad no definida'}, fue analizado con base en área convertida, zona cerrada de Matagalpa o Estelí, categoría territorial, suelo, accesos, servicios, riesgos y coeficientes técnicos. La clasificación ${avaluo?.zonaSnapshot?.clasificacion || 'N/D'} y el factor de plusvalía de zona se integran al factor global para generar una referencia profesional de mercado.`
     : `La propiedad evaluada (${avaluo?.tipoPropiedad || 'inmueble'}) en ${avaluo?.zona || 'zona no definida'}, ${avaluo?.ciudad || 'ciudad no definida'}, presenta condiciones ${avaluo?.zonaSnapshot?.clasificacion || 'urbanas'}. Según las variables ingresadas y los coeficientes aplicados, el resultado técnico muestra una estimación consistente para uso de referencia comercial.`;
 
   return (
@@ -120,7 +120,11 @@ export default function AvaluoReportView({ avaluo }) {
         <Field label="Ciudad" value={avaluo?.ciudad} />
         <Field label="Zona" value={avaluo?.zona} />
         <Field label="Clasificación" value={avaluo?.zonaSnapshot?.clasificacion} />
+        <Field label="Tipo de entorno" value={avaluo?.zonaSnapshot?.tipoEntorno} />
         <Field label="Plusvalía" value={impactText(avaluo?.zonaSnapshot?.factorPlusvalia)} />
+        <Field label="Valor terreno m² usado" value={formatMoney(avaluo?.zonaSnapshot?.valorTerrenoM2)} />
+        <Field label="Valor construcción m²" value={formatMoney(avaluo?.zonaSnapshot?.valorConstruccionM2)} />
+        <Field label="Observación técnica" value={avaluo?.zonaSnapshot?.observacionTecnica} />
       </section>
 
       {esTerreno && <Section title="Resumen técnico de terreno">

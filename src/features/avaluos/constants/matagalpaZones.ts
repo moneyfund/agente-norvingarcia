@@ -1,23 +1,22 @@
 import type { ZonaData } from '../types/avaluo.types';
 
+const obs = (nombre: string, ciudad: string, entorno: string) => `Zona ${nombre} en ${ciudad} con entorno ${entorno}; valores base iniciales centralizados para ajustes técnicos futuros.`;
+
 export const MATAGALPA_ZONES: ZonaData[] = [
-  { ciudad: 'Matagalpa', zona: 'Zona urbana', nombre: 'Zona urbana', clasificacion: 'B+', tipoEntorno: 'Mixto', factorPlusvalia: 1, valorTerrenoM2: 40 },
-  { ciudad: 'Matagalpa', zona: 'Zona semiurbana', nombre: 'Zona semiurbana', clasificacion: 'B', tipoEntorno: 'Residencial media', factorPlusvalia: 1, valorTerrenoM2: 20 },
-  { ciudad: 'Matagalpa', zona: 'Zona rural norte', nombre: 'Zona rural norte', clasificacion: 'C', tipoEntorno: 'Rural productivo', factorPlusvalia: 1, valorTerrenoM2: 7 },
-  { ciudad: 'Matagalpa', zona: 'Zona rural sur', nombre: 'Zona rural sur', clasificacion: 'C', tipoEntorno: 'Rural productivo', factorPlusvalia: 1, valorTerrenoM2: 5 },
-  { ciudad: 'Matagalpa', zona: 'Molino Norte', nombre: 'Molino Norte', clasificacion: 'A', tipoEntorno: 'Residencial alta', factorPlusvalia: 1.12, valorTerrenoM2: 55 },
-  { ciudad: 'Matagalpa', zona: 'Guanuca', nombre: 'Guanuca', clasificacion: 'A', tipoEntorno: 'Mixto', factorPlusvalia: 1.14, valorTerrenoM2: 55 },
-  { ciudad: 'Matagalpa', zona: 'Las Marías', nombre: 'Las Marías', clasificacion: 'B+', tipoEntorno: 'Residencial alta', factorPlusvalia: 1.08, valorTerrenoM2: 48 },
-  { ciudad: 'Matagalpa', zona: 'Apante', nombre: 'Apante', clasificacion: 'B', tipoEntorno: 'Residencial media', factorPlusvalia: 1.03, valorTerrenoM2: 42 },
-  { ciudad: 'Matagalpa', zona: 'Walter Mendoza', nombre: 'Walter Mendoza', clasificacion: 'B+', tipoEntorno: 'Mixto', factorPlusvalia: 1.06, valorTerrenoM2: 45 },
-  { ciudad: 'Matagalpa', zona: 'Linda Vista', nombre: 'Linda Vista', clasificacion: 'B', tipoEntorno: 'Residencial media', factorPlusvalia: 1.02, valorTerrenoM2: 40 },
-  { ciudad: 'Matagalpa', zona: 'Santa Teresita', nombre: 'Santa Teresita', clasificacion: 'B', tipoEntorno: 'Residencial media', factorPlusvalia: 1, valorTerrenoM2: 38 },
-  { ciudad: 'Matagalpa', zona: 'El Castillo', nombre: 'El Castillo', clasificacion: 'C', tipoEntorno: 'Popular', factorPlusvalia: 0.95, valorTerrenoM2: 32 },
-  { ciudad: 'Matagalpa', zona: 'Totolate Arriba', nombre: 'Totolate Arriba', clasificacion: 'C', tipoEntorno: 'Popular', factorPlusvalia: 0.94, valorTerrenoM2: 30 },
-  { ciudad: 'Matagalpa', zona: 'Totolate Abajo', nombre: 'Totolate Abajo', clasificacion: 'C', tipoEntorno: 'Popular', factorPlusvalia: 0.92, valorTerrenoM2: 28 },
-  { ciudad: 'Matagalpa', zona: 'Sor María Romero', nombre: 'Sor María Romero', clasificacion: 'C', tipoEntorno: 'Popular', factorPlusvalia: 0.91, valorTerrenoM2: 27 },
-  { ciudad: 'Matagalpa', zona: 'Las Tejas', nombre: 'Las Tejas', clasificacion: 'B', tipoEntorno: 'Residencial media', factorPlusvalia: 1.03, valorTerrenoM2: 41 },
-  { ciudad: 'Matagalpa', zona: 'San Francisco', nombre: 'San Francisco', clasificacion: 'B+', tipoEntorno: 'Mixto', factorPlusvalia: 1.06, valorTerrenoM2: 44 },
-  { ciudad: 'Matagalpa', zona: 'El Progreso', nombre: 'El Progreso', clasificacion: 'C', tipoEntorno: 'Popular', factorPlusvalia: 0.93, valorTerrenoM2: 29 },
-  { ciudad: 'Matagalpa', zona: 'Primero de Mayo', nombre: 'Primero de Mayo', clasificacion: 'C', tipoEntorno: 'Popular', factorPlusvalia: 0.88, valorTerrenoM2: 25 }
+  { id: 'matagalpa-molino-norte', ciudad: 'Matagalpa', zona: 'Molino Norte', nombre: 'Molino Norte', clasificacion: 'A', tipoEntorno: 'Residencial alta', factorPlusvalia: 1.18, valorTerrenoM2: 145, valorConstruccionM2: 580, observacionTecnica: obs('Molino Norte', 'Matagalpa', 'Residencial alta') },
+  { id: 'matagalpa-guanuca', ciudad: 'Matagalpa', zona: 'Guanuca', nombre: 'Guanuca', clasificacion: 'A', tipoEntorno: 'Residencial alta', factorPlusvalia: 1.20, valorTerrenoM2: 150, valorConstruccionM2: 590, observacionTecnica: obs('Guanuca', 'Matagalpa', 'Residencial alta') },
+  { id: 'matagalpa-las-marias', ciudad: 'Matagalpa', zona: 'Las Marías', nombre: 'Las Marías', clasificacion: 'A', tipoEntorno: 'Residencial alta', factorPlusvalia: 1.19, valorTerrenoM2: 148, valorConstruccionM2: 585, observacionTecnica: obs('Las Marías', 'Matagalpa', 'Residencial alta') },
+  { id: 'matagalpa-residencial-las-nubes', ciudad: 'Matagalpa', zona: 'Residencial Las Nubes', nombre: 'Residencial Las Nubes', clasificacion: 'A', tipoEntorno: 'Residencial alta', factorPlusvalia: 1.22, valorTerrenoM2: 155, valorConstruccionM2: 600, observacionTecnica: obs('Residencial Las Nubes', 'Matagalpa', 'Residencial alta') },
+  { id: 'matagalpa-apante', ciudad: 'Matagalpa', zona: 'Apante', nombre: 'Apante', clasificacion: 'B+', tipoEntorno: 'Residencial media alta', factorPlusvalia: 1.12, valorTerrenoM2: 125, valorConstruccionM2: 540, observacionTecnica: obs('Apante', 'Matagalpa', 'Residencial media alta') },
+  { id: 'matagalpa-walter-mendoza', ciudad: 'Matagalpa', zona: 'Walter Mendoza', nombre: 'Walter Mendoza', clasificacion: 'B', tipoEntorno: 'Residencial medio', factorPlusvalia: 1.05, valorTerrenoM2: 105, valorConstruccionM2: 500, observacionTecnica: obs('Walter Mendoza', 'Matagalpa', 'Residencial medio') },
+  { id: 'matagalpa-linda-vista', ciudad: 'Matagalpa', zona: 'Linda Vista', nombre: 'Linda Vista', clasificacion: 'B', tipoEntorno: 'Residencial medio', factorPlusvalia: 1.04, valorTerrenoM2: 100, valorConstruccionM2: 490, observacionTecnica: obs('Linda Vista', 'Matagalpa', 'Residencial medio') },
+  { id: 'matagalpa-santa-teresita', ciudad: 'Matagalpa', zona: 'Santa Teresita', nombre: 'Santa Teresita', clasificacion: 'B+', tipoEntorno: 'Residencial medio', factorPlusvalia: 1.10, valorTerrenoM2: 118, valorConstruccionM2: 520, observacionTecnica: obs('Santa Teresita', 'Matagalpa', 'Residencial medio') },
+  { id: 'matagalpa-el-castillo', ciudad: 'Matagalpa', zona: 'El Castillo', nombre: 'El Castillo', clasificacion: 'B', tipoEntorno: 'Residencial medio', factorPlusvalia: 1.03, valorTerrenoM2: 95, valorConstruccionM2: 480, observacionTecnica: obs('El Castillo', 'Matagalpa', 'Residencial medio') },
+  { id: 'matagalpa-totolate-arriba', ciudad: 'Matagalpa', zona: 'Totolate Arriba', nombre: 'Totolate Arriba', clasificacion: 'B', tipoEntorno: 'Residencial medio', factorPlusvalia: 1.00, valorTerrenoM2: 90, valorConstruccionM2: 470, observacionTecnica: obs('Totolate Arriba', 'Matagalpa', 'Residencial medio') },
+  { id: 'matagalpa-totolate-abajo', ciudad: 'Matagalpa', zona: 'Totolate Abajo', nombre: 'Totolate Abajo', clasificacion: 'B', tipoEntorno: 'Residencial medio', factorPlusvalia: 0.98, valorTerrenoM2: 85, valorConstruccionM2: 460, observacionTecnica: obs('Totolate Abajo', 'Matagalpa', 'Residencial medio') },
+  { id: 'matagalpa-sor-maria-romero', ciudad: 'Matagalpa', zona: 'Sor María Romero', nombre: 'Sor María Romero', clasificacion: 'B', tipoEntorno: 'Residencial medio', factorPlusvalia: 1.02, valorTerrenoM2: 92, valorConstruccionM2: 470, observacionTecnica: obs('Sor María Romero', 'Matagalpa', 'Residencial medio') },
+  { id: 'matagalpa-las-tejas', ciudad: 'Matagalpa', zona: 'Las Tejas', nombre: 'Las Tejas', clasificacion: 'C', tipoEntorno: 'Popular', factorPlusvalia: 0.92, valorTerrenoM2: 70, valorConstruccionM2: 430, observacionTecnica: obs('Las Tejas', 'Matagalpa', 'Popular') },
+  { id: 'matagalpa-san-francisco', ciudad: 'Matagalpa', zona: 'San Francisco', nombre: 'San Francisco', clasificacion: 'B+', tipoEntorno: 'Residencial medio', factorPlusvalia: 1.06, valorTerrenoM2: 110, valorConstruccionM2: 510, observacionTecnica: obs('San Francisco', 'Matagalpa', 'Residencial medio') },
+  { id: 'matagalpa-el-progreso', ciudad: 'Matagalpa', zona: 'El Progreso', nombre: 'El Progreso', clasificacion: 'C', tipoEntorno: 'Popular', factorPlusvalia: 0.90, valorTerrenoM2: 65, valorConstruccionM2: 420, observacionTecnica: obs('El Progreso', 'Matagalpa', 'Popular') },
+  { id: 'matagalpa-primero-de-mayo', ciudad: 'Matagalpa', zona: 'Primero de Mayo', nombre: 'Primero de Mayo', clasificacion: 'C', tipoEntorno: 'Popular', factorPlusvalia: 0.88, valorTerrenoM2: 60, valorConstruccionM2: 410, observacionTecnica: obs('Primero de Mayo', 'Matagalpa', 'Popular') },
 ];

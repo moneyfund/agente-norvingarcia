@@ -1,7 +1,6 @@
-import { ZONAS_POR_CIUDAD } from '../constants/locations';
+import { CIUDADES_AVALUO, getZonasByCiudad } from '../constants/locations';
 import { M2_POR_MANZANA } from '../engine/terreno.engine';
 
-const CIUDAD_UNICA = 'Matagalpa';
 const unidadesArea = [
   { value: 'm2', label: 'Metros cuadrados' },
   { value: 'manzana', label: 'Manzanas' },
@@ -55,13 +54,13 @@ function GeneralReportFields({ value, onChange }) {
 }
 
 export default function TerrenoForm({ value, onChange, onSubmit, loading, showSubmit = true }) {
-  const zonasDisponibles = ZONAS_POR_CIUDAD[CIUDAD_UNICA] || [];
+  const ciudadSeleccionada = value.ciudad || 'Matagalpa';
+  const zonasDisponibles = getZonasByCiudad(ciudadSeleccionada);
 
   if (!showSubmit) {
-    const ciudadSeleccionada = value.ciudad || CIUDAD_UNICA;
     return <div className='text-slate-200'><GeneralReportFields value={value} onChange={onChange} /><div className='grid gap-4 md:grid-cols-2'>
       {field('Título del avalúo', 'titulo', value, onChange)}
-      {selectField({ label: 'Ciudad', val: ciudadSeleccionada, opts: [CIUDAD_UNICA], onChange: (ciudad) => onChange('ciudad', ciudad) })}
+      {selectField({ label: 'Ciudad', val: ciudadSeleccionada, opts: CIUDADES_AVALUO, onChange: (ciudad) => { onChange('ciudad', ciudad); onChange('zona', ''); onChange('zonaData', null); } })}
       {selectField({
         label: 'Zona',
         val: value.zona || '',
@@ -113,19 +112,18 @@ export default function TerrenoForm({ value, onChange, onSubmit, loading, showSu
     <GeneralReportFields value={value} onChange={onChange} />
     <div className='mb-5 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4'>
       <h2 className='text-lg font-semibold text-amber-100'>Ficha técnica profesional de terreno</h2>
-      <p className='mt-1 text-sm text-amber-50/80'>Campos cerrados, cuantificables y conectados al motor técnico para solares urbanos, áreas semiurbanas y terrenos rurales de Matagalpa.</p>
+      <p className='mt-1 text-sm text-amber-50/80'>Campos cerrados, cuantificables y conectados al motor técnico para solares urbanos, áreas semiurbanas y terrenos rurales de Matagalpa y Estelí.</p>
     </div>
 
     <div className='grid gap-4 md:grid-cols-2'>
       {field('Título del avalúo', 'titulo', value, onChange)}
-      {selectField({ label: 'Ciudad', val: CIUDAD_UNICA, opts: [CIUDAD_UNICA], onChange: () => onChange('ciudad', CIUDAD_UNICA) })}
+      {selectField({ label: 'Ciudad', val: ciudadSeleccionada, opts: CIUDADES_AVALUO, onChange: (ciudad) => { onChange('ciudad', ciudad); onChange('zona', ''); onChange('zonaData', null); } })}
       {selectField({
-        label: 'Zona / ubicación en Matagalpa',
+        label: `Zona / ubicación en ${ciudadSeleccionada}`,
         val: value.zona || '',
         opts: zonasDisponibles.map((z) => z.zona),
         onChange: (zonaNombre) => {
           const zonaCompleta = zonasDisponibles.find((z) => z.zona === zonaNombre) || null;
-          onChange('ciudad', CIUDAD_UNICA);
           onChange('zona', zonaNombre);
           onChange('zonaData', zonaCompleta);
         },

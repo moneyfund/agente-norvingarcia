@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { calcularAvaluo } from '../engine/avaluo.engine';
-import { ZONAS_POR_CIUDAD } from '../constants/locations';
+import { getZonaByCiudadAndNombre } from '../constants/locations';
 import { createAvaluo, updateAvaluo } from '../../../services/avaluos.service';
 import { uploadAvaluoGalleryImages, uploadAvaluoMainImage, validateAvaluoGallery } from '../../../services/avaluosStorage.service';
 import { generateAvaluoAnalysis } from '../../../utils/generateAvaluoAnalysis';
@@ -17,8 +17,7 @@ export const useAvaluoSubmission = (usuarioId?: string) => {
       console.log('FILE SELECCIONADO', data.imagenPrincipalFile || null);
       if (data.imagenPrincipalFile) validateAvaluoGallery([data.imagenPrincipalFile]);
       validateAvaluoGallery(data.imagenesAdicionalesFiles || []);
-      const zonasCiudad = ZONAS_POR_CIUDAD[data.ciudad || 'Matagalpa'] || [];
-      const zona = data.zonaData || zonasCiudad.find((z) => z.zona === data.zona);
+      const zona = data.zonaData || getZonaByCiudadAndNombre(data.ciudad || 'Matagalpa', data.zona);
       if (!zona) throw new Error('Selecciona una zona válida.');
       const calc = calcularAvaluo(tipoPropiedad, data, zona);
       setResult(calc);

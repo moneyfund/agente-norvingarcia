@@ -29,7 +29,7 @@ export default function AvaluosWorkspace() {
   return <main className='min-h-screen bg-gradient-to-br from-[#0b0f17] via-[#111827] to-[#10233c] px-4 py-10'>
     <div className='mx-auto max-w-7xl'>
       <h1 className='text-3xl font-bold text-white'>Plataforma Profesional de Avalúos</h1>
-      <p className='text-slate-300 mt-2'>Peritaje inmobiliario técnico · Matagalpa · Casas y Terrenos</p>
+      <p className='text-slate-300 mt-2'>Peritaje inmobiliario técnico · Matagalpa y Estelí · Casas y Terrenos</p>
       <div className='mt-8 rounded-2xl border border-amber-500/30 bg-slate-950/60 p-6'>
         <PropertyTypeCards value={propertyType} onChange={(t)=>{ setPropertyType(t); setForm(initialTerrenoForm); }} />
         <div className='mt-6'>{propertyType==='terreno'&&<TerrenoForm value={form} onChange={(k,v)=>setForm((p)=>({ ...p,[k]:v }))} onSubmit={handleCalculate} loading={loading} />}{propertyType==='casa'&&<CasaForm value={form} onChange={(k,v)=>setForm((p)=>({ ...p,[k]:v }))} onSubmit={handleCalculate} loading={loading} />}</div>
