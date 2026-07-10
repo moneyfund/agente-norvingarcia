@@ -35,9 +35,10 @@ export const useAvaluoSubmission = (usuarioId?: string) => {
     setError('');
     try {
       const { imagenPrincipalFile, imagenesAdicionalesFiles, ...caracteristicas } = snapshot.data;
-      const basePayload = { titulo: snapshot.data.titulo || `Avalúo de ${snapshot.tipoPropiedad}`, tipoPropiedad: snapshot.tipoPropiedad, agenteEvaluador: snapshot.data.agenteEvaluador, telefonoAgente: snapshot.data.telefonoAgente || '', ciudad: snapshot.data.ciudad || 'Matagalpa', zona: snapshot.data.zona, unidadArea: result.unidadArea ?? snapshot.data.unidadArea, areaOriginal: result.areaOriginal ?? snapshot.data.areaOriginal, areaM2Convertida: result.areaM2Convertida ?? snapshot.data.areaM2Convertida, createdAt: new Date().toISOString(), usuarioId, imagenPrincipalUrl: '', imagenPrincipal: '', imagenesAdicionales: [], imagenes: [], caracteristicas, zonaSnapshot: snapshot.zona, coeficientesAplicados: result.coeficientesAplicados, valorBase: result.valorBase, valorTerreno: result.valorTerreno, valorConstruccion: result.valorConstruccion, valorFinal: result.valorFinalEstimado, valorM2: result.valorM2, rangoMercado: result.rangoMercado, nivelConfianza: result.nivelConfianza };
-      const analisisProfesional = generateAvaluoAnalysis(basePayload);
-      const id = await createAvaluo({ ...basePayload, analisisProfesional });
+      const datosGuardar = { titulo: snapshot.data.titulo || `Avalúo de ${snapshot.tipoPropiedad}`, tipoPropiedad: snapshot.tipoPropiedad, agenteEvaluador: snapshot.data.agenteEvaluador, telefonoAgente: snapshot.data.telefonoAgente || '', ciudad: snapshot.data.ciudad || 'Matagalpa', zona: snapshot.data.zona, unidadArea: result.unidadArea ?? snapshot.data.unidadArea, areaOriginal: result.areaOriginal ?? snapshot.data.areaOriginal, areaM2Convertida: result.areaM2Convertida ?? snapshot.data.areaM2Convertida, createdAt: new Date().toISOString(), usuarioId, imagenPrincipalUrl: '', imagenPrincipal: '', imagenesAdicionales: [], imagenes: [], caracteristicas, zonaSnapshot: snapshot.zona, coeficientesAplicados: result.coeficientesAplicados, valorBase: result.valorBase, valorTerreno: result.valorTerreno, valorConstruccion: result.valorConstruccion, valorFinal: result.valorFinalEstimado, valorM2: result.valorM2, rangoMercado: result.rangoMercado, nivelConfianza: result.nivelConfianza };
+      console.log(datosGuardar);
+      const analisisProfesional = generateAvaluoAnalysis(datosGuardar);
+      const id = await createAvaluo({ ...datosGuardar, analisisProfesional });
       console.log('docRef.id', id);
       console.log('mainImageFile', imagenPrincipalFile || null);
 
