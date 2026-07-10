@@ -1,7 +1,7 @@
 export type PropertyType = 'terreno' | 'casa';
 export type CiudadObjetivo = 'Matagalpa' | 'Estelí';
 
-export type UnidadArea = 'm2' | 'manzana';
+export type UnidadArea = 'm2' | 'manzana' | 'vara2';
 export type TipoTerritorio = 'Urbano' | 'Semiurbano' | 'Semirural' | 'Rural cercano' | 'Rural productivo' | 'Rural aislado';
 export type Topografia = 'Plano' | 'Semi plano' | 'Ondulado' | 'Inclinado' | 'Muy inclinado' | 'Quebrado';
 export type Acceso = 'Pavimentado' | 'Adoquinado' | 'Macadán' | 'Tierra';
@@ -31,6 +31,8 @@ export interface TerrenoInput {
   unidadArea?: UnidadArea;
   areaOriginal?: number;
   areaM2Convertida?: number;
+  areaConvertida?: number;
+  unidad?: UnidadArea;
   areaTerreno: number;
   tipoTerritorio?: TipoTerritorio;
   tipoSuelo?: TipoSuelo;
