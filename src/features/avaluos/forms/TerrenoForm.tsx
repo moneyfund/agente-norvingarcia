@@ -1,3 +1,4 @@
+import InformeGeneralSection from './InformeGeneralSection';
 import { CIUDADES_AVALUO, getZonasByCiudad } from '../constants/locations';
 import { M2_POR_MANZANA } from '../engine/terreno.engine';
 
@@ -38,27 +39,12 @@ const legacyEntornos = ['Residencial premium', 'Residencial media', 'Comercial',
 const legacyDesarrollo = ['Consolidado', 'Crecimiento', 'Emergente', 'Bajo desarrollo'];
 
 
-function GeneralReportFields({ value, onChange }) {
-  const selectedGallery = value.imagenesAdicionalesFiles || [];
-  const accept = 'image/jpeg,image/jpg,image/png,image/webp';
-  return <div className='mb-5 rounded-2xl border border-amber-500/30 bg-slate-950/70 p-4'>
-    <h3 className='text-lg font-semibold text-amber-100'>Datos generales para informe PDF</h3>
-    <p className='mt-1 text-sm text-slate-300'>Estos datos se guardan en Firestore y se usan para generar el informe profesional descargable.</p>
-    <div className='mt-4 grid gap-4 md:grid-cols-2'>
-      {field('Nombre del agente evaluador *', 'agenteEvaluador', value, onChange)}
-      {field('Teléfono del agente (opcional)', 'telefonoAgente', value, onChange)}
-      <label className={base}><span>Imagen principal de la propiedad</span><input type='file' accept={accept} className='mt-2 w-full rounded bg-slate-800 p-2 text-sm' onChange={e => onChange('imagenPrincipalFile', e.target.files?.[0] || null)} /><small className='text-slate-400'>Recomendado. JPG, JPEG, PNG o WEBP. Máximo 10 MB.</small></label>
-      <label className={base}><span>Fotografías adicionales (máximo 5)</span><input type='file' accept={accept} multiple className='mt-2 w-full rounded bg-slate-800 p-2 text-sm' onChange={e => onChange('imagenesAdicionalesFiles', Array.from(e.target.files || []))} /><small className='text-slate-400'>{selectedGallery.length}/5 seleccionadas. Cada imagen debe pesar máximo 10 MB.</small></label>
-    </div>
-  </div>;
-}
-
 export default function TerrenoForm({ value, onChange, onSubmit, loading, showSubmit = true }) {
   const ciudadSeleccionada = value.ciudad || 'Matagalpa';
   const zonasDisponibles = getZonasByCiudad(ciudadSeleccionada);
 
   if (!showSubmit) {
-    return <div className='text-slate-200'><GeneralReportFields value={value} onChange={onChange} /><div className='grid gap-4 md:grid-cols-2'>
+    return <div className='text-slate-200'><InformeGeneralSection value={value} onChange={onChange} /><div className='grid gap-4 md:grid-cols-2'>
       {field('Título del avalúo', 'titulo', value, onChange)}
       {selectField({ label: 'Ciudad', val: ciudadSeleccionada, opts: CIUDADES_AVALUO, onChange: (ciudad) => { onChange('ciudad', ciudad); onChange('zona', ''); onChange('zonaData', null); } })}
       {selectField({
@@ -109,7 +95,7 @@ export default function TerrenoForm({ value, onChange, onSubmit, loading, showSu
   };
 
   return <div className='text-slate-200'>
-    <GeneralReportFields value={value} onChange={onChange} />
+    <InformeGeneralSection value={value} onChange={onChange} />
     <div className='mb-5 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4'>
       <h2 className='text-lg font-semibold text-amber-100'>Ficha técnica profesional de terreno</h2>
       <p className='mt-1 text-sm text-amber-50/80'>Campos cerrados, cuantificables y conectados al motor técnico para solares urbanos, áreas semiurbanas y terrenos rurales de Matagalpa y Estelí.</p>
