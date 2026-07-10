@@ -21,6 +21,7 @@ export const calcularCasa = (data: CasaInput, zona: ZonaData): ResultadoAvaluo =
   const costoConstruccionM2 = toSafeNumber(zona.valorConstruccionM2, 0);
   const terrenoBase = areaTerreno * valorTerrenoM2;
   const construccionBase = areaConstruccion * costoConstruccionM2;
+  const valorBase = terrenoBase + construccionBase;
 
   const ubicacion = avg([toSafeFactor(zona.factorPlusvalia), pick('nivelComercial', data.nivelComercial), pick('seguridadZona', data.seguridadZona), pick('desarrolloUrbano', data.desarrolloUrbano), pick('uso', (data as any).usoInmueble || 'Residencial')]);
   const terreno = avg([pick('topografia', data.topografia), pick('formaTerreno', data.formaTerreno), pick('tipoSuelo', data.tipoSuelo), pick('accesoGeneral', data.accesoGeneral || data.acceso), toSafeFactor(getServiciosBasicosFactor(data.serviciosBasicos))]);
@@ -40,5 +41,5 @@ export const calcularCasa = (data: CasaInput, zona: ZonaData): ResultadoAvaluo =
     coefRow('Extras y amenidades', 'Distribución, seguridad, sostenibilidad y equipamiento', extras),
     coefRow('Matriz final ponderada', 'Ubicación 30%, terreno 15%, construcción 30%, estado 15%, extras 10%', factorPonderado),
   ];
-  return { valorTerreno: toSafeNumber(valorTerreno), valorConstruccion: toSafeNumber(valorConstruccion), valorM2: safeDivide(valorFinal, areaConstruccion || areaTerreno, 0), clasificacionZona: zona.clasificacion, plusvaliaAplicada: zona.factorPlusvalia, coeficientesAplicados, rangoMercado: range(valorFinal), nivelConfianza: confidence(coeficientesAplicados.length + 8), valorFinalEstimado: valorFinal, areaOriginal, unidadArea: unidad as any, areaM2Convertida: areaTerreno, areaM2: areaTerreno, factorGlobal: factorPonderado };
+  return { valorTerreno: toSafeNumber(valorTerreno), valorConstruccion: toSafeNumber(valorConstruccion), valorM2: safeDivide(valorFinal, areaConstruccion || areaTerreno, 0), clasificacionZona: zona.clasificacion, plusvaliaAplicada: zona.factorPlusvalia, coeficientesAplicados, rangoMercado: range(valorFinal), nivelConfianza: confidence(coeficientesAplicados.length + 8), valorFinalEstimado: valorFinal, valorBase: toSafeNumber(valorBase), areaOriginal, unidadArea: unidad as any, areaM2Convertida: areaTerreno, areaM2: areaTerreno, factorGlobal: factorPonderado };
 };

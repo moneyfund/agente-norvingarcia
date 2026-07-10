@@ -3,6 +3,17 @@ import { auth, db } from '../firebase/config';
 
 const avaluosCollection = collection(db, 'avaluos');
 
+const normalizeFirestoreData = (value) => {
+  if (value === undefined) return null;
+  if (Array.isArray(value)) return value.map(normalizeFirestoreData);
+  if (value && typeof value === 'object' && !(value instanceof Date)) {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, normalizeFirestoreData(item)]),
+    );
+  }
+  return value;
+};
+
 export const createAvaluo = async (payload) => {
   const authUser = auth.currentUser;
   if (!authUser?.uid) {
@@ -13,18 +24,21 @@ export const createAvaluo = async (payload) => {
     throw new Error('No tienes permisos para guardar avalúos de otro usuario.');
   }
 
-  const docRef = await addDoc(avaluosCollection, {
+  const datosGuardar = normalizeFirestoreData({
     ...payload,
     usuarioId: authUser.uid,
     createdAtServer: serverTimestamp(),
   });
+  console.log(datosGuardar);
+
+  const docRef = await addDoc(avaluosCollection, datosGuardar);
   return docRef.id;
 };
 
 export const updateAvaluo = async (id, payload) => {
   if (!id) throw new Error('ID de avalúo inválido para actualización.');
   const docRef = doc(db, 'avaluos', id);
-  await updateDoc(docRef, payload);
+  await updateDoc(docRef, normalizeFirestoreData(payload));
 };
 
 export const getAvaluosByUser = async (usuarioId) => {
