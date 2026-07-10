@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import AvaluoPdfTemplate from '../components/avaluos/AvaluoPdfTemplate';
+import HouseReportPDF from '../components/avaluos/HouseReportPDF';
 import { imageUrlToDataUrlViaProxy } from './imageProxy';
 
 const IMAGE_TIMEOUT_MS = 8000;
@@ -77,8 +78,8 @@ const asBase64IfPossible = async (url?: string) => {
 
 const prepareAvaluoImagesForPdf = async (avaluo: any) => ({
   ...avaluo,
-  imagenPrincipalBase64: await asBase64IfPossible(avaluo?.imagenPrincipalUrl),
-  imagenesAdicionalesBase64: await Promise.all((avaluo?.imagenesAdicionales || []).slice(0, 5).map(asBase64IfPossible)),
+  imagenPrincipalBase64: await asBase64IfPossible((avaluo?.imagenPrincipalUrl || avaluo?.imagenPrincipal)),
+  imagenesAdicionalesBase64: await Promise.all(((avaluo?.imagenesAdicionales || avaluo?.imagenes || [])).slice(0, 5).map(asBase64IfPossible)),
 });
 
 const waitForImage = async (img: HTMLImageElement) => {
@@ -121,7 +122,7 @@ const waitForImages = async (container: HTMLElement) => {
 };
 
 const renderTemplate = async (root: ReturnType<typeof createRoot>, host: HTMLElement, avaluo: any) => {
-  root.render(<AvaluoPdfTemplate avaluo={avaluo} />);
+  root.render(avaluo?.tipoPropiedad === 'casa' ? <HouseReportPDF avaluo={avaluo} /> : <AvaluoPdfTemplate avaluo={avaluo} />);
   await nextFrame();
   await nextFrame();
   await waitForImages(host);
