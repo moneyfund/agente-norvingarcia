@@ -7,28 +7,36 @@ const unidadesArea = [
   { value: 'manzana', label: 'Manzanas' },
 ];
 const tipoTerritorio = ['Urbano', 'Semiurbano', 'Semirural', 'Rural cercano', 'Rural productivo', 'Rural aislado'];
-const tipoSuelo = ['Suelo firme', 'Suelo arcilloso', 'Suelo rocoso', 'Suelo arenoso', 'Suelo húmedo', 'Suelo agrícola fértil', 'Suelo mixto'];
-const topografias = ['Plano', 'Semi plano', 'Ondulado', 'Inclinado', 'Muy inclinado', 'Quebrado'];
+const tipoSuelo = ['Arcilloso', 'Franco', 'Franco arcilloso', 'Franco arenoso', 'Arenoso', 'Pedregoso', 'Volcánico', 'Muy fértil', 'Rocoso'];
+const topografias = ['Plano', 'Ondulado leve', 'Ondulado medio', 'Quebrado', 'Escarpado', 'Con terrazas naturales'];
 const accesosGenerales = ['Excelente', 'Bueno', 'Regular', 'Difícil', 'Muy difícil'];
-const tiposVia = ['Carretera pavimentada', 'Calle adoquinada', 'Calle de concreto', 'Macadán', 'Tierra transitable', 'Camino rural', 'Vereda'];
+const tiposVia = ['Asfalto', 'Concreto', 'Adoquín', 'Macadán', 'Tierra buena', 'Tierra regular', 'Camino temporal'];
 const nivelesTrafico = ['Alto', 'Medio', 'Bajo', 'Muy bajo'];
 const seguridad = ['Alta', 'Media alta', 'Media', 'Baja'];
-const formas = ['Regular', 'Irregular leve', 'Irregular compleja', 'Esquinero', 'Fondo amplio', 'Frente amplio'];
+const formas = ['Regular', 'Rectangular', 'Cuadrado', 'Irregular leve', 'Irregular compleja', 'Esquinero', 'Fondo amplio', 'Frente amplio'];
 const entornos = ['Residencial premium', 'Residencial medio', 'Comercial', 'Mixto', 'Popular', 'Rural productivo', 'Natural/turístico'];
-const usos = ['Residencial', 'Comercial', 'Mixto', 'Lotificación', 'Agrícola', 'Ganadero', 'Turístico', 'Industrial liviano', 'Reserva natural'];
+const usos = ['Residencial', 'Comercial', 'Industrial', 'Turístico', 'Agrícola', 'Ganadero', 'Forestal', 'Mixto', 'Lotificación'];
 const desarrollo = ['Consolidado', 'En crecimiento', 'Emergente', 'Bajo desarrollo', 'Sin desarrollo urbano'];
 const deforestacion = ['Sin deforestación', 'Baja', 'Media', 'Alta', 'Muy alta'];
 const proximidades = ['Cerca de ciudad principal', 'Cerca de comunidad', 'Remoto'];
 const estadosLegales = ['Documentación completa', 'Documentación revisable', 'Problemas legales'];
 const recursos = ['Fuente de agua', 'Río o quebrada', 'Pozo', 'Árboles maderables', 'Vista panorámica', 'Área cultivable', 'Ninguno'];
+const hidrologias = ['Pozo', 'Río permanente', 'Río estacional', 'Quebrada', 'Nacimiento', 'Lago', 'Laguna', 'Sin agua'];
+const vegetaciones = ['Bosque', 'Pasto', 'Cultivo', 'Matorral', 'Sin cobertura', 'Bosque secundario', 'Bosque primario'];
+const orientaciones = ['Norte', 'Sur', 'Este', 'Oeste', 'Esquina', 'Doble frente'];
+const liquidez = ['Muy alta', 'Alta', 'Media', 'Baja', 'Muy baja'];
+const demanda = ['Muy alta', 'Alta', 'Media', 'Baja', 'Muy baja'];
+const oferta = ['Escasa', 'Normal', 'Alta', 'Excesiva'];
 const serviciosBasicos = [
   ['agua', 'Agua potable'],
   ['energia', 'Energía eléctrica / luz'],
   ['drenaje', 'Sistema de drenaje'],
   ['senalTelefonica', 'Acceso a señal telefónica'],
   ['internet', 'Acceso a internet'],
+  ['alumbradoPublico', 'Alumbrado público'],
+  ['recoleccionBasura', 'Recolección de basura'],
 ];
-const riesgos = ['Riesgo de inundación', 'Riesgo de deslizamiento', 'Zona de difícil acceso', 'Conflicto de servidumbre', 'Ninguno'];
+const riesgos = ['Inundación', 'Deslizamientos', 'Sequía', 'Incendios', 'Ninguno'];
 const legacyTopografias = ['Plano', 'Semi plano', 'Inclinado', 'Quebrado'];
 const legacyAccesos = ['Pavimentado', 'Adoquinado', 'Macadán', 'Tierra'];
 const legacyUsos = ['Residencial', 'Comercial', 'Mixto', 'Turístico'];
@@ -124,6 +132,9 @@ export default function TerrenoForm({ value, onChange, onSubmit, loading, showSu
       {selectField({ label: 'Tipo de suelo', val: value.tipoSuelo || '', opts: tipoSuelo, onChange: (v) => onChange('tipoSuelo', v) })}
       {selectField({ label: 'Topografía', val: value.topografia || '', opts: topografias, onChange: (v) => onChange('topografia', v) })}
       {selectField({ label: 'Forma del terreno', val: value.formaTerreno || '', opts: formas, onChange: (v) => onChange('formaTerreno', v) })}
+      {selectField({ label: 'Orientación / frente comercial', val: value.orientacion || '', opts: orientaciones, onChange: (v) => onChange('orientacion', v) })}
+      {num('Frente (m)', 'frenteTerreno', value, onChange)}
+      {num('Fondo (m)', 'fondoTerreno', value, onChange)}
     </Section>
 
     <Section title='Acceso, vía y dinámica comercial'>
@@ -140,9 +151,13 @@ export default function TerrenoForm({ value, onChange, onSubmit, loading, showSu
       {selectField({ label: 'Cercanía', val: value.proximity || '', opts: proximidades, onChange: (v) => onChange('proximity', v) })}
       {selectField({ label: 'Nivel de deforestación', val: value.nivelDeforestacion || '', opts: deforestacion, onChange: (v) => onChange('nivelDeforestacion', v) })}
       {selectField({ label: 'Seguridad jurídica', val: value.legalStatus || 'Documentación completa', opts: estadosLegales, onChange: (v) => onChange('legalStatus', v) })}
+      {selectField({ label: 'Liquidez del mercado', val: value.liquidez || '', opts: liquidez, onChange: (v) => onChange('liquidez', v) })}
+      {selectField({ label: 'Demanda local', val: value.demanda || '', opts: demanda, onChange: (v) => onChange('demanda', v) })}
+      {selectField({ label: 'Oferta comparable', val: value.oferta || '', opts: oferta, onChange: (v) => onChange('oferta', v) })}
     </Section>
 
     <div className='mt-4 grid gap-4 md:grid-cols-3'>
+      <div className={base}>{selectField({ label: 'Hidrología', val: value.hidrologia || '', opts: hidrologias, onChange: (v) => onChange('hidrologia', v) })}{selectField({ label: 'Vegetación', val: value.vegetacion || '', opts: vegetaciones, onChange: (v) => onChange('vegetacion', v) })}</div>
       <checks title='Recursos naturales' items={recursos} value={value.recursosNaturales || []} onChange={(s) => onChange('recursosNaturales', s)} />
       <ServiciosBasicosChecks value={value.serviciosBasicos || {}} onChange={(s) => onChange('serviciosBasicos', s)} />
       <checks title='Riesgos' items={riesgos} value={value.riesgos || []} onChange={(s) => onChange('riesgos', s)} />
