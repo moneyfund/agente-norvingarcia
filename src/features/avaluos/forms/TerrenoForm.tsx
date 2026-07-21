@@ -150,7 +150,15 @@ export default function TerrenoForm({ value, onChange, onSubmit, loading, showSu
       {selectField({ label: 'Desarrollo urbano', val: value.desarrolloUrbano || '', opts: desarrollo, onChange: (v) => onChange('desarrolloUrbano', v) })}
       {selectField({ label: 'Cercanía', val: value.proximity || '', opts: proximidades, onChange: (v) => onChange('proximity', v) })}
       {selectField({ label: 'Nivel de deforestación', val: value.nivelDeforestacion || '', opts: deforestacion, onChange: (v) => onChange('nivelDeforestacion', v) })}
-      {selectField({ label: 'Seguridad jurídica', val: value.legalStatus || 'Documentación completa', opts: estadosLegales, onChange: (v) => onChange('legalStatus', v) })}
+      {selectField({ label: 'Tipo de documentación', val: value.tipoDocumentacion || value.legalStatus || 'Documentación completa', opts: estadosLegales, onChange: (v) => { onChange('tipoDocumentacion', v); onChange('legalStatus', v); } })}
+      {selectField({ label: 'Documentación completa', val: value.documentacionCompleta || 'Sí / por confirmar físicamente', opts: ['Sí / por confirmar físicamente', 'No confirmada', 'En proceso'], onChange: (v) => onChange('documentacionCompleta', v) })}
+      {selectField({ label: 'Escritura pública', val: value.escrituraPublica || 'Declarada / requerida', opts: ['Declarada / requerida', 'No declarada', 'En trámite'], onChange: (v) => onChange('escrituraPublica', v) })}
+      {selectField({ label: 'Inscripción registral', val: value.inscripcionRegistral || 'Declarada / requerida', opts: ['Declarada / requerida', 'No declarada', 'En trámite'], onChange: (v) => onChange('inscripcionRegistral', v) })}
+      {selectField({ label: 'Plano catastral', val: value.planoCatastral || 'Declarado / requerido', opts: ['Declarado / requerido', 'No declarado', 'En trámite'], onChange: (v) => onChange('planoCatastral', v) })}
+      {selectField({ label: 'Libre de gravamen', val: value.libreGravamen || 'Sin gravamen declarado', opts: ['Sin gravamen declarado', 'No confirmado', 'Con gravamen declarado'], onChange: (v) => onChange('libreGravamen', v) })}
+      {field('Restricciones legales', 'restriccionesLegales', value, onChange)}
+      {field('Uso permitido', 'usoPermitido', value, onChange)}
+      {field('Observaciones legales', 'observacionesLegales', value, onChange)}
       {selectField({ label: 'Liquidez del mercado', val: value.liquidez || '', opts: liquidez, onChange: (v) => onChange('liquidez', v) })}
       {selectField({ label: 'Demanda local', val: value.demanda || '', opts: demanda, onChange: (v) => onChange('demanda', v) })}
       {selectField({ label: 'Oferta comparable', val: value.oferta || '', opts: oferta, onChange: (v) => onChange('oferta', v) })}
