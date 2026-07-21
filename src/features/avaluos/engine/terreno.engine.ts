@@ -27,12 +27,7 @@ export const FACTORES_TERRENO = {
   legalStatus: { 'Documentación completa': 1.06, 'Documentación revisable': 0.92, 'Problemas legales': 0.70 },
 } as const;
 
-const ZONAS_BASE_M2: Record<string, { precio: number; tipo: 'urbana' | 'semiurbana' | 'rural' }> = {
-  'Zona urbana': { precio: 32, tipo: 'urbana' },
-  'Zona semiurbana': { precio: 15, tipo: 'semiurbana' },
-  'Zona rural norte': { precio: 4.5, tipo: 'rural' },
-  'Zona rural sur': { precio: 3.25, tipo: 'rural' },
-};
+
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 const normalizeArea = (data: TerrenoInput) => {
@@ -105,8 +100,6 @@ const getScaleExplanation = (areaM2Convertida: number, areaManzanas: number, fac
 };
 
 const inferZoneType = (zona: ZonaData, data: TerrenoInput): 'urbana' | 'semiurbana' | 'rural' => {
-  const byName = ZONAS_BASE_M2[zona.zona]?.tipo;
-  if (byName) return byName;
   if (String(data.tipoTerritorio).toLowerCase().includes('rural')) return 'rural';
   if (String(data.tipoTerritorio).toLowerCase().includes('semi')) return 'semiurbana';
   return 'urbana';
@@ -114,10 +107,10 @@ const inferZoneType = (zona: ZonaData, data: TerrenoInput): 'urbana' | 'semiurba
 
 const getBasePriceM2 = (zona: ZonaData, data: TerrenoInput, areaManzanas: number) => {
   const zoneType = inferZoneType(zona, data);
-  const listedBase = ZONAS_BASE_M2[zona.zona]?.precio ?? toSafeNumber(zona.valorTerrenoM2);
+  const listedBase = toSafeNumber(zona.valorTerrenoM2);
   if (data.unidadArea === 'manzana' && zoneType === 'urbana') return clamp(listedBase, 18, 34);
   if (data.unidadArea === 'manzana' && zoneType === 'semiurbana') return clamp(listedBase, 9, 18);
-  if (zoneType === 'rural') return zona.zona === 'Zona rural sur' ? clamp(listedBase, 1.8, 6.5) : clamp(listedBase, 2.2, 8);
+  if (zoneType === 'rural') return listedBase;
   if (zoneType === 'semiurbana') return clamp(listedBase, 9, 22);
   if (areaManzanas > 1) return clamp(listedBase, 12, 34);
   return clamp(listedBase, 20, 45);
