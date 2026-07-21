@@ -24,21 +24,36 @@ const interpolatePrice = (area: number, pointA: RuralSurPricePoint, pointB: Rura
   return pointA.pricePerManzana + progress * (pointB.pricePerManzana - pointA.pricePerManzana);
 };
 
-export function getZonaRuralSurBasePricePerManzana(area: number): number {
-  const safeArea = Math.max(toSafeNumber(area, 0), 0);
+export function getRuralSurPricePerManzana(areaManzanas: number): number {
+  const area = Number(areaManzanas);
+  if (!Number.isFinite(area) || area <= 0) {
+    throw new Error('Área en manzanas inválida');
+  }
   const firstPoint = RURAL_SUR_PRICE_CURVE[0];
   const lastPoint = RURAL_SUR_PRICE_CURVE[RURAL_SUR_PRICE_CURVE.length - 1];
-  if (safeArea <= firstPoint.area) return firstPoint.pricePerManzana;
+  if (area <= firstPoint.area) return firstPoint.pricePerManzana;
   for (let i = 0; i < RURAL_SUR_PRICE_CURVE.length - 1; i += 1) {
     const current = RURAL_SUR_PRICE_CURVE[i];
     const next = RURAL_SUR_PRICE_CURVE[i + 1];
-    if (safeArea >= current.area && safeArea <= next.area) return interpolatePrice(safeArea, current, next);
+    if (area >= current.area && area <= next.area) return interpolatePrice(area, current, next);
   }
   return lastPoint.pricePerManzana;
 }
 
-const normalizeTextKey = (value: unknown) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
-const isZonaRuralSurMatagalpa = (zona: ZonaData, data: TerrenoInput) => normalizeTextKey(data.ciudad || zona.ciudad) === 'matagalpa' && normalizeTextKey(data.zona || zona.zona || zona.nombre) === 'zona rural sur';
+export const normalizeText = (value: unknown = '') => String(value || '')
+  .trim()
+  .toLowerCase()
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '');
+
+export const isZonaRuralSurMatagalpa = (zona: ZonaData, data: TerrenoInput) => {
+  const ciudad = normalizeText(data.ciudad || zona.ciudad);
+  const zonaNombre = normalizeText(data.zona || zona.zona || zona.nombre);
+  const zonaId = normalizeText(zona.id);
+  return ciudad === 'matagalpa' && (zonaNombre === 'zona rural sur' || zonaId === 'matagalpa-zona-rural-sur');
+};
+
+export const getZonaRuralSurBasePricePerManzana = getRuralSurPricePerManzana;
 
 export const FACTORES_TERRENO = {
   tipoTerritorio: { Urbano: 1.06, Semiurbano: 1.01, Semirural: 0.95, 'Rural cercano': 0.92, 'Rural productivo': 0.90, 'Rural aislado': 0.82 },
@@ -142,7 +157,7 @@ const inferZoneType = (zona: ZonaData, data: TerrenoInput): 'urbana' | 'semiurba
 };
 
 const getBasePriceM2 = (zona: ZonaData, data: TerrenoInput, areaManzanas: number) => {
-  if (isZonaRuralSurMatagalpa(zona, data)) return getZonaRuralSurBasePricePerManzana(areaManzanas) / M2_POR_MANZANA;
+  if (isZonaRuralSurMatagalpa(zona, data)) return getRuralSurPricePerManzana(areaManzanas) / M2_POR_MANZANA;
   const zoneType = inferZoneType(zona, data);
   const listedBase = toSafeNumber(zona.valorTerrenoM2);
   if (data.unidadArea === 'manzana' && zoneType === 'urbana') return clamp(listedBase, 18, 34);
@@ -225,7 +240,7 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
   const { areaOriginal, unidadArea, areaM2Convertida, areaManzanas } = normalizeArea(data);
   const basePriceM2 = getBasePriceM2(zona, data, areaManzanas);
   const isRuralSur = isZonaRuralSurMatagalpa(zona, data);
-  const basePricePerManzana = isRuralSur ? getZonaRuralSurBasePricePerManzana(areaManzanas) : basePriceM2 * M2_POR_MANZANA;
+  const basePricePerManzana = isRuralSur ? getRuralSurPricePerManzana(areaManzanas) : basePriceM2 * M2_POR_MANZANA;
   const factorEscala = isRuralSur ? 1 : getFactorEscala(areaM2Convertida);
   const scaleMultiplier = factorEscala;
   const riesgos = data.riesgos || (data.riesgoInundacion ? ['Riesgo de inundación'] : ['Ninguno']);
@@ -233,8 +248,8 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
   const zoneType = inferZoneType(zona, data);
 
   const coefNumericos = {
-    factorZona: toSafeNumber(zona.factorPlusvalia, 1),
-    factorTipoTerritorio: lookup(FACTORES_TERRENO.tipoTerritorio, data.tipoTerritorio),
+    factorZona: isRuralSur ? 1 : toSafeNumber(zona.factorPlusvalia, 1),
+    factorTipoTerritorio: isRuralSur ? 1 : lookup(FACTORES_TERRENO.tipoTerritorio, data.tipoTerritorio),
     factorTipoSuelo: lookup(FACTORES_TERRENO.tipoSuelo, data.tipoSuelo),
     factorTopografia: lookup(FACTORES_TERRENO.topografia, data.topografia),
     factorAcceso: getAccessFactor(data),
@@ -313,7 +328,7 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
   const valorConAmbiente = valorConServicios * factorAmbiental;
   const valorFinalSinTope = valorConAmbiente * factorJuridico * factorUbicacion * factorSinergia;
   const ajusteTecnicoSinTope = safeDivide(valorFinalSinTope, valorBase, 1);
-  const ajusteTecnicoTotal = isRuralSur ? clamp(ajusteTecnicoSinTope, 0.75, 1.25) : ajusteTecnicoSinTope;
+  const ajusteTecnicoTotal = isRuralSur ? clamp(ajusteTecnicoSinTope, 0.80, 1.20) : ajusteTecnicoSinTope;
   const valorFinal = valorBase * ajusteTecnicoTotal;
   const factorGlobal = safeDivide(valorFinal, valorBase, 1);
   const adjustedPriceM2 = safeDivide(valorFinal, areaM2Convertida, 0);
@@ -333,11 +348,11 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
   const indiceComercializacion = Math.round(clamp(indiceLiquidez * factorUrbanistico * factorAcceso, 10, 98));
 
   const coeficientesAplicados: CoeficienteAplicado[] = [
-    coefRow('Zona / plusvalía', zona.zona, coefNumericos.factorZona),
+    coefRow('Zona / plusvalía', isRuralSur ? `${zona.zona} — incluida en la curva territorial` : zona.zona, coefNumericos.factorZona),
     ...(isRuralSur ? [coefRow('Escala territorial aplicada', `${areaManzanas.toFixed(2)} manzanas → USD ${basePricePerManzana.toFixed(2)} por manzana`, 1), coefRow('Precio base por manzana según extensión', `${basePricePerManzana.toFixed(2)} USD/manzana`, 1)] : []),
     coefRow('Precio base por m²', `${basePriceM2.toFixed(2)} USD/m²`, 1),
-    coefRow('Normalización por escala', isRuralSur ? 'Neutralizada para Zona Rural Sur: la curva por tramos ya incorpora la reducción por extensión.' : `Factor ${factorEscala.toFixed(2)} — ${getScaleExplanation(areaM2Convertida, areaManzanas, factorEscala)}`, factorEscala),
-    coefRow('Categoría territorial', data.tipoTerritorio || 'No definido', coefNumericos.factorTipoTerritorio),
+    coefRow('Normalización por escala', isRuralSur ? 'Incluida en la curva territorial; multiplicador adicional 1.00.' : `Factor ${factorEscala.toFixed(2)} — ${getScaleExplanation(areaM2Convertida, areaManzanas, factorEscala)}`, factorEscala),
+    coefRow('Categoría territorial', isRuralSur ? `${data.tipoTerritorio || 'Rural'} — condición rural incluida en curva base` : data.tipoTerritorio || 'No definido', coefNumericos.factorTipoTerritorio),
     coefRow('Tipo de suelo', data.tipoSuelo || 'No definido', coefNumericos.factorTipoSuelo),
     coefRow('Topografía', `${data.topografia || 'No definido'} — ${limitText(coefNumericos.factorTopografia, coefNumericos.factorTopografia)}`, coefNumericos.factorTopografia),
     coefRow('Forma', data.formaTerreno || 'No definido', coefNumericos.factorForma),
@@ -383,7 +398,7 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
     coefRow('Potencial comercial', data.usoPotencial === 'Comercial' ? 'Uso principal' : 'No predominante', potencialCoef((data as any).potencialComercial, data.usoPotencial, 'Comercial', 0.045)),
     coefRow('Potencial industrial', data.usoPotencial === 'Industrial' ? 'Uso principal' : 'No predominante', potencialCoef((data as any).potencialIndustrial, data.usoPotencial, 'Industrial', 0.035)),
     coefRow('Precio base zona', isRuralSur ? `${basePricePerManzana.toFixed(2)} USD/manzana × ${areaManzanas.toFixed(2)} manzanas` : `${basePriceM2.toFixed(2)} USD/m² × ${areaM2Convertida.toFixed(2)} m²`, 1),
-    coefRow('Normalización por tamaño', isRuralSur ? `No aplicada; valor base por curva: ${valorBase.toFixed(2)}` : `Valor normalizado: ${valorNormalizado.toFixed(2)}`, factorEscala),
+    coefRow('Normalización por tamaño', isRuralSur ? `No aplicada; incluida en la curva territorial. Valor base por curva: ${valorBase.toFixed(2)}` : `Valor normalizado: ${valorNormalizado.toFixed(2)}`, factorEscala),
     coefRow('Coeficiente de liquidez', `Valor: ${valorConLiquidez.toFixed(2)}`, factorLiquidezTecnica),
     coefRow('Coeficiente de uso potencial', `Valor: ${valorConUso.toFixed(2)}`, factorUso),
     coefRow('Coeficiente urbanístico', `Valor: ${valorConUrbanismo.toFixed(2)}`, factorUrbanistico),
