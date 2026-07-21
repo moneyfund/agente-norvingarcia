@@ -147,7 +147,7 @@
 .terrain-pdf-template .terrain-total-box{margin-top:12px;padding:16px 20px;border-radius:18px;break-inside:avoid!important;page-break-inside:avoid!important}
 .terrain-pdf-template .terrain-note,.terrain-pdf-template .terrain-method{margin-top:14px;padding:13px 15px;border-radius:14px;font-size:12px;line-height:1.45}
 
-/* Fixed professional terrain report: one technical sheet page and exactly two coefficient pages. */
+/* Fixed professional terrain report: one technical sheet page and one consolidated coefficient page. */
 .terrain-pdf-template .terrain-technical-sheet{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start;grid-auto-rows:auto}
 .terrain-pdf-template .terrain-technical-sheet .terrain-info-section{padding:14px 16px;border-radius:16px;height:auto;min-height:0;align-self:start}
 .terrain-pdf-template .terrain-technical-sheet .terrain-info-section--wide{grid-column:1 / -1;padding:14px 18px}
@@ -169,3 +169,25 @@
 .terrain-pdf-template .terrain-coef-group--two-columns{align-self:stretch;overflow:hidden}
 .terrain-pdf-template .terrain-coef-group--two-columns .terrain-coef-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:0;align-items:start}
 .terrain-pdf-template .terrain-coef-group--two-columns .terrain-coef-row{grid-template-columns:.9fr .85fr .34fr;padding:4px 6px}
+
+/* Single fixed page for all terrain coefficient groups. */
+.terrain-pdf-template .coefficients-page-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto auto;gap:8px 10px;align-items:start;height:100%;max-height:100%;overflow:hidden}
+.terrain-pdf-template .coefficients-column{display:flex;flex-direction:column;gap:8px;min-height:0}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-group{border-radius:11px;overflow:hidden;min-height:0;break-inside:avoid;page-break-inside:avoid}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-group h3{padding:6px 8px;font-size:9.6px;line-height:1.08;grid-template-columns:13px 1fr auto;gap:5px;border-left-width:6px}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-group h3 svg{width:13px;height:13px}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-group h3 b{font-size:7.4px;line-height:1.05;white-space:nowrap}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-row{grid-template-columns:.88fr .92fr .32fr;gap:4px;padding:3.5px 6px;min-height:0;align-items:start;break-inside:avoid;page-break-inside:avoid}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-row span{font-size:8.15px;line-height:1.08;font-weight:900}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-row em{font-size:7.55px;line-height:1.08}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-row strong{font-size:8.15px;line-height:1.08}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-group--two-columns .terrain-coef-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:0;align-items:start}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-group--two-columns .terrain-coef-row{grid-template-columns:.9fr .76fr .31fr;padding:3.25px 5px;gap:3px}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-group--two-columns .terrain-coef-row span{font-size:7.55px;line-height:1.05}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-group--two-columns .terrain-coef-row em{font-size:7.05px;line-height:1.05}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-group--two-columns .terrain-coef-row strong{font-size:7.55px;line-height:1.05}
+.terrain-pdf-template .coefficients-page-grid .coefficients-total{grid-column:1 / -1;margin-top:0;padding:9px 13px;border-radius:12px;align-self:end;display:grid;grid-template-columns:.34fr .9fr 1.35fr;gap:10px;align-items:center;min-height:0}
+.terrain-pdf-template .coefficients-page-grid .coefficients-total span{font-size:8px;line-height:1;letter-spacing:.18em}
+.terrain-pdf-template .coefficients-page-grid .coefficients-total strong{margin-top:0;font-size:17px;line-height:1.05}
+.terrain-pdf-template .coefficients-page-grid .coefficients-total p{margin:0;font-size:10px;line-height:1.2}
+.terrain-pdf-template .coefficients-page-grid .coefficients-total p i{font-style:normal;margin:0 4px;color:#fecaca}
