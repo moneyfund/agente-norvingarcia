@@ -114,3 +114,35 @@
 .terrain-pdf-template .terrain-coef-group{display:block}
 .terrain-pdf-template .avaluo-pdf-signature{color:#111827;text-align:center;line-height:1.45}
 .terrain-pdf-template .avaluo-pdf-signature strong,.terrain-pdf-template .avaluo-pdf-signature span{display:block;margin-top:4px}
+
+/* Terrain PDF balanced pagination: compact cards, realistic A4 capacity and no forced one-block pages. */
+.terrain-pdf-template .avaluo-pdf-page{height:1123px;overflow:hidden;padding:42px 44px 76px}
+.terrain-pdf-template .avaluo-pdf-content{height:auto;min-height:0;padding-bottom:0;display:block}
+.terrain-pdf-template .avaluo-pdf-title{font-size:26px;padding-bottom:9px;margin-bottom:14px;line-height:1.1}
+.terrain-pdf-template .avaluo-pdf-footer{bottom:20px;left:44px;right:44px}
+.terrain-pdf-template .terrain-info-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;align-items:start;grid-auto-rows:auto}
+.terrain-pdf-template .terrain-info-section{height:auto;min-height:0;align-self:start;padding:14px 16px;border-radius:16px;break-inside:avoid!important;page-break-inside:avoid!important}
+.terrain-pdf-template .terrain-info-section--wide{grid-column:1 / -1}
+.terrain-pdf-template .terrain-info-section--wide .terrain-info-rows{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:16px}
+.terrain-pdf-template .terrain-info-section h3{font-size:13px;margin-bottom:7px;gap:7px;line-height:1.15}
+.terrain-pdf-template .terrain-info-section h3 svg{width:15px;height:15px;flex:0 0 auto}
+.terrain-pdf-template .terrain-info-row{grid-template-columns:.78fr 1.22fr;gap:8px;padding:6px 0;min-height:0;align-items:start;break-inside:avoid;page-break-inside:avoid}
+.terrain-pdf-template .terrain-info-row span{font-size:8.5px;line-height:1.2}
+.terrain-pdf-template .terrain-info-row strong{font-size:11px;line-height:1.22}
+.terrain-pdf-template .terrain-coef-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start;grid-auto-rows:auto}
+.terrain-pdf-template .terrain-coef-group{display:block;height:auto;min-height:0;align-self:start;border-radius:15px;break-inside:avoid;page-break-inside:avoid}
+.terrain-pdf-template .terrain-coef-group h3{padding:7px 9px;font-size:10.5px;grid-template-columns:15px 1fr auto;gap:6px;break-inside:avoid;page-break-inside:avoid}
+.terrain-pdf-template .terrain-coef-group h3 svg{width:14px;height:14px}
+.terrain-pdf-template .terrain-coef-group h3 b{font-size:8px}
+.terrain-pdf-template .terrain-coef-row{padding:5px 8px;gap:6px;min-height:0;align-items:start;break-inside:avoid;page-break-inside:avoid}
+.terrain-pdf-template .terrain-coef-row span{font-size:9px;line-height:1.18}
+.terrain-pdf-template .terrain-coef-row em{font-size:8.4px;line-height:1.18}
+.terrain-pdf-template .terrain-coef-row strong{font-size:9px;line-height:1.18}
+.terrain-pdf-template .terrain-value-grid{gap:12px;align-items:start;grid-auto-rows:auto}
+.terrain-pdf-template .terrain-value-tile{height:auto;min-height:72px;align-self:start;padding:13px 14px;border-radius:16px}
+.terrain-pdf-template .terrain-value-tile span{font-size:8.8px}.terrain-pdf-template .terrain-value-tile strong{font-size:16px;margin-top:6px}.terrain-pdf-template .terrain-value-tile--dark strong{font-size:23px}
+.terrain-pdf-template .terrain-summary-hero{padding:26px 30px;border-radius:24px}.terrain-pdf-template .terrain-summary-hero strong{font-size:48px}
+.terrain-pdf-template .terrain-analysis{padding:18px 22px;border-radius:18px}.terrain-pdf-template .terrain-analysis p{font-size:12.5px;line-height:1.55;margin-bottom:10px}
+.terrain-pdf-template .terrain-chart-grid{gap:12px;margin-top:14px;align-items:start;grid-auto-rows:auto}.terrain-pdf-template .terrain-chart-card{padding:13px;border-radius:16px;height:auto;min-height:0;align-self:start}
+.terrain-pdf-template .terrain-total-box{margin-top:12px;padding:16px 20px;border-radius:18px;break-inside:avoid!important;page-break-inside:avoid!important}
+.terrain-pdf-template .terrain-note,.terrain-pdf-template .terrain-method{margin-top:14px;padding:13px 15px;border-radius:14px;font-size:12px;line-height:1.45}

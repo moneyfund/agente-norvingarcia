@@ -27,6 +27,7 @@ export const createAvaluo = async (payload) => {
   const datosGuardar = normalizeFirestoreData({
     ...payload,
     usuarioId: authUser.uid,
+    createdAt: serverTimestamp(),
     createdAtServer: serverTimestamp(),
   });
   console.log(datosGuardar);
