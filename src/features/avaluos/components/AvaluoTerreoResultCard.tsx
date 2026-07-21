@@ -6,19 +6,25 @@ export default function AvaluoTerrenoResultCard({ result, onSave, canSave }) {
   return <section className='mt-8 rounded-2xl border border-blue-900 bg-slate-900 p-6 text-slate-200'>
     <h3 className='text-xl font-bold text-blue-200'>Dashboard técnico de avalúo</h3>
     <div className='mt-4 grid gap-3 md:grid-cols-3'>
+      {result.ruralSurScaleApplied && <>
+        {item('Precio base por manzana según curva', result.basePricePerManzana)}
+        {item('Área usada para la curva', `${toSafeNumber(result.areaManzanas).toLocaleString('es-NI', { maximumFractionDigits: 2 })} manzanas`, false)}
+        {item('Precio base equivalente por m²', result.basePriceM2 ?? toSafeNumber(result.basePricePerManzana) / 7042.25)}
+        {item('Valor base según curva', result.baseValueTotal ?? result.valorBase)}
+        {item('Factor técnico posterior', toSafeNumber(result.technicalAdjustmentFactor, 1).toFixed(3), false)}
+        {item('Multiplicador adicional de escala', toSafeNumber(result.scaleMultiplier, 1).toFixed(2), false)}
+      </>}
       {result.unidadArea === 'manzana' ? <>
         {item('Precio final por manzana', result.pricePerManzana ?? toSafeNumber(result.valorM2) * 7042.25)}
-        {result.ruralSurScaleApplied && item('Precio base por manzana según escala', result.basePricePerManzana)}
-        {result.ruralSurScaleApplied && item('Escala territorial aplicada', `${toSafeNumber(result.areaManzanas).toLocaleString('es-NI', { maximumFractionDigits: 2 })} manzanas → ${toMoney(result.basePricePerManzana, 0)} por manzana`, false)}
         {item('Precio final por m²', result.adjustedPriceM2 ?? result.valorM2)}
-        {result.ruralSurScaleApplied && item('Precio base equivalente por m²', toSafeNumber(result.basePricePerManzana) / 7042.25)}
         {item('Área en manzanas', toSafeNumber(result.areaOriginal).toLocaleString('es-NI', { maximumFractionDigits: 2 }), false)}
         {item('Área equivalente en m²', `${toSafeNumber(result.areaM2Convertida).toLocaleString('es-NI', { maximumFractionDigits: 2 })} m²`, false)}
-        {item('Valor total', result.estimatedValue ?? result.valorFinalEstimado)}
+        {item('Valor final', result.estimatedValue ?? result.valorFinalEstimado)}
       </> : <>
-        {item('Precio por m²', result.adjustedPriceM2 ?? result.valorM2)}
+        {result.ruralSurScaleApplied && item('Precio final por manzana', result.pricePerManzana ?? toSafeNumber(result.valorM2) * 7042.25)}
+        {item('Precio final por m²', result.adjustedPriceM2 ?? result.valorM2)}
         {item('Área total', `${toSafeNumber(result.areaM2Convertida).toLocaleString('es-NI', { maximumFractionDigits: 2 })} m²`, false)}
-        {item('Valor total', result.estimatedValue ?? result.valorFinalEstimado)}
+        {item('Valor final', result.estimatedValue ?? result.valorFinalEstimado)}
       </>}
       {item('Valor base del terreno', result.baseValueTotal ?? result.valorBase)}
       {result.ruralSurScaleApplied && item('Ajuste técnico acumulado', toSafeNumber(result.technicalAdjustmentFactor, 1).toFixed(3), false)}

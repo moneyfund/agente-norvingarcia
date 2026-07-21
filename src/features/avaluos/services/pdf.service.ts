@@ -47,6 +47,20 @@ export const exportAvaluoToPdf = (avaluo: any) => {
     <h2>Conclusión comercial</h2><p>${avaluo.analisisProfesional || 'El inmueble presenta una posición comercial acorde con las variables registradas.'}</p>
     <h2>Recomendaciones</h2><p>Validar medidas, documentación legal, estado de sistemas y evidencia fotográfica antes de cierre bancario o compraventa.</p>` : '';
 
+  const ruralSurScale = avaluo?.ruralSurScaleApplied ? `
+    <h2>Escala</h2>
+    <table>
+      <tr><td>Curva territorial por extensión</td><td>${number(avaluo.areaManzanas)} manzanas</td></tr>
+      <tr><td>Precio base por manzana</td><td>${money(avaluo.basePricePerManzana)}</td></tr>
+      <tr><td>Precio base equivalente por m²</td><td>${money(avaluo.basePriceM2)}</td></tr>
+      <tr><td>Valor base según curva</td><td>${money(avaluo.baseValueTotal || avaluo.valorBase)}</td></tr>
+      <tr><td>Normalización adicional</td><td>No aplicada; incluida en la curva territorial</td></tr>
+      <tr><td>Factor técnico posterior</td><td>${Number(avaluo.technicalAdjustmentFactor || 1).toFixed(3)}</td></tr>
+      <tr><td>Precio final por manzana</td><td>${money(avaluo.pricePerManzana)}</td></tr>
+      <tr><td>Precio final por m²</td><td>${money(avaluo.adjustedPriceM2 || avaluo.valorM2)}</td></tr>
+      <tr><td>Valor final</td><td>${money(avaluo.valorFinal || avaluo.valorFinalEstimado || avaluo.estimatedValue)}</td></tr>
+    </table>` : '';
+
   const terreno = avaluo?.tipoPropiedad === 'terreno' ? `
     <h2>Ficha técnica de terreno</h2>
     <table>
@@ -64,9 +78,9 @@ export const exportAvaluoToPdf = (avaluo: any) => {
       <tr><td>Uso potencial</td><td>${c.usoPotencial || 'N/D'}</td></tr>
       <tr><td>Desarrollo urbano</td><td>${c.desarrolloUrbano || 'N/D'}</td></tr>
       <tr><td>Rango de mercado</td><td>${money(avaluo.rangoMercado?.minimo)} - ${money(avaluo.rangoMercado?.maximo)}</td></tr>
-    </table>` : '';
+    </table>${ruralSurScale}` : '';
 
-  const html = `<!doctype html><html><head><style>body{font-family:Arial,sans-serif;color:#1e293b;padding:32px}h1{color:#0f172a}h2{margin-top:24px;color:#334155}table{width:100%;border-collapse:collapse;margin-top:12px}td,th{border:1px solid #cbd5e1;padding:8px;text-align:left}th{background:#f1f5f9}.highlight{background:#ecfdf5;border:1px solid #a7f3d0;padding:14px;border-radius:10px;margin:12px 0}</style></head><body><h1>Informe Técnico Inmobiliario</h1><p>Fecha: ${new Date().toLocaleDateString('es-NI')}</p><h2>${avaluo.titulo}</h2><p>Ciudad: ${avaluo.ciudad}</p><p>Zona: ${avaluo.zona}</p><p>Clasificación territorial: ${avaluo.zonaSnapshot?.clasificacion || 'N/D'}</p><p>Tipo de entorno: ${avaluo.zonaSnapshot?.tipoEntorno || 'N/D'}</p><p>Factor de plusvalía: ${avaluo.zonaSnapshot?.factorPlusvalia || 'N/D'}</p><p>Valor base m² usado: ${money(avaluo.zonaSnapshot?.valorTerrenoM2 || avaluo.valorM2 || 0)}</p><p>Observación técnica: ${avaluo.zonaSnapshot?.observacionTecnica || 'N/D'}</p>${terreno || casa || `<h2>Servicios básicos</h2><table><tr><td>Detalle</td><td>${serviciosBasicosText(c.serviciosBasicos)}</td></tr></table>`}<div class='highlight'><strong>Valor final:</strong> ${money(avaluo.valorFinal)}</div><h2>Coeficientes aplicados</h2><table><thead><tr><th>Factor</th><th>Valor aplicado</th><th>Impacto</th></tr></thead><tbody>${rows}</tbody></table><p>Firma profesional: Norvin García Real Estate</p></body></html>`;
+  const html = `<!doctype html><html><head><style>body{font-family:Arial,sans-serif;color:#1e293b;padding:32px}h1{color:#0f172a}h2{margin-top:24px;color:#334155}table{width:100%;border-collapse:collapse;margin-top:12px}td,th{border:1px solid #cbd5e1;padding:8px;text-align:left}th{background:#f1f5f9}.highlight{background:#ecfdf5;border:1px solid #a7f3d0;padding:14px;border-radius:10px;margin:12px 0}</style></head><body><h1>Informe Técnico Inmobiliario</h1><p>Fecha: ${new Date().toLocaleDateString('es-NI')}</p><h2>${avaluo.titulo}</h2><p>Ciudad: ${avaluo.ciudad}</p><p>Zona: ${avaluo.zona}</p><p>Clasificación territorial: ${avaluo.zonaSnapshot?.clasificacion || 'N/D'}</p><p>Tipo de entorno: ${avaluo.zonaSnapshot?.tipoEntorno || 'N/D'}</p><p>Factor de plusvalía: ${avaluo.zonaSnapshot?.factorPlusvalia || 'N/D'}</p><p>Valor base m² usado: ${money(avaluo.ruralSurScaleApplied ? avaluo.basePriceM2 : (avaluo.zonaSnapshot?.valorTerrenoM2 || avaluo.valorM2 || 0))}</p><p>Observación técnica: ${avaluo.zonaSnapshot?.observacionTecnica || 'N/D'}</p>${terreno || casa || `<h2>Servicios básicos</h2><table><tr><td>Detalle</td><td>${serviciosBasicosText(c.serviciosBasicos)}</td></tr></table>`}<div class='highlight'><strong>Valor final:</strong> ${money(avaluo.valorFinal)}</div><h2>Coeficientes aplicados</h2><table><thead><tr><th>Factor</th><th>Valor aplicado</th><th>Impacto</th></tr></thead><tbody>${rows}</tbody></table><p>Firma profesional: Norvin García Real Estate</p></body></html>`;
   const w = window.open('', '_blank');
   if (!w) return;
   w.document.write(html); w.document.close(); w.print();
