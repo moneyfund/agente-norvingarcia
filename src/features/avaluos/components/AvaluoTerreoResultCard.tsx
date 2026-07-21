@@ -17,7 +17,10 @@ export default function AvaluoTerrenoResultCard({ result, onSave, canSave }) {
         {item('Área total', `${toSafeNumber(result.areaM2Convertida).toLocaleString('es-NI', { maximumFractionDigits: 2 })} m²`, false)}
         {item('Valor total', result.estimatedValue ?? result.valorFinalEstimado)}
       </>}
+      {item('Precio equivalente por hectárea', result.pricePerHectarea ?? toSafeNumber(result.valorM2) * 10000)}
       {item('Valor base del terreno', result.valorBase)}
+      {item('Valor comercial', result.valorComercial ?? result.valorFinalEstimado)}
+      {item('Valor técnico', result.valorTecnico ?? result.valorFinalEstimado)}
       {item('Valor bajo', result.lowValue ?? result.rangoMercado?.minimo)}
       {item('Valor estimado', result.estimatedValue ?? result.valorFinalEstimado)}
       {item('Valor alto', result.highValue ?? result.rangoMercado?.maximo)}
@@ -29,6 +32,10 @@ export default function AvaluoTerrenoResultCard({ result, onSave, canSave }) {
       {item('Rango comercial', `${toMoney(result.rangoMercado?.minimo, 0)} - ${toMoney(result.rangoMercado?.maximo, 0)}`, false)}
       {item('Nivel confianza', result.nivelConfianza, false)}
       {item('Índice de liquidez', `${toSafeNumber(result.indiceLiquidez)} / 100`, false)}
+      {item('Nivel de demanda', result.nivelDemanda, false)}
+      {item('Nivel de plusvalía', result.nivelPlusvalia, false)}
+      {item('Potencial de crecimiento', result.potencialCrecimiento, false)}
+      {item('Índice de comercialización', `${toSafeNumber(result.indiceComercializacion)} / 100`, false)}
       {item('Tiempo estimado de venta', result.tiempoEstimadoVenta, false)}
       {item('Precio recomendado de publicación', result.precioRecomendadoPublicacion)}
       {item('Precio mínimo de negociación', result.precioMinimoNegociacion)}
