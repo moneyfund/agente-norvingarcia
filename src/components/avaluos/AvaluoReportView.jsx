@@ -123,7 +123,6 @@ export default function AvaluoReportView({ avaluo }) {
         <Field label="Tipo de entorno" value={avaluo?.zonaSnapshot?.tipoEntorno} />
         <Field label="Plusvalía" value={impactText(avaluo?.zonaSnapshot?.factorPlusvalia)} />
         <Field label="Valor terreno m² usado" value={formatMoney(avaluo?.zonaSnapshot?.valorTerrenoM2)} />
-        <Field label="Valor construcción m²" value={formatMoney(avaluo?.zonaSnapshot?.valorConstruccionM2)} />
         <Field label="Observación técnica" value={avaluo?.zonaSnapshot?.observacionTecnica} />
       </section>
 
@@ -160,7 +159,6 @@ export default function AvaluoReportView({ avaluo }) {
       <Section title="Resultado final">
         <div className="grid gap-4 md:grid-cols-2">
           <Highlight label="Valor terreno" value={formatMoney(avaluo?.valorTerreno)} />
-          <Highlight label="Valor construcción" value={formatMoney(avaluo?.valorConstruccion)} />
           <Highlight label="Valor estimado final" value={formatMoney(avaluo?.valorFinal)} />
           <Highlight label="Rango mercado" value={`${formatMoney(avaluo?.rangoMercado?.minimo)} - ${formatMoney(avaluo?.rangoMercado?.maximo)}`} />
           <Highlight label="Nivel confianza" value={avaluo?.nivelConfianza || 'N/D'} />

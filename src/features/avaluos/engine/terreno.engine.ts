@@ -290,7 +290,6 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
   const precioPublicacion = valorFinal * (1 + Math.min(0.035, margenConfianza / 2));
   const precioMinimoNegociacion = rangoMercado.minimo;
   const precioObjetivoCierre = valorFinal * (1 - Math.min(0.018, margenConfianza / 3));
-  const precioHectarea = adjustedPriceM2 * 10000;
   const valorTecnico = valorFinal;
   const valorComercial = valorFinal * factorLiquidezTecnica;
   const nivelDemanda = indiceLiquidez >= 75 ? 'Alta' : indiceLiquidez >= 55 ? 'Media' : 'Baja';
@@ -347,23 +346,22 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
     coefRow('Potencial turístico', data.usoPotencial === 'Turístico' ? 'Uso principal' : 'No predominante', potencialCoef((data as any).potencialTuristico, data.usoPotencial, 'Turístico', 0.04)),
     coefRow('Potencial comercial', data.usoPotencial === 'Comercial' ? 'Uso principal' : 'No predominante', potencialCoef((data as any).potencialComercial, data.usoPotencial, 'Comercial', 0.045)),
     coefRow('Potencial industrial', data.usoPotencial === 'Industrial' ? 'Uso principal' : 'No predominante', potencialCoef((data as any).potencialIndustrial, data.usoPotencial, 'Industrial', 0.035)),
-    coefRow('PASO 1 · Precio base zona', `${basePriceM2.toFixed(2)} USD/m² × ${areaM2Convertida.toFixed(2)} m²`, 1),
-    coefRow('PASO 2 · Normalización por tamaño', `Valor normalizado: ${valorNormalizado.toFixed(2)}`, factorEscala),
-    coefRow('PASO 3 · Coeficiente de liquidez', `Valor: ${valorConLiquidez.toFixed(2)}`, factorLiquidezTecnica),
-    coefRow('PASO 4 · Coeficiente de uso potencial', `Valor: ${valorConUso.toFixed(2)}`, factorUso),
-    coefRow('PASO 5 · Coeficiente urbanístico', `Valor: ${valorConUrbanismo.toFixed(2)}`, factorUrbanistico),
-    coefRow('PASO 6 · Coeficiente de topografía', `Valor: ${valorConTopografia.toFixed(2)}`, factorTopografia),
-    coefRow('PASO 7 · Coeficiente de accesibilidad', `Valor: ${valorConAccesibilidad.toFixed(2)}`, factorAcceso),
-    coefRow('PASO 8 · Coeficiente de servicios', `Valor: ${valorConServicios.toFixed(2)}`, factorServiciosBasicos),
-    coefRow('PASO 9 · Coeficiente ambiental', `Valor: ${valorConAmbiente.toFixed(2)}`, factorAmbiental),
-    coefRow('PASO 10 · Coeficiente jurídico', `Resultado final: ${valorFinal.toFixed(2)}`, factorJuridico),
-    coefRow('PASO 11 · Resultado final', `Valor base ${valorBase.toFixed(2)} → final ${valorFinal.toFixed(2)}`, factorGlobal),
+    coefRow('Precio base zona', `${basePriceM2.toFixed(2)} USD/m² × ${areaM2Convertida.toFixed(2)} m²`, 1),
+    coefRow('Normalización por tamaño', `Valor normalizado: ${valorNormalizado.toFixed(2)}`, factorEscala),
+    coefRow('Coeficiente de liquidez', `Valor: ${valorConLiquidez.toFixed(2)}`, factorLiquidezTecnica),
+    coefRow('Coeficiente de uso potencial', `Valor: ${valorConUso.toFixed(2)}`, factorUso),
+    coefRow('Coeficiente urbanístico', `Valor: ${valorConUrbanismo.toFixed(2)}`, factorUrbanistico),
+    coefRow('Coeficiente de topografía', `Valor: ${valorConTopografia.toFixed(2)}`, factorTopografia),
+    coefRow('Coeficiente de accesibilidad', `Valor: ${valorConAccesibilidad.toFixed(2)}`, factorAcceso),
+    coefRow('Coeficiente de servicios', `Valor: ${valorConServicios.toFixed(2)}`, factorServiciosBasicos),
+    coefRow('Coeficiente ambiental', `Valor: ${valorConAmbiente.toFixed(2)}`, factorAmbiental),
+    coefRow('Coeficiente jurídico', `Resultado final: ${valorFinal.toFixed(2)}`, factorJuridico),
+    coefRow('Resultado final', `Valor base ${valorBase.toFixed(2)} → final ${valorFinal.toFixed(2)}`, factorGlobal),
   ];
 
 
   return {
     valorTerreno: toSafeNumber(valorFinal),
-    valorConstruccion: 0,
     valorM2: safeDivide(valorFinal, areaM2Convertida, 0),
     clasificacionZona: zona.clasificacion,
     plusvaliaAplicada: coefNumericos.factorZona,
@@ -389,7 +387,6 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
     normalizacionAplicada,
     notaNormalizacion: normalizacionAplicada ? getScaleExplanation(areaM2Convertida, areaManzanas, factorEscala) : undefined,
     pricePerManzana: toSafeNumber(adjustedPriceM2 * M2_POR_MANZANA),
-    pricePerHectarea: toSafeNumber(precioHectarea),
     valorComercial: toSafeNumber(valorComercial),
     valorTecnico: toSafeNumber(valorTecnico),
     nivelDemanda,

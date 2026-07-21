@@ -38,7 +38,6 @@ export const useTerrenoAvaluo = (usuarioId?: string) => {
           coeficientesAplicados: resultCalc.coeficientesAplicados,
           valorBase: resultCalc.valorBase,
           valorTerreno: resultCalc.valorTerreno,
-          valorConstruccion: resultCalc.valorConstruccion,
           valorFinal: resultCalc.valorFinalEstimado,
           valorM2: resultCalc.valorM2,
           rangoMercado: resultCalc.rangoMercado,
