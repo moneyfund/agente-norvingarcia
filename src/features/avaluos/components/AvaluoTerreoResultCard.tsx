@@ -17,7 +17,6 @@ export default function AvaluoTerrenoResultCard({ result, onSave, canSave }) {
         {item('Área total', `${toSafeNumber(result.areaM2Convertida).toLocaleString('es-NI', { maximumFractionDigits: 2 })} m²`, false)}
         {item('Valor total', result.estimatedValue ?? result.valorFinalEstimado)}
       </>}
-      {item('Precio equivalente por hectárea', result.pricePerHectarea ?? toSafeNumber(result.valorM2) * 10000)}
       {item('Valor base del terreno', result.valorBase)}
       {item('Valor comercial', result.valorComercial ?? result.valorFinalEstimado)}
       {item('Valor técnico', result.valorTecnico ?? result.valorFinalEstimado)}
