@@ -221,3 +221,51 @@
 .terrain-pdf-template .coefficients-page-grid .coefficients-total span{font-size:10.8px;line-height:1.1;letter-spacing:.2em}
 .terrain-pdf-template .coefficients-page-grid .coefficients-total strong{font-size:23px;line-height:1.1}
 .terrain-pdf-template .coefficients-page-grid .coefficients-total p{font-size:13.5px;line-height:1.3}
+
+/* Definitive terrain PDF layout system. */
+.terrain-pdf-template{
+  --pdf-page-padding-x:48px;
+  --pdf-page-padding-top:42px;
+  --pdf-page-padding-bottom:82px;
+  --pdf-section-gap:18px;
+  --pdf-card-gap:14px;
+  --pdf-card-padding:16px;
+  --pdf-row-gap:7px;
+  --pdf-footer-height:54px;
+}
+.terrain-pdf-template .avaluo-pdf-page{padding:var(--pdf-page-padding-top) var(--pdf-page-padding-x) var(--pdf-page-padding-bottom);}
+.terrain-pdf-template .avaluo-pdf-footer{left:var(--pdf-page-padding-x);right:var(--pdf-page-padding-x);bottom:22px;height:var(--pdf-footer-height);padding-top:10px;align-items:start;}
+.terrain-pdf-template .avaluo-pdf-title{margin-bottom:var(--pdf-section-gap);}
+.terrain-pdf-template p{hyphens:auto;text-align:justify;text-justify:inter-word;line-height:1.45;word-spacing:normal;}
+.terrain-pdf-template .terrain-value-tile span,.terrain-pdf-template .terrain-info-row span,.terrain-pdf-template .terrain-coef-row span{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#6b7280;font-weight:950;text-transform:uppercase;letter-spacing:.08em;}
+.terrain-pdf-template .terrain-value-tile strong,.terrain-pdf-template .terrain-info-row strong,.terrain-pdf-template .terrain-coef-row em{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#111827;font-weight:850;overflow-wrap:anywhere;word-break:normal;hyphens:auto;}
+.terrain-pdf-template .terrain-technical-sheet{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--pdf-card-gap);grid-auto-rows:auto;align-items:stretch;}
+.terrain-pdf-template .terrain-technical-sheet .terrain-info-section{padding:var(--pdf-card-padding);min-height:0;height:auto;align-self:stretch;border-radius:18px;box-shadow:0 12px 26px rgba(17,24,39,.045);}
+.terrain-pdf-template .terrain-technical-sheet .terrain-info-section:not(.terrain-info-section--wide){display:flex;flex-direction:column;}
+.terrain-pdf-template .terrain-technical-sheet .terrain-info-section h3{min-height:30px;margin:0 0 8px;font-size:15px;padding:0;}
+.terrain-pdf-template .terrain-technical-sheet .terrain-info-row{grid-template-columns:.78fr 1.22fr;gap:10px;padding:var(--pdf-row-gap) 0;min-height:0;}
+.terrain-pdf-template .terrain-technical-sheet .terrain-info-row span{font-size:9.2px;line-height:1.25;}
+.terrain-pdf-template .terrain-technical-sheet .terrain-info-row strong{font-size:11.4px;line-height:1.28;}
+.terrain-pdf-template .terrain-technical-sheet .terrain-info-section--wide{grid-column:1/-1;padding:var(--pdf-card-padding);}
+.terrain-pdf-template .terrain-technical-sheet .terrain-info-section--wide .terrain-info-rows{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:none;grid-auto-flow:row;gap:0 18px;align-items:start;}
+.terrain-pdf-template .coefficients-page-grid{display:flex;flex-direction:column;gap:12px;height:auto;max-height:none;overflow:visible;}
+.terrain-pdf-template .coefficients-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px;align-items:start;}
+.terrain-pdf-template .coefficients-column{display:flex;flex-direction:column;gap:12px;height:auto;justify-content:flex-start;min-width:0;}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-group{border:1px solid #e5e7eb;border-radius:15px;box-shadow:0 10px 22px rgba(17,24,39,.045);}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-group h3{min-height:38px;padding:8px 10px;font-size:10.8px;line-height:1.15;grid-template-columns:16px 1fr auto;}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-row{grid-template-columns:.88fr .92fr .34fr;gap:6px;padding:5.5px 8px;min-height:0;align-items:start;}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-row span{font-size:8.9px;line-height:1.16;}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-row em{font-size:8.2px;line-height:1.16;}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-row strong{font-size:8.9px;line-height:1.16;text-align:right;color:#991b1b;font-weight:950;}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-group--two-columns .terrain-coef-rows{grid-template-columns:repeat(2,minmax(0,1fr));}
+.terrain-pdf-template .coefficients-page-grid .terrain-coef-group--two-columns .terrain-coef-row{grid-template-columns:.85fr .8fr .35fr;padding:5px 6px;overflow-wrap:anywhere;word-break:normal;hyphens:auto;}
+.terrain-pdf-template .coefficients-page-grid .coefficients-total{display:grid;grid-template-columns:.5fr repeat(5,1fr);gap:8px;align-items:center;margin-top:0;padding:12px 14px;border-radius:16px;min-height:0;}
+.terrain-pdf-template .coefficients-page-grid .coefficients-total span{font-size:10px;letter-spacing:.18em;}
+.terrain-pdf-template .coefficients-page-grid .coefficients-total small{display:block;color:#fee2e2;font-size:7.5px;font-weight:950;text-transform:uppercase;letter-spacing:.09em;}
+.terrain-pdf-template .coefficients-page-grid .coefficients-total strong{display:block;margin-top:3px;font-size:13px;line-height:1.1;color:#fff;overflow-wrap:anywhere;}
+.terrain-pdf-template .terrain-summary-hero{margin-bottom:var(--pdf-section-gap);padding:24px 28px;}
+.terrain-pdf-template .terrain-summary-hero strong{font-size:44px;}
+.terrain-pdf-template .terrain-value-grid{gap:var(--pdf-card-gap);grid-auto-rows:1fr;}
+.terrain-pdf-template .terrain-value-tile{min-height:86px;padding:var(--pdf-card-padding);align-self:stretch;}
+.terrain-pdf-template .terrain-value-grid--large{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:1fr;}
+.terrain-pdf-template .terrain-value-grid--large .terrain-value-tile{min-height:82px;}
