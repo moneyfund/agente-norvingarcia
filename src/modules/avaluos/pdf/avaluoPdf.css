@@ -101,3 +101,16 @@
 
 /* Final professional terrain PDF pagination and alignment refinements. */
 .terrain-pdf-template .avaluo-pdf-content{height:100%;display:flex;flex-direction:column}.terrain-pdf-template .avaluo-pdf-title{flex:0 0 auto}.terrain-value-grid,.terrain-info-grid,.terrain-chart-grid,.terrain-coef-grid{grid-auto-rows:1fr}.terrain-value-tile,.terrain-info-section,.terrain-chart-card,.terrain-coef-group{page-break-inside:avoid;break-inside:avoid;align-self:stretch}.terrain-value-tile--dark{background:linear-gradient(135deg,#7f1d1d,#b91c1c 52%,#ef4444);border-color:#b91c1c;box-shadow:0 18px 36px rgba(185,28,28,.2)}.terrain-summary-hero strong,.terrain-value-tile strong,.terrain-total-box strong{font-family:Inter,Montserrat,Manrope,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:-.035em}.terrain-summary-hero{background:linear-gradient(135deg,#7f1d1d 0%,#991b1b 42%,#c1121f 70%,#ef4444 100%)}.terrain-info-row,.terrain-coef-row{min-height:32px}.terrain-coef-grid{gap:14px}.terrain-coef-group{display:flex;flex-direction:column}.terrain-coef-row{flex:0 0 auto}.terrain-pdf-template .terrain-cover-photo,.terrain-pdf-template .terrain-cover-bottom,.terrain-pdf-template .terrain-value-grid,.terrain-pdf-template .terrain-info-grid,.terrain-pdf-template .terrain-analysis,.terrain-pdf-template .terrain-chart-card,.terrain-pdf-template .terrain-coef-group,.terrain-pdf-template .terrain-total-box,.terrain-pdf-template .terrain-note,.terrain-pdf-template .terrain-method{page-break-inside:avoid!important;break-inside:avoid!important}
+
+/* Terrain PDF: explicit A4 pages with protected footer area and content-sized cards. */
+.terrain-pdf-template .avaluo-pdf-page{height:1123px;overflow:hidden;padding:50px 48px 108px}
+.terrain-pdf-template .avaluo-pdf-content{height:auto;min-height:0;padding-bottom:90px;display:block}
+.terrain-pdf-template .avaluo-pdf-footer{position:absolute;bottom:28px;left:48px;right:48px;z-index:2}
+.terrain-pdf-template .terrain-value-grid,.terrain-pdf-template .terrain-info-grid,.terrain-pdf-template .terrain-chart-grid,.terrain-pdf-template .terrain-coef-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;grid-auto-rows:auto;gap:14px}
+.terrain-pdf-template .terrain-value-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.terrain-pdf-template .terrain-value-grid--large{grid-template-columns:repeat(2,minmax(0,1fr))}
+.terrain-pdf-template .terrain-value-tile,.terrain-pdf-template .terrain-info-section,.terrain-pdf-template .terrain-chart-card,.terrain-pdf-template .terrain-coef-group{height:auto;min-height:0;align-self:start;page-break-inside:avoid!important;break-inside:avoid!important}
+.terrain-pdf-template .terrain-info-row,.terrain-pdf-template .terrain-coef-row{min-height:0;align-items:start}
+.terrain-pdf-template .terrain-coef-group{display:block}
+.terrain-pdf-template .avaluo-pdf-signature{color:#111827;text-align:center;line-height:1.45}
+.terrain-pdf-template .avaluo-pdf-signature strong,.terrain-pdf-template .avaluo-pdf-signature span{display:block;margin-top:4px}
