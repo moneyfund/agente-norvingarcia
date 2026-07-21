@@ -28,10 +28,10 @@ export const FACTORES_TERRENO = {
 } as const;
 
 const ZONAS_BASE_M2: Record<string, { precio: number; tipo: 'urbana' | 'semiurbana' | 'rural' }> = {
-  'Zona urbana': { precio: 40, tipo: 'urbana' },
-  'Zona semiurbana': { precio: 20, tipo: 'semiurbana' },
-  'Zona rural norte': { precio: 7, tipo: 'rural' },
-  'Zona rural sur': { precio: 5, tipo: 'rural' },
+  'Zona urbana': { precio: 32, tipo: 'urbana' },
+  'Zona semiurbana': { precio: 15, tipo: 'semiurbana' },
+  'Zona rural norte': { precio: 4.5, tipo: 'rural' },
+  'Zona rural sur': { precio: 3.25, tipo: 'rural' },
 };
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
@@ -57,13 +57,19 @@ const justificationFor = (factor: string, coeficiente: number) => {
 const coefRow = (factor: string, valorAplicado: string, coeficiente: number, justificacion?: string): CoeficienteAplicado => ({ factor, valorAplicado, coeficiente: toSafeNumber(coeficiente, 1), impacto: impactText(coeficiente), justificacion: justificacion || justificationFor(factor, toSafeNumber(coeficiente, 1)) });
 
 const CATEGORY_LIMITS = {
-  topografia: { min: 0.70, max: 1.08 },
-  acceso: { min: 0.75, max: 1.12 },
-  serviciosBasicos: { min: 0.85, max: 1.12 },
-  seguridadJuridica: { min: 0.70, max: 1.08 },
+  ubicacion: { min: 0.80, max: 1.20 },
+  topografia: { min: 0.92, max: 1.08 },
+  forma: { min: 0.95, max: 1.05 },
+  tipoSuelo: { min: 0.92, max: 1.08 },
+  acceso: { min: 0.92, max: 1.08 },
+  serviciosBasicos: { min: 0.92, max: 1.08 },
+  seguridadJuridica: { min: 0.92, max: 1.08 },
   usoPotencial: { min: 0.85, max: 1.15 },
-  entorno: { min: 0.85, max: 1.12 },
-  desarrolloUrbano: { min: 0.80, max: 1.10 },
+  entorno: { min: 0.92, max: 1.08 },
+  desarrolloUrbano: { min: 0.90, max: 1.10 },
+  recursosNaturales: { min: 0.94, max: 1.06 },
+  liquidez: { min: 0.90, max: 1.10 },
+  ambiental: { min: 0.90, max: 1.08 },
 } as const;
 
 const limitCategoryFactor = (value: number, limits: { min: number; max: number }) => clamp(toSafeNumber(value, 1), limits.min, limits.max);
@@ -77,10 +83,14 @@ const reductionCoef = (valorDespuesTope: number, valorAntesTope: number) => {
 };
 
 export function getFactorEscala(areaM2Convertida: number): number {
-  const areaM2 = Math.max(1, toSafeNumber(areaM2Convertida, 0));
-  // Curva continua: economías de escala sin saltos bruscos ni topes finales artificiales.
-  return clamp(1 / (1 + 0.115 * Math.log1p(areaM2 / 520)), 0.22, 1.04);
+  const areaManzanas = Math.max(0.01, safeDivide(toSafeNumber(areaM2Convertida, 0), M2_POR_MANZANA, 0.01));
+  if (areaManzanas <= 1) return 1;
+  const logArea = Math.log(areaManzanas);
+  const earlyDiscount = 0.06 * (logArea / Math.log(10));
+  const largeParcelDiscount = 0.17 * (Math.log1p(areaManzanas / 20) / (1 + 0.35 * Math.log1p(areaManzanas / 20)));
+  return clamp(1 - earlyDiscount - largeParcelDiscount, 0.54, 1);
 }
+
 
 export const getScaleMultiplier = getFactorEscala;
 
@@ -105,12 +115,12 @@ const inferZoneType = (zona: ZonaData, data: TerrenoInput): 'urbana' | 'semiurba
 const getBasePriceM2 = (zona: ZonaData, data: TerrenoInput, areaManzanas: number) => {
   const zoneType = inferZoneType(zona, data);
   const listedBase = ZONAS_BASE_M2[zona.zona]?.precio ?? toSafeNumber(zona.valorTerrenoM2);
-  if (data.unidadArea === 'manzana' && zoneType === 'urbana') return 20;
-  if (data.unidadArea === 'manzana' && zoneType === 'semiurbana') return clamp(listedBase, 12, 22);
-  if (zoneType === 'rural') return zona.zona === 'Zona rural sur' ? clamp(listedBase, 2, 10) : clamp(listedBase, 3, 12);
-  if (zoneType === 'semiurbana') return clamp(listedBase, 12, 28);
-  if (areaManzanas > 1) return clamp(listedBase, 12, 28);
-  return clamp(listedBase, 25, 55);
+  if (data.unidadArea === 'manzana' && zoneType === 'urbana') return clamp(listedBase, 18, 34);
+  if (data.unidadArea === 'manzana' && zoneType === 'semiurbana') return clamp(listedBase, 9, 18);
+  if (zoneType === 'rural') return zona.zona === 'Zona rural sur' ? clamp(listedBase, 1.8, 6.5) : clamp(listedBase, 2.2, 8);
+  if (zoneType === 'semiurbana') return clamp(listedBase, 9, 22);
+  if (areaManzanas > 1) return clamp(listedBase, 12, 34);
+  return clamp(listedBase, 20, 45);
 };
 
 
@@ -162,11 +172,9 @@ const synergyFactor = (data: TerrenoInput, zoneType: string, access: number, ser
   const friction = access < 0.92 && services < 1 && risk < 1;
   return premiumCombo ? 1.045 : productiveCombo ? 1.025 : friction ? 0.94 : 1;
 };
-const confidenceRange = (nivel: ResultadoAvaluo['nivelConfianza']) => nivel === 'Muy Alta' ? 0.02 : nivel === 'Alto' ? 0.04 : nivel === 'Medio' ? 0.07 : 0.10;
+const confidenceRange = (nivel: ResultadoAvaluo['nivelConfianza']) => nivel === 'Muy Alta' || nivel === 'Alto' ? 0.04 : nivel === 'Medio' ? 0.06 : nivel === 'Baja' ? 0.08 : 0.10;
 const liquidityIndex = (nivel: any, demanda: any, oferta: any) => clamp(50 * lookup(FACTORES_TERRENO.liquidez, nivel) * lookup(FACTORES_TERRENO.mercado, demanda) * lookup(FACTORES_TERRENO.oferta, oferta), 18, 92);
 const ventaMeses = (indice: number) => indice >= 78 ? '1 a 3 meses' : indice >= 62 ? '3 a 6 meses' : indice >= 45 ? '6 a 9 meses' : '9 a 14 meses';
-
-const isHighValueException = (data: TerrenoInput) => ['Turístico', 'Comercial'].includes(String(data.usoPotencial)) || ['Comercial', 'Natural/turístico'].includes(String(data.entorno || data.tipoEntorno));
 
 const confianza = (data: TerrenoInput, areaM2Convertida: number, zona?: ZonaData): ResultadoAvaluo['nivelConfianza'] => {
   const requeridos = Boolean(zona?.zona) && areaM2Convertida > 0 && Boolean(data.usoPotencial) && Boolean(data.serviciosBasicos);
@@ -177,6 +185,11 @@ const confianza = (data: TerrenoInput, areaM2Convertida: number, zona?: ZonaData
   if (faltantesSecundarios > 2) return 'Medio';
   return 'Alto';
 };
+
+
+const booleanCoef = (enabled: unknown, positive: number, negative = 0) => enabled === true ? 1 + positive : enabled === false && negative ? 1 - negative : 1;
+const optionCoef = (value: unknown, scores: Record<string, number>, fallback = 1) => toSafeNumber(scores[String(value)], fallback);
+const potencialCoef = (enabled: unknown, selectedUse: unknown, useName: string, impact = 0.035) => enabled === true || String(selectedUse) === useName ? 1 + impact : 1;
 
 export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): ResultadoAvaluo => {
   const { areaOriginal, unidadArea, areaM2Convertida, areaManzanas } = normalizeArea(data);
@@ -233,28 +246,43 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
   const factorEntorno = limitCategoryFactor(factorEntornoRaw, CATEGORY_LIMITS.entorno);
   const factorDesarrollo = limitCategoryFactor(factorDesarrolloRaw, CATEGORY_LIMITS.desarrolloUrbano);
 
-  const factorSinergia = synergyFactor(data, zoneType, factorAcceso, factorServiciosBasicos, factorTopografia, factorUso, factorRiesgos);
-  const factorGlobal = coefNumericos.factorZona
-    * factorEscala
-    * factorTopografia
-    * factorAcceso
-    * factorServiciosBasicos
-    * factorUso
-    * factorEntorno
-    * factorSeguridad
-    * factorRiesgos
-    * factorDesarrollo
-    * coefNumericos.factorHidrologia
-    * coefNumericos.factorVegetacion
-    * coefNumericos.factorOrientacion
-    * coefNumericos.factorGeometria
-    * factorMercado
-    * factorSinergia;
-  const valorBase = areaM2Convertida * basePriceM2;
-  let adjustedPriceM2 = basePriceM2 * factorGlobal;
-  let normalizacionAplicada = factorEscala < 0.995;
+  const factorSinergia = limitCategoryFactor(synergyFactor(data, zoneType, factorAcceso, factorServiciosBasicos, factorTopografia, factorUso, factorRiesgos), { min: 0.98, max: 1.025 });
+  const factorInfraestructura = limitCategoryFactor(
+    optionCoef((data as any).cercaniaHospitales, { Alta: 1.025, Media: 1.01, Baja: 0.99, Lejana: 0.98 })
+    * optionCoef((data as any).cercaniaEscuelas, { Alta: 1.02, Media: 1.01, Baja: 0.995, Lejana: 0.985 })
+    * optionCoef((data as any).transportePublico, { Alta: 1.025, Media: 1.01, Baja: 0.99, Nula: 0.975 }),
+    { min: 0.96, max: 1.06 }
+  );
+  const factorProductividadSuelo = optionCoef((data as any).productividadSuelo, { Alta: 1.05, Media: 1.01, Baja: 0.96 });
+  const factorRestriccionAmbiental = (data as any).restriccionesAmbientales ? 0.96 : 1;
+  const factorRestriccionLegal = (data as any).restriccionesLegales ? 0.95 : 1;
+  const factorPotenciales = limitCategoryFactor(
+    potencialCoef((data as any).potencialAgricola, data.usoPotencial, 'Agrícola')
+    * potencialCoef((data as any).potencialGanadero, data.usoPotencial, 'Ganadero', 0.025)
+    * potencialCoef((data as any).potencialTuristico, data.usoPotencial, 'Turístico', 0.04)
+    * potencialCoef((data as any).potencialComercial, data.usoPotencial, 'Comercial', 0.045)
+    * potencialCoef((data as any).potencialIndustrial, data.usoPotencial, 'Industrial', 0.035),
+    { min: 0.95, max: 1.08 }
+  );
+  const factorUbicacion = limitCategoryFactor(coefNumericos.factorZona * factorDesarrollo * coefNumericos.factorSeguridadZona, CATEGORY_LIMITS.ubicacion);
+  const factorLiquidezTecnica = limitCategoryFactor(coefNumericos.factorLiquidez * coefNumericos.factorDemanda * coefNumericos.factorOferta, CATEGORY_LIMITS.liquidez);
+  const factorUrbanistico = limitCategoryFactor(factorDesarrollo * factorEntorno * booleanCoef((data as any).potencialSubdivision, 0.04) * potencialCoef((data as any).potencialUrbanizar, data.usoPotencial, 'Lotificación', 0.05), { min: 0.90, max: 1.10 });
+  const factorAmbiental = limitCategoryFactor(factorRiesgos * coefNumericos.factorHidrologia * coefNumericos.factorVegetacion * factorRestriccionAmbiental, CATEGORY_LIMITS.ambiental);
+  const factorJuridico = limitCategoryFactor(factorSeguridad * factorRestriccionLegal, CATEGORY_LIMITS.seguridadJuridica);
 
-  const valorFinal = areaM2Convertida * adjustedPriceM2;
+  const valorBase = areaM2Convertida * basePriceM2;
+  const valorNormalizado = valorBase * factorEscala;
+  const valorConLiquidez = valorNormalizado * factorLiquidezTecnica;
+  const valorConUso = valorConLiquidez * factorUso * factorPotenciales;
+  const valorConUrbanismo = valorConUso * factorUrbanistico;
+  const valorConTopografia = valorConUrbanismo * factorTopografia * limitCategoryFactor(coefNumericos.factorTipoSuelo * factorProductividadSuelo, CATEGORY_LIMITS.tipoSuelo) * limitCategoryFactor(coefNumericos.factorForma * coefNumericos.factorGeometria, CATEGORY_LIMITS.forma);
+  const valorConAccesibilidad = valorConTopografia * factorAcceso * factorInfraestructura;
+  const valorConServicios = valorConAccesibilidad * factorServiciosBasicos;
+  const valorConAmbiente = valorConServicios * factorAmbiental;
+  const valorFinal = valorConAmbiente * factorJuridico * factorUbicacion * factorSinergia;
+  const factorGlobal = safeDivide(valorFinal, valorBase, 1);
+  const adjustedPriceM2 = safeDivide(valorFinal, areaM2Convertida, 0);
+  const normalizacionAplicada = factorEscala < 0.995;
   const nivelConfianza = confianza(data, areaM2Convertida, zona);
   const margenConfianza = confidenceRange(nivelConfianza);
   const rangoMercado = { minimo: valorFinal * (1 - margenConfianza), maximo: valorFinal * (1 + margenConfianza) };
@@ -262,6 +290,13 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
   const precioPublicacion = valorFinal * (1 + Math.min(0.035, margenConfianza / 2));
   const precioMinimoNegociacion = rangoMercado.minimo;
   const precioObjetivoCierre = valorFinal * (1 - Math.min(0.018, margenConfianza / 3));
+  const precioHectarea = adjustedPriceM2 * 10000;
+  const valorTecnico = valorFinal;
+  const valorComercial = valorFinal * factorLiquidezTecnica;
+  const nivelDemanda = indiceLiquidez >= 75 ? 'Alta' : indiceLiquidez >= 55 ? 'Media' : 'Baja';
+  const nivelPlusvalia = factorUbicacion >= 1.08 ? 'Alta' : factorUbicacion >= 0.99 ? 'Media' : 'Baja';
+  const potencialCrecimiento = factorUrbanistico >= 1.06 ? 'Alto' : factorUrbanistico >= 0.99 ? 'Medio' : 'Bajo';
+  const indiceComercializacion = Math.round(clamp(indiceLiquidez * factorUrbanistico * factorAcceso, 10, 98));
 
   const coeficientesAplicados: CoeficienteAplicado[] = [
     coefRow('Zona / plusvalía', zona.zona, coefNumericos.factorZona),
@@ -295,7 +330,34 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
     coefRow('Oferta', (data as any).oferta || 'Normal', coefNumericos.factorOferta),
     coefRow('Mercado local', `Liquidez ${(data as any).liquidez || 'Media'} · Demanda ${(data as any).demanda || 'Media'} · Oferta ${(data as any).oferta || 'Normal'}`, factorMercado),
     coefRow('Sinergia multicriterio', 'Interacción topografía + servicios + zona + accesibilidad + seguridad + uso potencial', factorSinergia),
-    coefRow('Factor total aplicado', 'Producto ponderado de matriz territorial, técnica, comercial y sinérgica', factorGlobal),
+    coefRow('Riesgo de inundación', data.riesgoInundacion ? 'Declarado' : riesgos.includes('Riesgo de inundación') ? 'En lista de riesgos' : 'No declarado', optionCoef(data.riesgoInundacion ? 'Sí' : 'No', { Sí: 0.96, No: 1 })),
+    coefRow('Riesgo por deslizamientos', riesgos.includes('Riesgo de deslizamiento') ? 'Declarado' : 'No declarado', riesgos.includes('Riesgo de deslizamiento') ? 0.95 : 1),
+    coefRow('Cercanía a carreteras principales', data.cercaniaPrincipal ? 'Cercano' : 'No declarado', booleanCoef(data.cercaniaPrincipal, 0.035)),
+    coefRow('Cercanía a centros urbanos', data.proximity || 'Según desarrollo urbano', coefNumericos.factorProximidad),
+    coefRow('Cercanía a hospitales', (data as any).cercaniaHospitales || 'No declarado', optionCoef((data as any).cercaniaHospitales, { Alta: 1.025, Media: 1.01, Baja: 0.99, Lejana: 0.98 })),
+    coefRow('Cercanía a escuelas', (data as any).cercaniaEscuelas || 'No declarado', optionCoef((data as any).cercaniaEscuelas, { Alta: 1.02, Media: 1.01, Baja: 0.995, Lejana: 0.985 })),
+    coefRow('Disponibilidad de transporte', (data as any).transportePublico || 'No declarado', optionCoef((data as any).transportePublico, { Alta: 1.025, Media: 1.01, Baja: 0.99, Nula: 0.975 })),
+    coefRow('Disponibilidad de agua permanente', data.serviciosBasicos?.agua ? 'Disponible' : 'No disponible', data.serviciosBasicos?.agua ? 1.03 : 0.97),
+    coefRow('Nivel de productividad del suelo', (data as any).productividadSuelo || data.tipoSuelo || 'No declarado', optionCoef((data as any).productividadSuelo, { Alta: 1.05, Media: 1.01, Baja: 0.96 })),
+    coefRow('Restricciones ambientales', (data as any).restriccionesAmbientales ? 'Presentes' : 'No declaradas', booleanCoef(!(data as any).restriccionesAmbientales, 0, 0.04)),
+    coefRow('Restricciones legales', (data as any).restriccionesLegales ? 'Presentes' : 'No declaradas', booleanCoef(!(data as any).restriccionesLegales, 0, 0.05)),
+    coefRow('Posibilidad de subdivisión', (data as any).potencialSubdivision ? 'Viable' : 'No declarada', booleanCoef((data as any).potencialSubdivision, 0.04)),
+    coefRow('Potencial agrícola', data.usoPotencial === 'Agrícola' ? 'Uso principal' : 'No predominante', potencialCoef((data as any).potencialAgricola, data.usoPotencial, 'Agrícola')),
+    coefRow('Potencial ganadero', data.usoPotencial === 'Ganadero' ? 'Uso principal' : 'No predominante', potencialCoef((data as any).potencialGanadero, data.usoPotencial, 'Ganadero', 0.025)),
+    coefRow('Potencial turístico', data.usoPotencial === 'Turístico' ? 'Uso principal' : 'No predominante', potencialCoef((data as any).potencialTuristico, data.usoPotencial, 'Turístico', 0.04)),
+    coefRow('Potencial comercial', data.usoPotencial === 'Comercial' ? 'Uso principal' : 'No predominante', potencialCoef((data as any).potencialComercial, data.usoPotencial, 'Comercial', 0.045)),
+    coefRow('Potencial industrial', data.usoPotencial === 'Industrial' ? 'Uso principal' : 'No predominante', potencialCoef((data as any).potencialIndustrial, data.usoPotencial, 'Industrial', 0.035)),
+    coefRow('PASO 1 · Precio base zona', `${basePriceM2.toFixed(2)} USD/m² × ${areaM2Convertida.toFixed(2)} m²`, 1),
+    coefRow('PASO 2 · Normalización por tamaño', `Valor normalizado: ${valorNormalizado.toFixed(2)}`, factorEscala),
+    coefRow('PASO 3 · Coeficiente de liquidez', `Valor: ${valorConLiquidez.toFixed(2)}`, factorLiquidezTecnica),
+    coefRow('PASO 4 · Coeficiente de uso potencial', `Valor: ${valorConUso.toFixed(2)}`, factorUso),
+    coefRow('PASO 5 · Coeficiente urbanístico', `Valor: ${valorConUrbanismo.toFixed(2)}`, factorUrbanistico),
+    coefRow('PASO 6 · Coeficiente de topografía', `Valor: ${valorConTopografia.toFixed(2)}`, factorTopografia),
+    coefRow('PASO 7 · Coeficiente de accesibilidad', `Valor: ${valorConAccesibilidad.toFixed(2)}`, factorAcceso),
+    coefRow('PASO 8 · Coeficiente de servicios', `Valor: ${valorConServicios.toFixed(2)}`, factorServiciosBasicos),
+    coefRow('PASO 9 · Coeficiente ambiental', `Valor: ${valorConAmbiente.toFixed(2)}`, factorAmbiental),
+    coefRow('PASO 10 · Coeficiente jurídico', `Resultado final: ${valorFinal.toFixed(2)}`, factorJuridico),
+    coefRow('PASO 11 · Resultado final', `Valor base ${valorBase.toFixed(2)} → final ${valorFinal.toFixed(2)}`, factorGlobal),
   ];
 
 
@@ -327,6 +389,13 @@ export const calculateLandValuation = (data: TerrenoInput, zona: ZonaData): Resu
     normalizacionAplicada,
     notaNormalizacion: normalizacionAplicada ? getScaleExplanation(areaM2Convertida, areaManzanas, factorEscala) : undefined,
     pricePerManzana: toSafeNumber(adjustedPriceM2 * M2_POR_MANZANA),
+    pricePerHectarea: toSafeNumber(precioHectarea),
+    valorComercial: toSafeNumber(valorComercial),
+    valorTecnico: toSafeNumber(valorTecnico),
+    nivelDemanda,
+    nivelPlusvalia,
+    potencialCrecimiento,
+    indiceComercializacion,
     rangoPorcentaje: margenConfianza,
     indiceLiquidez: Math.round(indiceLiquidez),
     tiempoEstimadoVenta: ventaMeses(indiceLiquidez),
