@@ -7,8 +7,11 @@ export default function AvaluoTerrenoResultCard({ result, onSave, canSave }) {
     <h3 className='text-xl font-bold text-blue-200'>Dashboard técnico de avalúo</h3>
     <div className='mt-4 grid gap-3 md:grid-cols-3'>
       {result.unidadArea === 'manzana' ? <>
-        {item('Precio por manzana', result.pricePerManzana ?? toSafeNumber(result.valorM2) * 7042.25)}
-        {item('Precio equivalente por m²', result.adjustedPriceM2 ?? result.valorM2)}
+        {item('Precio final por manzana', result.pricePerManzana ?? toSafeNumber(result.valorM2) * 7042.25)}
+        {result.ruralSurScaleApplied && item('Precio base por manzana según escala', result.basePricePerManzana)}
+        {result.ruralSurScaleApplied && item('Escala territorial aplicada', `${toSafeNumber(result.areaManzanas).toLocaleString('es-NI', { maximumFractionDigits: 2 })} manzanas → ${toMoney(result.basePricePerManzana, 0)} por manzana`, false)}
+        {item('Precio final por m²', result.adjustedPriceM2 ?? result.valorM2)}
+        {result.ruralSurScaleApplied && item('Precio base equivalente por m²', toSafeNumber(result.basePricePerManzana) / 7042.25)}
         {item('Área en manzanas', toSafeNumber(result.areaOriginal).toLocaleString('es-NI', { maximumFractionDigits: 2 }), false)}
         {item('Área equivalente en m²', `${toSafeNumber(result.areaM2Convertida).toLocaleString('es-NI', { maximumFractionDigits: 2 })} m²`, false)}
         {item('Valor total', result.estimatedValue ?? result.valorFinalEstimado)}
@@ -17,7 +20,8 @@ export default function AvaluoTerrenoResultCard({ result, onSave, canSave }) {
         {item('Área total', `${toSafeNumber(result.areaM2Convertida).toLocaleString('es-NI', { maximumFractionDigits: 2 })} m²`, false)}
         {item('Valor total', result.estimatedValue ?? result.valorFinalEstimado)}
       </>}
-      {item('Valor base del terreno', result.valorBase)}
+      {item('Valor base del terreno', result.baseValueTotal ?? result.valorBase)}
+      {result.ruralSurScaleApplied && item('Ajuste técnico acumulado', toSafeNumber(result.technicalAdjustmentFactor, 1).toFixed(3), false)}
       {item('Valor comercial', result.valorComercial ?? result.valorFinalEstimado)}
       {item('Valor técnico', result.valorTecnico ?? result.valorFinalEstimado)}
       {item('Valor bajo', result.lowValue ?? result.rangoMercado?.minimo)}
