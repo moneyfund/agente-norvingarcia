@@ -1,6 +1,9 @@
+import { useEffect } from 'react';
 import InformeGeneralSection from './InformeGeneralSection';
 import { CIUDADES_AVALUO, getZonasByCiudad } from '../constants/locations';
 import { M2_POR_MANZANA } from '../engine/terreno.engine';
+import BasePriceReferenceEditor from '../basePrice/BasePriceReferenceEditor';
+import { buildSuggestedBaseReference } from '../basePrice/basePriceReference';
 
 const unidadesArea = [
   { value: 'm2', label: 'Metros cuadrados' },
@@ -92,14 +95,39 @@ export default function TerrenoForm({ value, onChange, onSubmit, loading, showSu
   const unidadArea = value.unidadArea || 'm2';
   const areaOriginal = Number(value.areaOriginal || value.areaTerreno || 0);
   const areaM2Convertida = unidadArea === 'manzana' ? areaOriginal * M2_POR_MANZANA : areaOriginal;
+  const referenciaSugerida = buildSuggestedBaseReference({ ...value, unidadArea, areaOriginal, areaM2Convertida }, value.zonaData);
+
+  useEffect(() => {
+    if (!referenciaSugerida) return;
+    if (!value.precioBaseFueEditado) {
+      onChange('precioBaseSugerido', referenciaSugerida.precioBaseSugerido);
+      onChange('precioBaseAplicado', referenciaSugerida.precioBaseSugerido);
+      onChange('unidadPrecioBase', referenciaSugerida.unidad);
+    }
+  }, [referenciaSugerida?.precioBaseSugerido, referenciaSugerida?.unidad]);
+
+  const resetManualBasePrice = () => {
+    if (!referenciaSugerida) return;
+    onChange('precioBaseSugerido', referenciaSugerida.precioBaseSugerido);
+    onChange('precioBaseAplicado', referenciaSugerida.precioBaseSugerido);
+    onChange('unidadPrecioBase', referenciaSugerida.unidad);
+    onChange('precioBaseFueEditado', false);
+    onChange('motivoAjustePrecioBase', '');
+    onChange('detalleAjustePrecioBase', '');
+    onChange('confirmacionValorExtraordinario', false);
+  };
+
+  const confirmReferenceReset = () => !value.precioBaseFueEditado || window.confirm('El cambio de zona, unidad o área recalculará la referencia territorial y eliminará el ajuste manual actual.');
 
   const setArea = (nextArea, nextUnit = unidadArea) => {
+    if (!confirmReferenceReset()) return;
     const area = Number(nextArea);
     const converted = nextUnit === 'manzana' ? area * M2_POR_MANZANA : area;
     onChange('areaOriginal', area);
     onChange('unidadArea', nextUnit);
     onChange('areaM2Convertida', converted);
     onChange('areaTerreno', converted);
+    onChange('precioBaseFueEditado', false);
   };
 
   return <div className='text-slate-200'>
@@ -111,21 +139,35 @@ export default function TerrenoForm({ value, onChange, onSubmit, loading, showSu
 
     <div className='grid gap-4 md:grid-cols-2'>
       {field('Título del avalúo', 'titulo', value, onChange)}
-      {selectField({ label: 'Ciudad', val: ciudadSeleccionada, opts: CIUDADES_AVALUO, onChange: (ciudad) => { onChange('ciudad', ciudad); onChange('zona', ''); onChange('zonaData', null); } })}
+      {selectField({ label: 'Ciudad', val: ciudadSeleccionada, opts: CIUDADES_AVALUO, onChange: (ciudad) => { if (!confirmReferenceReset()) return; onChange('ciudad', ciudad); onChange('zona', ''); onChange('zonaData', null); onChange('precioBaseFueEditado', false); } })}
       {selectField({
         label: `Zona / ubicación en ${ciudadSeleccionada}`,
         val: value.zona || '',
         opts: zonasDisponibles.map((z) => z.zona),
         onChange: (zonaNombre) => {
+          if (!confirmReferenceReset()) return;
           const zonaCompleta = zonasDisponibles.find((z) => z.zona === zonaNombre) || null;
           onChange('zona', zonaNombre);
           onChange('zonaData', zonaCompleta);
+          onChange('precioBaseFueEditado', false);
         },
       })}
       {selectField({ label: 'Unidad de área', val: unidadArea, opts: unidadesArea, onChange: (v) => setArea(areaOriginal, v) })}
       {num(unidadArea === 'manzana' ? 'Área original (manzanas)' : 'Área original (m²)', 'areaOriginal', { ...value, areaOriginal }, (k, v) => setArea(v))}
       <div className={base}><span>Área convertida a m²</span><p className='mt-2 rounded bg-slate-800 p-2 font-semibold text-emerald-200'>{areaM2Convertida ? areaM2Convertida.toLocaleString('es-NI', { maximumFractionDigits: 2 }) : '0'} m²</p>{unidadArea === 'manzana' && <p className='mt-2 text-xs text-amber-100'>Para terrenos grandes, el precio por m² disminuye según la extensión de la propiedad.</p>}</div>
     </div>
+
+    {referenciaSugerida && <BasePriceReferenceEditor
+      suggestedValue={value.precioBaseSugerido ?? referenciaSugerida.precioBaseSugerido}
+      appliedValue={value.precioBaseAplicado ?? referenciaSugerida.precioBaseSugerido}
+      unit={value.unidadPrecioBase || referenciaSugerida.unidad}
+      edited={!!value.precioBaseFueEditado}
+      reason={value.motivoAjustePrecioBase}
+      detail={value.detalleAjustePrecioBase}
+      extraordinary={value.confirmacionValorExtraordinario}
+      onChange={(patch) => Object.entries(patch).forEach(([k, v]) => onChange(k, v))}
+      onReset={resetManualBasePrice}
+    />}
 
     <Section title='Clasificación territorial y suelo'>
       {selectField({ label: 'Categoría territorial', val: value.tipoTerritorio || '', opts: tipoTerritorio, onChange: (v) => onChange('tipoTerritorio', v) })}

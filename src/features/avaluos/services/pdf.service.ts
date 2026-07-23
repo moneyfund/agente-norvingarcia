@@ -17,6 +17,14 @@ const normalizeCoeficientes = (coeficientesAplicados: any) => (Array.isArray(coe
   : Object.entries(coeficientesAplicados || {}).map(([factor, coeficiente]) => ({ factor, valorAplicado: Number(coeficiente).toFixed(3), coeficiente: Number(coeficiente), impacto: impactText(coeficiente) }))
 ).map(normalizeImpactSign);
 const list = (value: any) => Array.isArray(value) ? value.join(', ') : (value || 'N/D');
+
+const refBase = (avaluo: any) => {
+  const suggested = avaluo?.referenciaBase?.precioBaseSugerido ?? avaluo?.precioBasePorManzana ?? avaluo?.basePricePerManzana ?? avaluo?.precioBaseM2 ?? avaluo?.basePriceM2 ?? null;
+  const applied = avaluo?.referenciaBase?.precioBaseAplicado ?? suggested;
+  const variation = suggested && applied ? ((Number(applied) / Number(suggested)) - 1) * 100 : 0;
+  return { ...(avaluo?.referenciaBase || {}), precioBaseSugerido: suggested, precioBaseAplicado: applied, variacionPorcentual: variation, unidad: avaluo?.referenciaBase?.unidad || (avaluo?.unidadArea === 'manzana' ? 'USD_MNZ' : 'USD_M2'), precioBaseFueEditado: Boolean(avaluo?.referenciaBase?.precioBaseFueEditado) };
+};
+
 const serviciosBasicosText = (servicios: any = {}) => [
   ['Agua potable', servicios.agua],
   ['Energía eléctrica', servicios.energia],
@@ -27,6 +35,7 @@ const serviciosBasicosText = (servicios: any = {}) => [
 
 export const exportAvaluoToPdf = (avaluo: any) => {
   const c = avaluo?.caracteristicas || {};
+  const rb = refBase(avaluo);
   const coeficientes = normalizeCoeficientes(avaluo?.coeficientesAplicados);
   const rows = coeficientes.map((coef: any) => `<tr><td>${coef.factor}</td><td>${coef.valorAplicado}</td><td>${coef.impacto}</td></tr>`).join('');
   const casa = avaluo?.tipoPropiedad === 'casa' ? `
@@ -78,7 +87,19 @@ export const exportAvaluoToPdf = (avaluo: any) => {
       <tr><td>Uso potencial</td><td>${c.usoPotencial || 'N/D'}</td></tr>
       <tr><td>Desarrollo urbano</td><td>${c.desarrolloUrbano || 'N/D'}</td></tr>
       <tr><td>Rango de mercado</td><td>${money(avaluo.rangoMercado?.minimo)} - ${money(avaluo.rangoMercado?.maximo)}</td></tr>
-    </table>${ruralSurScale}` : '';
+    </table>
+    <h2>Referencia base utilizada</h2>
+    <table>
+      <tr><td>Precio territorial sugerido</td><td>${money(rb.precioBaseSugerido)}</td></tr>
+      <tr><td>Precio aplicado al avalúo</td><td>${money(rb.precioBaseAplicado)}</td></tr>
+      <tr><td>Unidad</td><td>${rb.unidad === 'USD_MNZ' ? 'USD / manzana' : 'USD / m²'}</td></tr>
+      <tr><td>Diferencia porcentual</td><td>${Number(rb.variacionPorcentual || 0).toFixed(2)}%</td></tr>
+      <tr><td>Origen de la referencia</td><td>${rb.precioBaseFueEditado ? 'Ajuste manual' : rb.fuente || 'Referencia territorial automática'}</td></tr>
+      <tr><td>Motivo del ajuste</td><td>${rb.motivoAjuste || 'N/D'}</td></tr>
+      <tr><td>Observación técnica</td><td>${rb.detalleAjuste || 'N/D'}</td></tr>
+    </table>
+    <p>${rb.precioBaseFueEditado ? 'El precio base territorial fue ajustado manualmente para este informe debido a condiciones particulares de microzona, sin modificar la configuración general del sistema.' : 'El avalúo utiliza la referencia territorial automática correspondiente a la zona seleccionada.'}</p>
+${ruralSurScale}` : '';
 
   const html = `<!doctype html><html><head><style>body{font-family:Arial,sans-serif;color:#1e293b;padding:32px}h1{color:#0f172a}h2{margin-top:24px;color:#334155}table{width:100%;border-collapse:collapse;margin-top:12px}td,th{border:1px solid #cbd5e1;padding:8px;text-align:left}th{background:#f1f5f9}.highlight{background:#ecfdf5;border:1px solid #a7f3d0;padding:14px;border-radius:10px;margin:12px 0}</style></head><body><h1>Informe Técnico Inmobiliario</h1><p>Fecha: ${new Date().toLocaleDateString('es-NI')}</p><h2>${avaluo.titulo}</h2><p>Ciudad: ${avaluo.ciudad}</p><p>Zona: ${avaluo.zona}</p><p>Clasificación territorial: ${avaluo.zonaSnapshot?.clasificacion || 'N/D'}</p><p>Tipo de entorno: ${avaluo.zonaSnapshot?.tipoEntorno || 'N/D'}</p><p>Factor de plusvalía: ${avaluo.zonaSnapshot?.factorPlusvalia || 'N/D'}</p><p>Valor base m² usado: ${money(avaluo.ruralSurScaleApplied ? avaluo.basePriceM2 : (avaluo.zonaSnapshot?.valorTerrenoM2 || avaluo.valorM2 || 0))}</p><p>Observación técnica: ${avaluo.zonaSnapshot?.observacionTecnica || 'N/D'}</p>${terreno || casa || `<h2>Servicios básicos</h2><table><tr><td>Detalle</td><td>${serviciosBasicosText(c.serviciosBasicos)}</td></tr></table>`}<div class='highlight'><strong>Valor final:</strong> ${money(avaluo.valorFinal)}</div><h2>Coeficientes aplicados</h2><table><thead><tr><th>Factor</th><th>Valor aplicado</th><th>Impacto</th></tr></thead><tbody>${rows}</tbody></table><p>Firma profesional: Norvin García Real Estate</p></body></html>`;
   const w = window.open('', '_blank');

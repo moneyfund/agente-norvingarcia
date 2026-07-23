@@ -53,6 +53,14 @@ const normalizeImpactSign = (coef) => {
   const correctedCoef = numericCoef > 0 ? Math.min(1, 1 / numericCoef) : 1;
   return { ...coef, coeficiente: correctedCoef, impacto: impactText(correctedCoef) };
 };
+
+const fallbackReferenciaBase = (avaluo) => {
+  const suggested = avaluo?.referenciaBase?.precioBaseSugerido ?? avaluo?.precioBasePorManzana ?? avaluo?.basePricePerManzana ?? avaluo?.precioBaseM2 ?? avaluo?.basePriceM2 ?? null;
+  const applied = avaluo?.referenciaBase?.precioBaseAplicado ?? suggested;
+  const variacion = suggested && applied ? ((Number(applied) / Number(suggested)) - 1) * 100 : 0;
+  return { ...(avaluo?.referenciaBase || {}), precioBaseSugerido: suggested, precioBaseAplicado: applied, variacionPorcentual: variacion, unidad: avaluo?.referenciaBase?.unidad || (avaluo?.unidadArea === 'manzana' ? 'USD_MNZ' : 'USD_M2'), precioBaseFueEditado: Boolean(avaluo?.referenciaBase?.precioBaseFueEditado) };
+};
+
 const normalizeCoeficientes = (coeficientesAplicados) => (Array.isArray(coeficientesAplicados)
   ? coeficientesAplicados
   : Object.entries(coeficientesAplicados || {}).map(([factor, coeficiente]) => ({ factor: labelize(factor), valorAplicado: Number(coeficiente).toFixed(3), coeficiente: Number(coeficiente), impacto: impactText(coeficiente) }))
@@ -78,6 +86,7 @@ export default function AvaluoReportView({ avaluo }) {
   }, [avaluo, esTerreno]);
 
   const coeficientes = useMemo(() => normalizeCoeficientes(avaluo?.coeficientesAplicados), [avaluo]);
+  const referenciaBase = fallbackReferenciaBase(avaluo);
 
   const analisis = esTerreno
     ? `El terreno evaluado en ${avaluo?.zona || 'zona no definida'}, ${avaluo?.ciudad || 'ciudad no definida'}, fue analizado con base en área convertida, zona cerrada de Matagalpa o Estelí, categoría territorial, suelo, accesos, servicios, riesgos y coeficientes técnicos. La clasificación ${avaluo?.zonaSnapshot?.clasificacion || 'N/D'} y el factor de plusvalía de zona se integran al factor global para generar una referencia profesional de mercado.`
@@ -134,6 +143,18 @@ export default function AvaluoReportView({ avaluo }) {
           <Highlight label="Valor/m² final" value={formatMoney(avaluo?.valorM2)} />
           <Highlight label="Rango mercado" value={`${formatMoney(avaluo?.rangoMercado?.minimo)} - ${formatMoney(avaluo?.rangoMercado?.maximo)}`} />
           <Highlight label="Nivel confianza" value={avaluo?.nivelConfianza || 'N/D'} />
+        </div>
+      </Section>}
+
+      {esTerreno && <Section title="Referencia base utilizada">
+        <div className="grid gap-4 md:grid-cols-2">
+          <Field label="Referencia base sugerida" value={formatMoney(referenciaBase.precioBaseSugerido)} />
+          <Field label="Referencia base aplicada" value={formatMoney(referenciaBase.precioBaseAplicado)} />
+          <Field label="Unidad" value={referenciaBase.unidad === 'USD_MNZ' ? 'USD / manzana' : 'USD / m²'} />
+          <Field label="Variación porcentual" value={`${Number(referenciaBase.variacionPorcentual || 0).toFixed(2)}%`} />
+          <Field label="Ajustado manualmente" value={referenciaBase.precioBaseFueEditado ? 'Sí' : 'No'} />
+          <Field label="Motivo del ajuste" value={referenciaBase.motivoAjuste || 'Referencia territorial automática'} />
+          <Field label="Detalle técnico" value={referenciaBase.detalleAjuste || ''} />
         </div>
       </Section>}
 
