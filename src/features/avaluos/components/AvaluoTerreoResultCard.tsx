@@ -6,6 +6,13 @@ export default function AvaluoTerrenoResultCard({ result, onSave, canSave }) {
   return <section className='mt-8 rounded-2xl border border-blue-900 bg-slate-900 p-6 text-slate-200'>
     <h3 className='text-xl font-bold text-blue-200'>Dashboard técnico de avalúo</h3>
     <div className='mt-4 grid gap-3 md:grid-cols-3'>
+      {result.referenciaBase && <>
+        {item('Precio base sugerido', result.referenciaBase.precioBaseSugerido)}
+        {item('Precio base aplicado', result.referenciaBase.precioBaseAplicado)}
+        {item('Diferencia porcentual', `${Number(result.referenciaBase.variacionPorcentual || 0).toFixed(2)}%`, false)}
+        {item('Fuente de la referencia', result.referenciaBase.motivoAjuste || result.referenciaBase.fuente, false)}
+        {item('Unidad aplicada', result.referenciaBase.unidad === 'USD_MNZ' ? 'USD / manzana' : 'USD / m²', false)}
+      </>}
       {result.ruralSurScaleApplied && <>
         {item('Precio base por manzana según curva', result.basePricePerManzana)}
         {item('Área usada para la curva', `${toSafeNumber(result.areaManzanas).toLocaleString('es-NI', { maximumFractionDigits: 2 })} manzanas`, false)}
