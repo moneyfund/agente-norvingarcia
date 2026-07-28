@@ -3,9 +3,9 @@ export default function AvaluoTerrenoResultCard({ result, onSave, canSave }) {
   const coeficientes = normalizeCoeficientes(result.coeficientesAplicados);
   const serviciosBasicos = coeficientes.find((coef) => coef.factor === 'Servicios básicos');
 
-  return <section className='mt-8 rounded-2xl border border-blue-900 bg-slate-900 p-6 text-slate-200'>
-    <h3 className='text-xl font-bold text-blue-200'>Dashboard técnico de avalúo</h3>
-    <div className='mt-4 grid gap-3 md:grid-cols-3'>
+  return <section className='avaluo-results'>
+    <div className="avaluo-results__heading"><span>Resultado calculado</span><h3>Dashboard técnico de avalúo</h3><p>Valor, rango comercial e indicadores derivados por el motor técnico vigente.</p></div>
+    <div className='avaluo-results__grid'>
       {result.referenciaBase && <>
         {item('Precio base sugerido', result.referenciaBase.precioBaseSugerido)}
         {item('Precio base aplicado', result.referenciaBase.precioBaseAplicado)}
@@ -60,8 +60,8 @@ export default function AvaluoTerrenoResultCard({ result, onSave, canSave }) {
       {item('Área equivalente en manzanas', toSafeNumber(result.areaManzanas).toLocaleString('es-NI', { maximumFractionDigits: 2 }), false)}
       {serviciosBasicos && item('Servicios básicos', serviciosBasicos.impacto, false)}
     </div>
-    <div className='mt-5 overflow-hidden rounded-xl border border-slate-700'>
-      <div className='bg-slate-800 px-4 py-3 font-semibold text-slate-100'>Coeficientes aplicados</div>
+    <details open className='avaluo-coefficients'>
+      <summary>Desglose de coeficientes aplicados <span>{coeficientes.length} factores</span></summary>
       <div className='overflow-x-auto'>
         <table className='min-w-full text-sm'>
           <thead className='bg-slate-950 text-left text-slate-400'><tr><th className='px-4 py-2'>Factor</th><th className='px-4 py-2'>Valor aplicado</th><th className='px-4 py-2'>Impacto</th><th className='px-4 py-2'>Justificación</th></tr></thead>
@@ -70,8 +70,8 @@ export default function AvaluoTerrenoResultCard({ result, onSave, canSave }) {
           </tbody>
         </table>
       </div>
-    </div>
-    {canSave && <button onClick={onSave} className='mt-4 rounded-xl bg-amber-500 px-4 py-2 font-semibold text-slate-900'>Guardar avalúo</button>}
+    </details>
+    {canSave && <button onClick={onSave} className='avaluo-btn avaluo-btn--primary mt-4'>Guardar avalúo</button>}
   </section>;
 }
 const toSafeNumber = (value, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
@@ -93,4 +93,4 @@ const normalizeCoeficientes = (coeficientesAplicados) => (Array.isArray(coeficie
   ? coeficientesAplicados
   : Object.entries(coeficientesAplicados || {}).map(([factor, coeficiente]) => ({ factor, valorAplicado: Number(coeficiente).toFixed(3), coeficiente: Number(coeficiente), impacto: impactText(Number(coeficiente)) }))
 ).map(normalizeImpactSign);
-const item = (label, val, money = true) => <div className='rounded-xl border border-slate-700 bg-slate-800 p-3'><p className='text-xs text-slate-400'>{label}</p><p className='text-lg font-semibold'>{money ? toMoney(val) : toText(val)}</p></div>;
+const item = (label, val, money = true) => <div className={`avaluo-result-item ${label === 'Valor estimado' ? 'is-primary' : ''}`}><p>{label}</p><strong>{money ? toMoney(val) : toText(val)}</strong></div>;
