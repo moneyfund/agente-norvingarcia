@@ -13,7 +13,7 @@ export interface ServiciosBasicos { agua?: boolean; energia?: boolean; drenaje?:
 export type UsoPotencial = 'Residencial' | 'Comercial' | 'Industrial' | 'Turístico' | 'Agrícola' | 'Ganadero' | 'Forestal' | 'Mixto' | 'Lotificación' | 'Industrial liviano' | 'Reserva natural';
 export type FormaTerreno = 'Regular' | 'Irregular' | 'Irregular leve' | 'Irregular compleja' | 'Esquinero' | 'Fondo amplio' | 'Frente amplio';
 export type NivelComercial = 'Alto' | 'Medio' | 'Bajo';
-export type EntornoTerreno = 'Residencial premium' | 'Residencial alta' | 'Residencial media' | 'Residencial media alta' | 'Residencial medio' | 'Comercial' | 'Comercial / urbano premium' | 'Mixto' | 'Popular' | 'Popular consolidado' | 'Residencial popular' | 'Rural productivo' | 'Natural/turístico';
+export type EntornoTerreno = 'Residencial premium' | 'Residencial alta' | 'Residencial media' | 'Residencial media alta' | 'Residencial medio' | 'Comercial' | 'Comercial / urbano premium' | 'Mixto' | 'Popular' | 'Popular consolidado' | 'Residencial popular' | 'Urbano popular' | 'Urbano popular consolidado' | 'Rural productivo' | 'Natural/turístico';
 export type DesarrolloUrbano = 'Consolidado' | 'En crecimiento' | 'Crecimiento' | 'Emergente' | 'Bajo desarrollo' | 'Sin desarrollo urbano';
 export type TipoSuelo = 'Suelo firme' | 'Suelo arcilloso' | 'Suelo rocoso' | 'Suelo arenoso' | 'Suelo húmedo' | 'Suelo agrícola fértil' | 'Suelo mixto' | 'Arcilloso' | 'Franco' | 'Franco arcilloso' | 'Franco arenoso' | 'Arenoso' | 'Pedregoso' | 'Volcánico' | 'Muy fértil' | 'Rocoso';
 export type RecursoNatural = 'Fuente de agua' | 'Río o quebrada' | 'Pozo' | 'Árboles maderables' | 'Vista panorámica' | 'Área cultivable' | 'Ninguno';
