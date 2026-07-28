@@ -1,18 +1,22 @@
-const base = 'rounded-xl border border-slate-700 bg-slate-900 p-3';
+import { ImagePlus, Trash2, UserRound } from 'lucide-react';
+import { useId } from 'react';
+
 const accept = 'image/jpeg,image/jpg,image/png,image/webp';
 
-export default function InformeGeneralSection({ value, onChange }: { value: any; onChange: (key: string, value: any) => void }) {
-  const selectedGallery = value.imagenesAdicionalesFiles || [];
-  const handleGallery = (files: File[]) => onChange('imagenesAdicionalesFiles', files.slice(0, 5));
-
-  return <div className='mb-5 rounded-2xl border border-amber-500/30 bg-slate-950/70 p-4'>
-    <h3 className='text-lg font-semibold text-amber-100'>Datos generales para informe PDF</h3>
-    <p className='mt-1 text-sm text-slate-300'>Estos datos se guardan en Firestore y se usan para generar el informe profesional descargable.</p>
-    <div className='mt-4 grid gap-4 md:grid-cols-2'>
-      <label className={base}><span>Nombre del agente evaluador *</span><input className='mt-2 w-full rounded bg-slate-800 p-2' value={value.agenteEvaluador || ''} onChange={e => onChange('agenteEvaluador', e.target.value)} /></label>
-      <label className={base}><span>Teléfono del agente (opcional)</span><input className='mt-2 w-full rounded bg-slate-800 p-2' value={value.telefonoAgente || ''} onChange={e => onChange('telefonoAgente', e.target.value)} /></label>
-      <label className={base}><span>Imagen principal de la propiedad</span><input type='file' accept={accept} className='mt-2 w-full rounded bg-slate-800 p-2 text-sm' onChange={e => onChange('imagenPrincipalFile', e.target.files?.[0] || null)} /><small className='text-slate-400'>Recomendado. JPG, JPEG, PNG o WEBP. Máximo 10 MB.</small></label>
-      <label className={base}><span>Fotografías adicionales (máximo 5)</span><input type='file' accept={accept} multiple className='mt-2 w-full rounded bg-slate-800 p-2 text-sm' onChange={e => handleGallery(Array.from(e.target.files || []))} /><small className='text-slate-400'>{selectedGallery.length}/5 seleccionadas. Cada imagen debe pesar máximo 10 MB.</small></label>
-    </div>
+function UploadField({ label, file, multiple = false, count = 0, onFiles }) {
+  const id = useId();
+  const files = multiple ? (file || []) : file ? [file] : [];
+  return <div className="avaluo-upload-field"><div className="avaluo-upload-label"><span>{label}</span>{multiple && <small>{count}/5</small>}</div>
+    <label htmlFor={id} className="avaluo-dropzone"><ImagePlus aria-hidden="true" /><strong>Arrastra o selecciona {multiple ? 'fotografías' : 'una imagen'}</strong><small>JPG, PNG o WEBP · máximo 10 MB</small><input id={id} className="sr-only" type="file" accept={accept} multiple={multiple} onChange={(event) => onFiles(Array.from(event.target.files || []))} /></label>
+    {!!files.length && <div className="avaluo-file-list">{files.map((selected, index) => <div key={`${selected.name}-${index}`}><span><strong>{selected.name}</strong><small>{(selected.size / 1024 / 1024).toFixed(2)} MB</small></span><button type="button" aria-label={`Eliminar ${selected.name}`} onClick={() => onFiles(files.filter((_, itemIndex) => itemIndex !== index))}><Trash2 /></button></div>)}</div>}
   </div>;
+}
+
+export default function InformeGeneralSection({ value, onChange }: { value: any; onChange: (key: string, value: any) => void }) {
+  const gallery = value.imagenesAdicionalesFiles || [];
+  return <section className="avaluo-report-data" aria-labelledby="report-data-title"><div className="avaluo-card-title"><span><UserRound /></span><div><p>Datos del informe</p><h2 id="report-data-title">Responsable y evidencia fotográfica</h2><small>La información mantiene su conexión actual con Firestore, Storage y el informe PDF.</small></div></div>
+    <div className="avaluo-report-grid"><label><span>Agente evaluador <b>*</b></span><input value={value.agenteEvaluador || ''} onChange={(event) => onChange('agenteEvaluador', event.target.value)} /></label><label><span>Teléfono del agente <small>Opcional</small></span><input type="tel" value={value.telefonoAgente || ''} onChange={(event) => onChange('telefonoAgente', event.target.value)} /></label>
+      <UploadField label="Imagen principal" file={value.imagenPrincipalFile} onFiles={(files) => onChange('imagenPrincipalFile', files[0] || null)} />
+      <UploadField label="Fotografías adicionales" multiple file={gallery} count={gallery.length} onFiles={(files) => onChange('imagenesAdicionalesFiles', files.slice(0, 5))} />
+    </div></section>;
 }

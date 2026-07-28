@@ -1,1 +1,20 @@
-export function PropertyTypeCards({ value, onChange }) { const types=[['terreno','Terreno'],['casa','Casa']]; return <div className='grid grid-cols-2 gap-4'>{types.map(([k,l])=><button key={k} onClick={()=>onChange(k)} className={`rounded-2xl border p-5 text-left ${value===k?'border-amber-400 bg-slate-800':'border-slate-700 bg-slate-900'}`}><p className='text-slate-100 text-lg font-semibold'>{l}</p><p className='text-slate-400 text-sm'>Análisis técnico profesional</p></button>)}</div>; }
+import { Check, Home, Map } from 'lucide-react';
+
+const propertyTypes = [
+  { key: 'terreno', label: 'Terreno', icon: Map, description: 'Ubicación, extensión, topografía, acceso, servicios, uso potencial y mercado.' },
+  { key: 'casa', label: 'Casa', icon: Home, description: 'Terreno, construcción, estado, distribución, acabados y amenidades.' },
+];
+
+export function PropertyTypeCards({ value, onChange }) {
+  return <section aria-labelledby="property-type-title" className="avaluo-type-section">
+    <div className="avaluo-section-heading"><span>01</span><div><h2 id="property-type-title">Tipo de propiedad</h2><p>Selecciona la matriz técnica que corresponde al inmueble.</p></div></div>
+    <div className="avaluo-property-types">{propertyTypes.map(({ key, label, icon: Icon, description }) => {
+      const selected = value === key;
+      return <button type="button" key={key} aria-pressed={selected} onClick={() => onChange(key)} className={`avaluo-property-card ${selected ? 'is-selected' : ''}`}>
+        <span className="avaluo-property-icon"><Icon aria-hidden="true" /></span>
+        <span><strong>{label}</strong><small>{description}</small></span>
+        <span className="avaluo-property-check" aria-label={selected ? 'Seleccionado' : 'No seleccionado'}><Check /></span>
+      </button>;
+    })}</div>
+  </section>;
+}
