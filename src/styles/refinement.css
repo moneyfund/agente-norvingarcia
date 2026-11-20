@@ -112,3 +112,23 @@
 .ng-card-link:active .ng-card-view {transform:scale(.97);}
 @media(max-width:480px){.ng-card-view{min-height:44px;min-width:74px;}}
 @media(prefers-reduced-motion:reduce){.ng-card-view{transition:none;}}
+
+/* Ambient enamel lighting across public pages, behind the content only. */
+:root.dark .ng-site {
+  background-color: #17181b;
+  background-image:
+    radial-gradient(ellipse 52% 46% at 100% 29%, #ac073340 0%, #80002029 38%, transparent 100%),
+    radial-gradient(ellipse 46% 42% at 0% 76%, #92092d42 0%, #60001c24 44%, transparent 100%),
+    linear-gradient(105deg, #1e171c 0%, #17181b 42%, #19171c 75%, #21151c 100%);
+  background-size: 100% 1120px, 100% 1120px, 100% 100%;
+  background-repeat: repeat-y, repeat-y, no-repeat;
+}
+@media(max-width:760px) {
+  :root.dark .ng-site {
+    background-image:
+      radial-gradient(ellipse 72% 42% at 100% 27%, #a8073338 0%, #80002020 42%, transparent 100%),
+      radial-gradient(ellipse 65% 37% at 0% 75%, #92092d35 0%, #60001c20 45%, transparent 100%),
+      linear-gradient(105deg,#1d171c,#17181b 52%,#21151c);
+    background-size: 100% 850px,100% 850px,100% 100%;
+  }
+}
