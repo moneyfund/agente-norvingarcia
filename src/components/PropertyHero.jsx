@@ -52,7 +52,13 @@ export default function PropertyHero() {
       <div className="ng-wrap ng-residence-inner">
         <div className="ng-residence-copy">
           <p className="ng-hero-kicker"><span /> Bienes raíces en Nicaragua</p>
-          <h1 id="ng-hero-name">Norvin <em>García</em></h1>
+          <h1 id="ng-hero-name" className="ng-hero-wordmark">
+            <span className="sr-only">Norvin García</span>
+            <picture aria-hidden="true">
+              <source media="(max-width: 660px)" srcSet="/brand/norvin-garcia-hero-stacked.svg" width="556" height="222" />
+              <img src="/brand/norvin-garcia-hero.svg" alt="" width="1150" height="117" fetchPriority="high" />
+            </picture>
+          </h1>
           <p className="ng-residence-description">Asesoría personal para comprar o vender casas, terrenos y fincas.</p>
           <div className="ng-residence-actions">
             <Link to="/propiedades" className="ng-button ng-button--wine">Explorar propiedades</Link>
