@@ -25,8 +25,8 @@ export function usePropertyReviews(propertyId) {
         setReviews(data);
         setLoading(false);
       },
-      (err) => {
-        setError(err.message || 'No se pudieron cargar las reseñas.');
+      () => {
+        setError('No se pudieron cargar las reseñas.');
         setLoading(false);
       },
     );

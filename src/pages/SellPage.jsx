@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { MessageCircle } from 'lucide-react';
-import Button from '../components/Button';
+import FormLogin from '../components/FormLogin';
+import PageMasthead from '../components/PageMasthead';
+import { contact } from '../config/brand';
 import Input from '../components/Input';
 import Seo from '../components/Seo';
 import { useAuth } from '../hooks/useAuth';
@@ -45,37 +47,39 @@ function SellPage() {
   };
 
   return (
-    <section className="section-container">
-      <Seo title="¿Quieres vender? | Norvin García" description="Capta clientes vendedores con un formulario optimizado y contacto directo por WhatsApp." />
-      <h1 className="font-display text-4xl font-semibold">¿Quieres vender tu propiedad?</h1>
-      <p className="mt-3 max-w-3xl text-slate-600 dark:text-slate-300">Déjame tus datos y prepararé una estrategia personalizada para vender tu propiedad al mejor precio.</p>
-      {!isAuthenticated && (
-        <div className="mt-6 rounded-2xl border border-brand-500/30 bg-brand-500/5 p-4">
-          <p className="text-sm font-medium text-brand-600 dark:text-brand-100">Debes iniciar sesión para enviar esta solicitud.</p>
-          <Button className="mt-3" type="button" onClick={loginWithGoogle}>Iniciar sesión con Google</Button>
-        </div>
-      )}
-      <form onSubmit={handleSubmit} className="mt-8 grid gap-4 rounded-2xl bg-white p-6 shadow-premium dark:bg-slate-900">
-        <div className="grid gap-4 md:grid-cols-2">
-          <Input label="Nombre" placeholder="Tu nombre" value={form.name || user?.displayName || ''} onChange={handleChange('name')} />
-          <Input label="Teléfono" placeholder="Tu teléfono" value={form.phone} onChange={handleChange('phone')} />
-        </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          <Input label="Email" type="email" placeholder="correo@ejemplo.com" value={form.email || user?.email || ''} onChange={handleChange('email')} />
-          <Input label="Tipo de propiedad" placeholder="Casa, apartamento, terreno..." value={form.propertyType} onChange={handleChange('propertyType')} />
-        </div>
-        <label>
-          <span className="mb-2 block text-sm font-medium">Descripción</span>
-          <textarea rows="5" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900" placeholder="Cuéntame más sobre tu propiedad" value={form.description} onChange={handleChange('description')}></textarea>
-        </label>
-        {statusMessage && <p className="rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800">{statusMessage}</p>}
-        {error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-        <div className="flex flex-wrap gap-3">
-          <Button type="submit" disabled={!isAuthenticated || saving}>{saving ? 'Enviando...' : 'Enviar solicitud'}</Button>
-          <a href="https://wa.me/18095551234" target="_blank" rel="noreferrer"><Button type="button" variant="secondary" className="inline-flex items-center gap-2"><MessageCircle size={16} /> Contacto directo</Button></a>
-        </div>
-      </form>
-    </section>
+    <>
+      <Seo title="Vender una propiedad | Norvin García" description="Solicita asesoría para vender una propiedad en Nicaragua con Norvin García." />
+      <PageMasthead label="Asesoría para propietarios" title="Vender tu propiedad">
+        Cuéntame sobre el inmueble y qué buscas lograr con la venta.
+      </PageMasthead>
+      <div className="ng-wrap ng-service-layout">
+        <aside className="ng-service-aside">
+          <h2 className="ng-display">Cómo empezamos.</h2>
+          <ol className="ng-sell-steps">
+            <li><strong>Conocemos el inmueble.</strong><p>Revisamos su ubicación, superficie, estado y documentación disponible.</p></li>
+            <li><strong>Definimos la estrategia.</strong><p>Evaluamos propiedades comparables y acordamos un plan para presentar tu inmueble.</p></li>
+            <li><strong>Coordinamos el proceso.</strong><p>Organizamos consultas, visitas y seguimiento con interesados.</p></li>
+          </ol>
+          <a href={contact.whatsapp} target="_blank" rel="noreferrer" className="ng-button ng-button--line"><MessageCircle size={18} aria-hidden="true" /> Consultar por WhatsApp</a>
+        </aside>
+        <form onSubmit={handleSubmit} className="ng-form ng-form-panel">
+          <h2 className="ng-display">Solicitud de venta.</h2>
+          {!isAuthenticated && <FormLogin onLogin={loginWithGoogle}>Inicia sesión para enviar tu solicitud.</FormLogin>}
+          <div className="ng-form-row">
+            <Input label="Nombre" autoComplete="name" value={form.name || user?.displayName || ''} onChange={handleChange('name')} />
+            <Input label="Teléfono" type="tel" autoComplete="tel" value={form.phone} onChange={handleChange('phone')} />
+          </div>
+          <div className="ng-form-row">
+            <Input label="Correo electrónico" type="email" autoComplete="email" value={form.email || user?.email || ''} onChange={handleChange('email')} />
+            <Input label="Tipo de propiedad" placeholder="Casa, terreno, finca…" value={form.propertyType} onChange={handleChange('propertyType')} />
+          </div>
+          <label><span>Descripción</span><textarea rows="5" placeholder="Ubicación, superficie y detalles que quieras compartir" value={form.description} onChange={handleChange('description')} /></label>
+          {statusMessage && <p className="ng-meta" role="status">{statusMessage}</p>}
+          {error && <p className="ng-inline-error" role="alert">{error}</p>}
+          <button className="ng-button ng-button--wine" type="submit" disabled={!isAuthenticated || saving}>{saving ? 'Enviando…' : 'Enviar solicitud'}</button>
+        </form>
+      </div>
+    </>
   );
 }
 

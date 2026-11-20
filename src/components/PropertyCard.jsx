@@ -1,44 +1,90 @@
+import { ArrowUpRight, Bath, BedDouble, Heart, MapPin, Ruler } from 'lucide-react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { BedDouble, Bath, Heart, MapPin, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { getPrimaryImageUrl } from '../utils/propertyMedia';
+import { applyImageFallback, formatUSD, isPositiveNumber, operationLabel, pricePerArea, propertyCover, propertyUnit } from '../utils/propertyPresentation';
 
-const currency = new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-const measurementLabelByUnit = {
-  varas: 'vara',
-  metros: 'metro',
-  manzanas: 'manzana',
-};
+function moveLight(event) {
+  if (event.pointerType !== 'mouse' || !window.matchMedia('(hover: hover) and (prefers-reduced-motion: no-preference)').matches) return;
+  const card = event.currentTarget;
+  const rect = card.getBoundingClientRect();
+  const x = (event.clientX - rect.left) / rect.width;
+  const y = (event.clientY - rect.top) / rect.height;
+  card.style.setProperty('--card-x', `${x * 100}%`);
+  card.style.setProperty('--card-y', `${y * 100}%`);
+  card.style.setProperty('--card-rx', `${(0.5 - y) * 6}deg`);
+  card.style.setProperty('--card-ry', `${(x - 0.5) * 6}deg`);
+  card.style.setProperty('--card-pan-x', `${(0.5 - x) * 10}px`);
+  card.style.setProperty('--card-pan-y', `${(0.5 - y) * 10}px`);
+}
 
-function PropertyCard({ property, ctaLabel = 'Ver más' }) {
-  const reduceMotion = useReducedMotion();
-  const image = getPrimaryImageUrl(property) || '/img/placeholder-property.svg';
-  const operationLabel = property.tipoOperacion === 'alquiler' ? 'En Alquiler' : 'En Venta';
-  const unit = property.unidadMedida || 'varas';
-  const unitLabel = measurementLabelByUnit[unit] || 'unidad';
-  const hasValidArea = property.area !== null && property.area !== undefined && Number(property.area) > 0;
-  const precioPorArea = property.precioPorArea ?? (hasValidArea ? Number(property.precio || 0) / Number(property.area) : null);
+function resetLight(event) {
+  for (const name of ['x', 'y', 'rx', 'ry', 'pan-x', 'pan-y']) {
+    event.currentTarget.style.removeProperty(`--card-${name}`);
+  }
+}
+
+export function PropertySkeleton() {
+  return (
+    <div className="ng-card-skeleton" aria-hidden="true">
+      <div />
+      <span />
+      <span />
+    </div>
+  );
+}
+
+function PropertyCard({ property, index = 0, variant = 'standard' }) {
+  const reducedMotion = useReducedMotion();
+  const title = property.titulo || property.title || 'Propiedad';
+  const unit = propertyUnit(property.unidadMedida);
+  const perArea = pricePerArea(property);
+  const area = isPositiveNumber(property.area) ? property.area : property.areaConstruida;
 
   return (
-    <motion.article whileHover={reduceMotion ? undefined : {y:-5}} transition={{duration:.28}} className={`ng-property-card ${property.premium?'is-premium':''}`}>
-      <Link className="ng-card-media" to={`/propiedad/${property.id}`} aria-label={`Ver ${property.titulo || 'propiedad'}`}>
-        <img src={image} alt={property.titulo || 'Propiedad'} loading="lazy" decoding="async" onError={event=>{const fallback='/img/placeholder-property.svg';if(!event.currentTarget.src.endsWith(fallback))event.currentTarget.src=fallback;}}/>
-        <div className="ng-card-badges"><span>{operationLabel}</span>{property.premium && <span>Premium</span>}</div>
-        <span className="ng-card-arrow"><ArrowUpRight size={19}/></span>
-      </Link>
-      <div className="ng-card-body">
-        <div className="ng-card-meta"><span>{property.tipo}</span><span><Heart size={13}/> {property.likes?.length || 0}</span></div>
-        <p className="ng-card-price">{currency.format(property.precio || 0)}</p>
-        <h3><Link to={`/propiedad/${property.id}`}>{property.titulo}</Link></h3>
-        <p className="ng-card-location"><MapPin size={14}/>{property.ubicacion}</p>
-        <div className="ng-card-specs">
-          {Number(property.habitaciones)>0 && <span><BedDouble size={15}/> {property.habitaciones} hab.</span>}
-          {Number(property.banos)>0 && <span><Bath size={15}/> {property.banos} baños</span>}
-          {hasValidArea && <span>{property.area} {unit}</span>}
+    <motion.article
+      className={`ng-property-card ng-property-card--${variant}`}
+      initial={reducedMotion ? false : { opacity: 0.55, clipPath: 'inset(0 0 6% 0)' }}
+      whileInView={{ opacity: 1, clipPath: 'inset(-5px -5px -5px -5px)' }}
+      viewport={{ once: true, amount: 0.13 }}
+      transition={{ duration: reducedMotion ? 0 : 0.55, delay: reducedMotion ? 0 : Math.min(index, 3) * 0.055, ease: [0.22, 1, 0.36, 1] }}
+      onPointerMove={moveLight}
+      onPointerLeave={resetLight}
+    >
+      <Link to={`/propiedad/${property.id}`} state={{ property }} className="ng-card-link">
+        <div className="ng-card-media">
+          <img
+            src={propertyCover(property)}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            onError={applyImageFallback}
+          />
+          <div className="ng-card-badges">
+            <span>{operationLabel(property)}</span>
+            {property.premium && <span>Destacada</span>}
+          </div>
+          <div className="ng-card-caption">
+            <div>
+              {property.tipo && <p className="ng-label">{property.tipo}</p>}
+              <h3>{title}</h3>
+            </div>
+            <span className="ng-card-arrow" aria-hidden="true"><ArrowUpRight size={22} /></span>
+          </div>
         </div>
-        {hasValidArea && precioPorArea !== null && Number.isFinite(precioPorArea) && <p className="ng-card-unit">Por {unitLabel}: {currency.format(precioPorArea)}</p>}
-        <Link to={`/propiedad/${property.id}`} className="ng-card-cta">{ctaLabel}<ArrowUpRight size={17}/></Link>
-      </div>
+        <div className="ng-card-body">
+          <div className="ng-card-summary">
+            <p className="ng-card-price">{formatUSD(property.precio)}</p>
+            {property.ubicacion && <p className="ng-card-location"><MapPin size={14} aria-hidden="true" />{property.ubicacion}</p>}
+          </div>
+          <div className="ng-card-specs">
+            {isPositiveNumber(area) && <span><Ruler size={15} aria-hidden="true" />{area} {unit.short}</span>}
+            {isPositiveNumber(property.habitaciones) && <span><BedDouble size={16} aria-hidden="true" />{property.habitaciones} hab.</span>}
+            {isPositiveNumber(property.banos) && <span><Bath size={15} aria-hidden="true" />{property.banos} baños</span>}
+            {Boolean(property.likes?.length) && <span className="ng-card-likes" aria-label={`${property.likes.length} me gusta`}><Heart size={14} aria-hidden="true" />{property.likes.length}</span>}
+          </div>
+          {perArea !== null && <p className="ng-card-unit">{formatUSD(perArea)} / {unit.long}</p>}
+        </div>
+      </Link>
     </motion.article>
   );
 }

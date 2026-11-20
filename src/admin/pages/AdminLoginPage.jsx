@@ -1,76 +1,51 @@
 import { Link, Navigate, useLocation } from 'react-router-dom';
-import Button from '../../components/Button';
+import BrandMark, { Monogram } from '../../components/BrandMark';
+import FormLogin from '../../components/FormLogin';
+import Seo from '../../components/Seo';
+import ThemeToggle from '../../components/ThemeToggle';
 import { useAuth } from '../../hooks/useAuth';
 
-function AdminLoginPage() {
-  const {
-    isAuthenticated,
-    isAdmin,
-    loading,
-    loginWithGoogle,
-    logout,
-    user,
-  } = useAuth();
-  const location = useLocation();
+function AdminLoginPage({ theme, toggleTheme }) {
+  const { isAuthenticated, isAdmin, loading, loginWithGoogle, logout, user } = useAuth();
+  const { state } = useLocation();
+  const from = state?.from;
+  const privateTool = /^\/(listado|avaluos(?:\/[^/]+)?)$/.test(from?.pathname || '');
+  const adminPage = /^\/admin(?:\/(?!login(?:\/|$))[^/]*)?(?:\/[^/]+)?$/.test(from?.pathname || '');
 
-  if (loading) {
-    return <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">Verificando sesión...</div>;
-  }
-
-  if (isAuthenticated && isAdmin) {
-    return <Navigate to="/admin" replace />;
-  }
-
-  const showUnauthorized = Boolean(location.state?.unauthorized) || (isAuthenticated && !isAdmin);
-
-  if (!isAuthenticated) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
-        <div className="w-full max-w-md space-y-5 rounded-2xl bg-white p-8 shadow-premium">
-          <h1 className="text-3xl font-bold">Acceso Admin</h1>
-          <p className="text-sm text-slate-500">Inicia sesión únicamente con Google para entrar al panel.</p>
-          {showUnauthorized && (
-            <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-              Acceso denegado: necesitas una cuenta autenticada con Google para entrar al panel admin.
-            </p>
-          )}
-          <Button type="button" className="w-full" onClick={loginWithGoogle}>
-            Iniciar sesión con Google
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Navigate to="/admin" replace />;
-  }
+  if (isAuthenticated && privateTool) return <Navigate to={from} replace />;
+  if (isAuthenticated && isAdmin) return <Navigate to={adminPage ? from : '/admin'} replace />;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
-      <div className="w-full max-w-md space-y-5 rounded-2xl bg-white p-8 shadow-premium">
-        <h1 className="text-3xl font-bold">Acceso denegado</h1>
-        <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          Tu cuenta ({user.email}) no está autorizada para administrar. Debes iniciar sesión con Google.
-        </p>
-        <div className="rounded-xl border border-slate-200 p-4">
-          <div className="flex items-center gap-3">
-            <img src={user.photoURL || 'https://via.placeholder.com/40'} alt={user.displayName || 'Usuario'} className="h-10 w-10 rounded-full object-cover" />
-            <div>
-              <p className="text-sm font-semibold">{user.displayName || 'Usuario'}</p>
-              <p className="text-xs text-slate-500">{user.email}</p>
-            </div>
-          </div>
-          <div className="mt-4 grid gap-2">
-            <Button type="button" className="w-full" onClick={loginWithGoogle}>Cambiar de cuenta</Button>
-            <Link to="/">
-              <Button type="button" variant="outline" className="w-full">Ir al inicio</Button>
-            </Link>
-            <Button type="button" variant="outline" className="w-full" onClick={logout}>Cerrar sesión</Button>
-          </div>
-        </div>
+    <main className="ng-access">
+      <Seo title="Acceso | Norvin García" description="Accede con Google a las herramientas inmobiliarias." />
+      <header className="ng-wrap ng-access-header">
+        <BrandMark />
+        <ThemeToggle theme={theme} onToggle={toggleTheme} />
+      </header>
+      <div className="ng-access-grid">
+        <div className="ng-access-mark"><Monogram /></div>
+        <section className="ng-access-content">
+          {loading ? <p role="status">Verificando sesión…</p> : (
+            <>
+              <p className="ng-label ng-section-label">{privateTool ? 'Herramientas inmobiliarias' : 'Administración'}</p>
+              <h1 className="ng-display">{isAuthenticated ? 'Acceso restringido' : 'Iniciar sesión'}</h1>
+              {isAuthenticated ? (
+                <>
+                  <p>La cuenta {user?.email} no tiene acceso al panel.</p>
+                  <FormLogin onLogin={loginWithGoogle}>Puedes entrar con otra cuenta de Google.</FormLogin>
+                  <button type="button" className="ng-button ng-button--line" onClick={logout}>Cerrar sesión</button>
+                </>
+              ) : (
+                <FormLogin onLogin={loginWithGoogle}>
+                  {privateTool ? 'Usa tu cuenta de Google para acceder a esta herramienta.' : 'Usa tu cuenta de Google para acceder al panel.'}
+                </FormLogin>
+              )}
+              <Link to="/" className="ng-text-link">Volver al inicio</Link>
+            </>
+          )}
+        </section>
       </div>
-    </div>
+    </main>
   );
 }
 

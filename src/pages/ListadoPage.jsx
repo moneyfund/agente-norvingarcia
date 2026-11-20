@@ -227,10 +227,10 @@ function ListadoPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl p-4 pb-24">
-      <h1 className="mb-3 text-2xl font-bold">Captación profesional de propiedades</h1>
+    <div className="ng-wrap ng-listado">
+      <div className="ng-listado-heading"><p className="ng-label ng-section-label">Herramientas inmobiliarias</p><h1 className="ng-display">Captación de propiedades</h1></div>
       <div className="mb-4 flex flex-wrap gap-2">
-        {['id', 'ubicacion', 'datos', 'caracteristicas', 'precio'].map((s) => <button key={s} type="button" className="rounded bg-slate-100 px-3 py-2 text-sm" onClick={() => sectionRefs.current[s]?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>{s}</button>)}
+        {['id', 'ubicacion', 'datos', 'caracteristicas', 'precio'].map((s) => <button key={s} type="button" className="ng-button ng-button--line" onClick={() => sectionRefs.current[s]?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>{s}</button>)}
       </div>
       {success && <div className="mb-3 flex items-center gap-2 rounded border border-emerald-200 bg-emerald-50 p-3 text-emerald-700"><CheckCircle2 size={18} />{success}</div>}
       {error && <div className="mb-3 flex items-center gap-2 rounded border border-red-200 bg-red-50 p-3 text-red-700"><TriangleAlert size={18} />{error}</div>}
@@ -269,26 +269,20 @@ function ListadoPage() {
           <div className="md:col-span-2 grid grid-cols-3 gap-2">{previewUrls.map((src) => <img key={src} src={src} alt="preview" className="h-24 w-full rounded object-cover" />)}</div>
         </Card>
 
-        <div className="fixed inset-x-0 bottom-0 z-20 border-t bg-white/95 p-3 backdrop-blur">
+        <div className="ng-listado-actions">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2">
-            <button type="submit" disabled={saving} className="rounded-lg bg-blue-700 px-4 py-3 text-white">{saving ? 'Guardando...' : 'Guardar propiedad'}</button>
+            <button type="submit" disabled={saving} className="ng-button ng-button--wine">{saving ? 'Guardando...' : 'Guardar propiedad'}</button>
             <label className="ml-auto flex items-center gap-2 text-sm"><input type="checkbox" checked={autoSave} onChange={(e) => setAutoSave(e.target.checked)} />Autoguardado</label>
           </div>
         </div>
       </form>
-
-      <div className="mt-8 rounded-xl bg-white p-4 shadow">
-        <h3 className="mb-3 font-semibold">Debug Firestore</h3>
-        <p className="text-sm">Firebase DB: {String(!!import.meta.env.VITE_FIREBASE_API_KEY)} | Auth: {user?.uid ? 'OK' : 'Sin sesión'}</p>
-        <p className="text-xs text-slate-500">Para writes en Firestore revisa reglas en firestore.rules y permite create/update para usuarios autenticados.</p>
-      </div>
 
       <div className="mt-8 grid gap-3 md:grid-cols-2">
         {visibleItems.map((item) => (
           <div key={item.id} className="rounded-xl border bg-white p-4 shadow-sm">
             <p className="text-sm text-gray-500">{item.codigoInterno} · {item.tipoPropiedad}</p>
             <h3 className="font-semibold">{item.zona} - Q{item.precioSolicitado}</h3>
-            <button className="text-sm font-semibold text-blue-700" onClick={() => { setForm(item); setEditingId(item.id); }}>Editar</button>
+            <button className="ng-text-link" onClick={() => { setForm(item); setEditingId(item.id); }}>Editar</button>
           </div>
         ))}
       </div>

@@ -1,0 +1,228 @@
+.ng-detail-header { background: var(--ng-surface); border-bottom: 1px solid var(--ng-line); padding-block: 1.1rem 1.9rem; }
+.ng-back { display: inline-flex; align-items: center; gap: .5rem; padding: .45rem 0; color: var(--ng-accent); font-size: .9rem; font-weight: 650; }
+.ng-back:hover { text-decoration: underline; }
+.ng-detail-title { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: .6rem 2rem; margin-top: 1.4rem; }
+.ng-detail-title .ng-label { color: var(--ng-accent); }
+.ng-detail-title h1 { font-size: clamp(2.8rem, 6vw, 6.7rem); margin: .3rem 0 .65rem; text-wrap: wrap; }
+.ng-detail-location { display: flex; align-items: center; gap: .5rem; color: var(--ng-muted); line-height: 1.45; }
+.ng-detail-location svg { flex: none; color: var(--ng-accent); }
+.ng-detail-price { color: var(--ng-text); font: 650 clamp(1.7rem, 3.4vw, 3.6rem)/1.15 var(--ng-mono); letter-spacing: -.07em; align-self: center; }
+.ng-detail-content { padding-block: clamp(1rem, 3vw, 2.5rem) clamp(3rem, 6vw, 6.5rem); }
+.ng-detail-state { padding-block: 1.5rem 4rem; }
+.ng-detail-state > :last-child { margin-top: .8rem; }
+.ng-detail-skeleton { padding: 1rem; }
+.ng-detail-skeleton > div:first-of-type { height: 2rem; width: 48%; margin-bottom: 1.3rem; }
+.ng-detail-skeleton > div:last-child { height: clamp(240px, 49vw, 590px); }
+
+.ng-gallery { border: 1px solid var(--ng-line); background: var(--ng-surface); border-radius: 5px; overflow: hidden; }
+.ng-gallery-stage {
+  position: relative;
+  isolation: isolate;
+  height: clamp(255px, 52vw, 610px);
+  overflow: hidden;
+  color: #fff5f9;
+  background: radial-gradient(ellipse at 45% 35%, #42313d, #1b151c 82%);
+  touch-action: pan-y pinch-zoom;
+}
+.ng-gallery-stage > .ng-gallery-media, .ng-gallery-slide, .ng-gallery-picture { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ng-gallery-slide { overflow: hidden; }
+.ng-gallery-ambient { position: absolute; inset: -10%; z-index: -1; width: 120%; max-width: none; height: 120%; object-fit: cover; opacity: .35; filter: blur(28px) brightness(.68); pointer-events: none; }
+.ng-gallery-picture { border: none; display: block; cursor: zoom-in; }
+.ng-gallery-picture:focus-visible { outline-offset: -4px; }
+.ng-gallery-media { width: 100%; height: 100%; object-fit: contain; display: block; }
+.ng-gallery-stage > .ng-icon-button { position: absolute; z-index: 2; --button-border: #f8d9e387; background: #1e1420d9; color: white; }
+.ng-gallery-stage > .ng-icon-button:hover { background: #6d2a43; }
+.ng-gallery-prev { top: calc(50% - 22px); left: .85rem; }
+.ng-gallery-next { top: calc(50% - 22px); right: .85rem; }
+.ng-gallery-expand { bottom: .75rem; right: .85rem; }
+.ng-gallery-strip { display: flex; justify-content: space-between; align-items: center; gap: .6rem; padding: .75rem; }
+.ng-gallery-thumbs { min-width: 0; display: flex; gap: .45rem; overflow: auto; padding: .2rem .2rem .44rem; scrollbar-width: thin; }
+.ng-gallery-thumbs button { position: relative; display: grid; place-items: center; flex: 0 0 clamp(54px, 9vw, 105px); aspect-ratio: 1.65; border: 2px solid transparent; background: var(--ng-raised); color: var(--ng-text); border-radius: 3px; overflow: hidden; }
+.ng-gallery-thumbs button:hover, .ng-gallery-thumbs button[aria-pressed='true'] { border-color: var(--ng-accent); }
+.ng-gallery-thumbs button img, .ng-gallery-thumbnail { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ng-gallery-count { flex: none; color: var(--ng-muted); font: .85rem/1 var(--ng-mono); }
+.ng-lightbox { --ng-dialog-width: 96rem; --ng-bg: #1b151b; --ng-surface: #211a22; --ng-raised: #3a2c38; --ng-text: #fff2f8; --ng-muted: #eed5e2; --ng-accent: #f9b7d0; --ng-line: #744e63; --ng-focus: #ffc4df; color-scheme: dark; }
+.ng-lightbox .ng-dialog-inner { padding: clamp(.55rem, 1.5vw, 1rem); }
+.ng-lightbox .ng-dialog-head { padding: 0 0 .55rem; }
+.ng-lightbox .ng-dialog-head h2 { font-size: clamp(1.45rem, 3.5vw, 2.35rem); }
+.ng-gallery-stage--fullscreen { height: min(70dvh, 1100px); }
+.ng-gallery-paused { display: grid; place-items: center; }
+.ng-gallery-missing { min-height: 270px; display: grid; place-items: center; gap: .4rem; padding: 1rem; border: 1px solid var(--ng-line); background: var(--ng-surface); }
+.ng-gallery-missing img { width: min(100%, 360px); }
+
+.ng-detail-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(245px, .43fr); align-items: start; gap: 1.75rem; margin-top: clamp(1.2rem, 3vw, 2.8rem); }
+.ng-detail-contact { position: sticky; top: calc(var(--ng-nav-height) + 1rem); grid-column: 2; grid-row: 1; display: grid; gap: .65rem; padding: clamp(.9rem, 2.7vw, 1.65rem); border: 1px solid var(--ng-line); border-top: 2px solid #a65771; background: var(--ng-surface); }
+.ng-detail-contact .ng-label { color: var(--ng-accent); }
+.ng-detail-contact h2 { font: 400 2.5rem/1 var(--ng-serif); margin-bottom: .3rem; }
+.ng-detail-contact .ng-text-link { width: fit-content; margin-top: .15rem; }
+.ng-detail-contact .ng-share-field { display: grid; gap: .3rem; color: var(--ng-muted); font-size: .8rem; }
+.ng-share-field input { width: 100%; padding: .4rem; border: 1px solid var(--ng-line); background: var(--ng-bg); }
+.ng-detail-information { grid-column: 1; grid-row: 1; min-width: 0; display: grid; gap: 2rem; }
+.ng-detail-information .ng-display { font-size: clamp(2.65rem, 5vw, 4.4rem); margin-bottom: .85rem; }
+.ng-detail-specs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-block: 1px solid var(--ng-line); }
+.ng-detail-specs > div { min-width: 0; padding: .83rem .65rem .83rem .1rem; border-bottom: 1px solid var(--ng-line); }
+.ng-detail-specs > div:nth-child(even) { border-left: 1px solid var(--ng-line); padding-left: .75rem; }
+.ng-detail-specs > div:nth-last-child(-n+2):nth-child(odd):nth-last-child(2), .ng-detail-specs > div:last-child { border-bottom: 0; }
+.ng-detail-specs dt { font-size: .78rem; color: var(--ng-muted); }
+.ng-detail-specs dd { margin-top: .15rem; font-weight: 650; overflow-wrap: anywhere; }
+.ng-detail-description { margin-top: 1.15rem; max-width: 74ch; color: var(--ng-muted); line-height: 1.75; white-space: pre-line; }
+.ng-map-frame { position: relative; z-index: 0; border: 1px solid var(--ng-line); border-radius: 4px; overflow: hidden; min-height: 280px; background: var(--ng-raised); }
+.ng-leaflet { width: 100%; height: 310px; }
+.ng-map-frame > :is(div[role='status']) { display: grid; place-items: center; }
+.ng-interaction-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 2rem; }
+.ng-community-panel { display: grid; align-content: start; gap: .75rem; padding: clamp(.9rem, 2.4vw, 1.5rem); border-radius: 5px; border: 1px solid var(--ng-line); background: var(--ng-surface); }
+.ng-community-panel > h2 { font: 400 clamp(2.1rem, 4vw, 3.1rem)/1 var(--ng-serif); }
+.ng-community-form { display: grid; gap: .65rem; }
+.ng-community-form select { min-height: 44px; color: var(--ng-text); background: var(--ng-bg); border-color: var(--ng-line); }
+
+@media (max-width: 760px) {
+  .ng-detail-title { grid-template-columns: 1fr; }
+  .ng-detail-layout { grid-template-columns: 1fr; }
+  .ng-detail-contact, .ng-detail-information { position: static; grid-column: auto; grid-row: auto; }
+  .ng-interaction-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 550px) {
+  .ng-detail-title h1 { font-size: clamp(2.45rem, 12.5vw, 3.8rem); }
+  .ng-gallery-prev { left: .32rem; }
+  .ng-gallery-next, .ng-gallery-expand { right: .32rem; }
+  .ng-gallery-strip { padding: .4rem; }
+  .ng-gallery-stage--fullscreen { height: 62dvh; }
+}
+
+.ng-about-hero {
+  background: radial-gradient(ellipse at 88% 0%, #713048, transparent 65%), linear-gradient(125deg, #2a1723, #19151c);
+  color: #fff5f9;
+  border-bottom: 1px solid #a5677e;
+  --ng-accent: #ffcade;
+  --ng-line: #f0c8d750;
+  --ng-muted: #ead7e0;
+  position: relative;
+  isolation: isolate;
+}
+.ng-about-hero::after { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--ng-carbon); opacity: .38; mask-image: linear-gradient(115deg, #000, transparent 62%); }
+.ng-about-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(260px, .85fr); align-items: center; gap: 1.65rem clamp(2rem, 8vw, 7.5rem); padding-block: clamp(2.1rem, 7vw, 6.25rem); }
+.ng-about-copy { display: grid; gap: .88rem; justify-items: start; align-content: center; }
+.ng-about-copy .ng-label, .ng-about-affiliation svg { color: var(--ng-accent); }
+.ng-about-copy h1 { font-size: clamp(4.9rem, 11vw, 10.3rem); line-height: .83; margin: .32rem 0 .6rem; text-wrap: wrap; }
+.ng-about-copy h1 em { color: #efb2c9; }
+.ng-about-affiliation { display: inline-flex; align-items: center; gap: .5rem; font-weight: 650; }
+.ng-about-copy > p:nth-of-type(3) { max-width: 46ch; color: var(--ng-muted); line-height: 1.7; }
+.ng-about-copy .ng-button { margin-top: .35rem; }
+.ng-about-copy .ng-icon-button:hover { background: #f6dfed21; }
+.ng-about-portrait { position: relative; padding: 1px; border: 1px solid transparent; background: linear-gradient(#3d2937,#261c25) padding-box, var(--ng-chrome) border-box; box-shadow: 0 25px 60px #1008105a; overflow: hidden; }
+.ng-about-portrait img { width: 100%; aspect-ratio: 4 / 4.7; object-fit: cover; object-position: 50% 43%; transition: transform .9s var(--ng-ease); }
+.ng-about-portrait:hover img { transform: scale(1.035); }
+:root:not(.dark) .ng-about-hero { background: radial-gradient(ellipse at 88% 0%, #dac9d3, transparent 68%), linear-gradient(125deg, #fffaf8, #efe3e7); color: #351a29; --ng-muted: #5b4653; --ng-line: #c6b1bd; --ng-accent: #813451; }
+:root:not(.dark) .ng-about-copy h1 em { color: #813451; }
+:root:not(.dark) .ng-about-hero::after { opacity: .16; }
+.ng-about-story { display: grid; grid-template-columns: .9fr 1.1fr; gap: 1.35rem clamp(2rem, 8vw, 7rem); padding-block: clamp(3.3rem, 8vw, 6rem); }
+.ng-about-story .ng-display, .ng-about-approach .ng-display { font-size: clamp(3rem, 6vw, 5.5rem); }
+.ng-about-story > div:nth-child(2) { align-self: center; display: grid; gap: .85rem; justify-items: start; line-height: 1.7; color: var(--ng-muted); }
+.ng-about-approach { background: var(--ng-surface); border-block: 1px solid var(--ng-line); padding-block: clamp(2.3rem, 6vw, 5rem); }
+.ng-about-approach .ng-wrap > div { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.15rem; margin-top: 1.65rem; }
+.ng-about-approach article { border-top: 1px solid var(--ng-line); padding-top: .9rem; }
+.ng-about-approach article > svg { color: var(--ng-accent); }
+.ng-about-approach h3 { font-weight: 650; margin-block: .45rem .3rem; }
+.ng-about-approach p { font-size: .95rem; color: var(--ng-muted); line-height: 1.65; }
+
+.ng-service-layout { display: grid; grid-template-columns: minmax(240px, .88fr) minmax(0, 1.12fr); align-items: start; gap: 1.6rem clamp(1.5rem, 5.2vw, 5rem); padding-block: clamp(1.5rem, 5.2vw, 4.5rem); }
+.ng-service-aside { display: grid; gap: 1rem; justify-items: start; }
+.ng-service-layout h2, .ng-guide-section > h2, .ng-guide-cta h2, .ng-subtitle { font-size: clamp(2.55rem, 5.1vw, 4.35rem); }
+.ng-contact-methods { display: grid; gap: .65rem; }
+.ng-contact-methods > * { display: flex; align-items: center; gap: .55rem; overflow-wrap: anywhere; }
+.ng-contact-methods svg { color: var(--ng-accent); flex: none; }
+.ng-contact-methods a:hover { color: var(--ng-accent); }
+.ng-contact-map { grid-column: 1/-1; }
+.ng-contact-map h2 { margin-block: .4rem .75rem; }
+.ng-sell-steps { display: grid; gap: .8rem; list-style: decimal; margin-inline-start: 1.35rem; }
+.ng-sell-steps li { border-bottom: 1px solid var(--ng-line); padding: 0 0 .7rem .3rem; }
+.ng-sell-steps li::marker { color: var(--ng-accent); font-family: var(--ng-mono); }
+.ng-sell-steps p { margin-top: .25rem; color: var(--ng-muted); }
+.ng-form-panel { display: grid; gap: .85rem; background: var(--ng-surface); border: 1px solid var(--ng-line); border-radius: 4px; padding: clamp(.95rem, 3vw, 2rem); }
+.ng-form-panel h2 { font-size: clamp(2.35rem, 4.4vw, 3.85rem); }
+.ng-form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem; }
+.ng-form label { display: grid; gap: .35rem; }
+.ng-form label > span { font-weight: 650; color: var(--ng-muted); font-size: .87rem; margin-bottom: 0; }
+.ng-form :is(input, textarea) { width: 100%; min-height: 44px; padding: .65rem .75rem; border: 1px solid var(--ng-line); border-radius: 3px; color: var(--ng-text); background: var(--ng-bg); font-size: 1rem; }
+.ng-form textarea { resize: vertical; }
+.ng-form > .ng-button { justify-self: start; }
+.ng-form-login { display: grid; justify-items: start; gap: .45rem; padding: .78rem; border: 1px solid var(--ng-line); color: var(--ng-muted); background: var(--ng-raised); border-radius: 3px; font-size: .9rem; }
+.ng-visit-form { display: grid; gap: .8rem; margin-top: 1rem; }
+
+.ng-guide-nav { background: var(--ng-surface); border-bottom: 1px solid var(--ng-line); }
+.ng-guide-nav .ng-wrap { display: flex; gap: .5rem 1.25rem; flex-wrap: wrap; padding-block: .6rem; }
+.ng-guide-nav a { display: inline-flex; align-items: center; min-height: 40px; color: var(--ng-accent); font-size: .9rem; font-weight: 650; }
+.ng-guide-nav a:hover { text-decoration: underline; }
+.ng-guides { display: grid; gap: clamp(2.5rem, 6vw, 5rem); padding-block: clamp(2.2rem, 6vw, 4.8rem); }
+.ng-guide-section { scroll-margin-top: calc(var(--ng-nav-height) + 1rem); display: grid; grid-template-columns: minmax(220px, .75fr) minmax(0, 1.25fr); gap: 1rem clamp(1.8rem, 6vw, 5rem); }
+.ng-guide-topics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.1rem; }
+.ng-guide-topics article { border-top: 1px solid var(--ng-line); padding-top: .8rem; }
+.ng-guide-topics h3, .ng-guide-accordion summary { margin-bottom: .4rem; font-weight: 650; }
+.ng-guide-topics p, .ng-guide-accordion p { color: var(--ng-muted); line-height: 1.65; font-size: .95rem; }
+.ng-guide-accordion { border-top: 1px solid var(--ng-line); }
+.ng-guide-accordion details { padding: .55rem 0; border-bottom: 1px solid var(--ng-line); }
+.ng-guide-accordion summary { display: flex; justify-content: space-between; align-items: center; min-height: 40px; gap: .5rem; cursor: pointer; list-style: none; margin-bottom: 0; }
+.ng-guide-accordion summary::-webkit-details-marker { display: none; }
+.ng-guide-accordion details p { padding: .3rem 2rem .55rem 0; }
+.ng-guide-accordion summary svg { flex: none; color: var(--ng-accent); transition: transform .25s; }
+.ng-guide-accordion details[open] summary svg { transform: rotate(180deg); }
+.ng-guide-cta { background: var(--ng-surface); border: 1px solid var(--ng-line); border-top: 2px solid #a0536d; padding: clamp(1.15rem, 4vw, 2.2rem); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .85rem; }
+.ng-guide-cta h2 { font-size: clamp(2.2rem, 4.5vw, 3.85rem); }
+
+.ng-map-page { padding-block: 1.15rem clamp(2.8rem, 7vw, 6rem); }
+.ng-map-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .9rem; }
+.ng-map-canvas { width: 100%; height: clamp(370px, 64vh, 710px); }
+.ng-site .leaflet-container { background: var(--ng-raised); }
+.ng-site .price-marker { display: inline-block; padding: .46rem .65rem; background: #702b45; border-color: #fff6f9; line-height: 1.2; font-family: var(--ng-mono); }
+.ng-site .property-map-preview-card { border-radius: 4px; background: var(--ng-surface); color: var(--ng-text); }
+.ng-site .property-map-preview-popup .leaflet-popup-content-wrapper, .ng-site .property-map-preview-popup .leaflet-popup-tip { background: var(--ng-surface); border-radius: 4px; }
+.ng-site .property-map-preview__title { color: var(--ng-text); }
+.ng-site .property-map-preview__address { color: var(--ng-muted); }
+.ng-site .property-map-preview__actions { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: .5rem; }
+.ng-site .property-map-preview__actions a { color: var(--ng-accent); border-bottom: 1px solid var(--ng-line); font-weight: 700; }
+.ng-site .property-map-preview-popup a.leaflet-popup-close-button { border-radius: 50%; background: #21141cdd; color: white; width: 25px; height: 25px; line-height: 25px; top: 5px; right: 5px; }
+
+.ng-ai-workspace, .ng-listado { display: grid; gap: 1.5rem; padding-block: clamp(1.2rem, 5vw, 3.5rem) clamp(3rem, 7vw, 6rem); }
+.ng-ai-steps { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: .85rem; }
+.ng-ai-step { border-block: 1px solid var(--ng-line); padding-block: .8rem; }
+.ng-ai-step-title { font-weight: 700; color: var(--ng-accent); }
+.ng-ai-card, .ng-ai-editor { border: 1px solid var(--ng-line); background: var(--ng-surface); border-radius: 4px; overflow: hidden; }
+.ng-ai-editor { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .9rem; padding: clamp(.65rem, 3vw, 2rem); }
+.ng-ai-workspace .ng-ai-card p.text-slate-500, .ng-ai-workspace p.text-brand-600, .ng-ai-workspace span.text-brand-600 { color: var(--ng-muted); }
+.ng-ai-workspace textarea, .ng-ai-workspace select { border-color: var(--ng-line); }
+.ng-listado { max-width: 1200px; }
+.ng-listado-heading .ng-display { font-size: clamp(3.1rem, 7vw, 6rem); }
+.ng-listado form > div, .ng-listado form section { scroll-margin-top: calc(var(--ng-nav-height) + 1rem); }
+.ng-listado form section, .ng-listado .mt-8 > div { background: var(--ng-surface); border-color: var(--ng-line); border-radius: 5px; }
+.ng-listado :is(input,textarea,select):not([type=checkbox]) { background: var(--ng-bg); color: var(--ng-text); border-color: var(--ng-line); }
+.ng-listado-actions { position: sticky; bottom: 0; z-index: 9; padding: .6rem; border: 1px solid var(--ng-line); background: var(--ng-surface); box-shadow: 0 -8px 25px #150c1816; }
+.ng-site .avaluo-workspace .avaluo-header { border-top: 2px solid #a45872; }
+.ng-site .avaluo-workspace .avaluo-header__icon { background: linear-gradient(146deg, #a34d68, #641d39 65%, #311522); }
+
+.ng-access { min-height: 100svh; }
+.ng-access-header { display: flex; align-items: center; justify-content: space-between; gap: .85rem; min-height: var(--ng-nav-height); }
+.ng-access-grid { min-height: calc(100svh - var(--ng-nav-height)); display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--ng-line); }
+.ng-access-mark { display: grid; place-items: center; position: relative; isolation: isolate; overflow: hidden; background: radial-gradient(ellipse at 25% 5%, #85364e, #441b2c 45%, #211720 83%); }
+.ng-access-mark::before { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--ng-carbon); opacity: .46; mask-image: linear-gradient(140deg, #000, transparent 90%); }
+.ng-access-mark .ng-monogram { font-size: clamp(7rem, 18vw, 17rem); }
+.ng-access-content { max-width: 42rem; align-self: center; display: grid; justify-items: start; gap: .85rem; padding: clamp(1.7rem, 6vw, 5rem); }
+.ng-access-content .ng-display { font-size: clamp(3.9rem, 7vw, 7.3rem); }
+.ng-access-content .ng-form-login { width: 100%; background: none; border: 0; padding: 0; font-size: 1rem; }
+
+@media (min-width: 1181px) {
+  .ng-site .avaluo-workspace :is(.avaluo-sidebar, .avaluo-summary) { top: calc(var(--ng-nav-height) + 1rem); }
+}
+@media (max-width: 760px) {
+  .ng-about-grid, .ng-about-story, .ng-service-layout, .ng-guide-section, .ng-ai-editor { grid-template-columns: 1fr; }
+  .ng-about-portrait { width: 100%; max-width: 430px; }
+  .ng-about-portrait img { aspect-ratio: 4/4; }
+  .ng-about-approach .ng-wrap > div { grid-template-columns: 1fr; }
+  .ng-access-grid { grid-template-columns: 1fr; }
+  .ng-access-mark { min-height: 150px; }
+  .ng-access-content { align-self: start; }
+}
+@media (max-width: 540px) {
+  .ng-ai-steps, .ng-form-row { grid-template-columns: 1fr; }
+  .ng-guide-topics { gap: .75rem; }
+  .ng-about-copy h1 { font-size: clamp(4rem, 15vw, 6.5rem); }
+}

@@ -1,28 +1,46 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useId, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 
-function Modal({ open, onClose, children }) {
-  return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.95, opacity: 0 }}
-            className="w-full max-w-lg rounded-2xl bg-white p-6 dark:bg-slate-900"
-            onClick={(event) => event.stopPropagation()}
-          >
-            {children}
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+function Modal({ open, onClose, title, className = '', children }) {
+  const dialogRef = useRef(null);
+  const titleId = useId();
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!open || !dialog) return;
+    if (!dialog.open) dialog.showModal();
+    return () => {
+      if (dialog.open) dialog.close();
+    };
+  }, [open]);
+
+  if (!open) return null;
+
+  return createPortal(
+    <dialog
+      ref={dialogRef}
+      className={`ng-dialog ${className}`}
+      aria-labelledby={titleId}
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div className="ng-dialog-inner">
+        <header className="ng-dialog-head">
+          <h2 id={titleId}>{title}</h2>
+          <button type="button" className="ng-icon-button" aria-label="Cerrar" onClick={onClose}>
+            <X size={21} aria-hidden="true" />
+          </button>
+        </header>
+        {children}
+      </div>
+    </dialog>,
+    document.body,
   );
 }
 

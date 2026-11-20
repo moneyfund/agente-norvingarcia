@@ -1,35 +1,10 @@
-import { useEffect, useState } from 'react';
+import { Monogram } from './BrandMark';
 
-const DISPLAY_DURATION_MS = 2500;
-const EXIT_DURATION_MS = 450;
-
-function Preloader({ onFinish }) {
-  const [isExiting, setIsExiting] = useState(false);
-
-  useEffect(() => {
-    const exitTimer = setTimeout(() => {
-      setIsExiting(true);
-    }, DISPLAY_DURATION_MS);
-
-    const finishTimer = setTimeout(() => {
-      onFinish?.();
-    }, DISPLAY_DURATION_MS + EXIT_DURATION_MS);
-
-    return () => {
-      clearTimeout(exitTimer);
-      clearTimeout(finishTimer);
-    };
-  }, [onFinish]);
-
+function Preloader({ signature = false }) {
   return (
-    <div
-      className={`preloader ${isExiting ? 'preloader--exit' : ''}`}
-      aria-hidden="true"
-    >
-      <div className="preloader__content">
-        <span className="ng-monogram ng-preloader-mark">NG</span><span className="ng-preloader-name">NORVIN GARCÍA</span>
-        <p className="preloader__text">¡VISITA, CONOCE E INVIERTE EN NICARAGUA!</p>
-      </div>
+    <div className={`ng-route-loading${signature ? ' ng-signature-loading' : ''}`} role="status">
+      <Monogram />
+      <span className="sr-only">Cargando página</span>
     </div>
   );
 }

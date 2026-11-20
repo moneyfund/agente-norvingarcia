@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
-import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import Button from '../components/Button';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useLocation, useParams } from 'react-router-dom';
+import { ArrowLeft, MapPin, MessageCircle, Share2 } from 'lucide-react';
+import { useInView } from 'framer-motion';
 import Modal from '../components/Modal';
 import Seo from '../components/Seo';
+import PropertyGallery from '../components/PropertyGallery';
 import PropertyCommentsSection from '../components/PropertyCommentsSection';
 import PropertyReviewsSection from '../components/PropertyReviewsSection';
 import PropertyLikeButton from '../components/PropertyLikeButton';
@@ -16,253 +15,164 @@ import { usePropertyReviews } from '../hooks/usePropertyReviews';
 import { usePropertyLikes } from '../hooks/usePropertyLikes';
 import { useProtectedPropertyForm } from '../hooks/useProtectedPropertyForm';
 import { getPropiedadById } from '../services/propiedadesService';
+import { contact } from '../config/brand';
 import { normalizePropertyMedia } from '../utils/propertyMedia';
-import { propertyMarkerIcon } from '../utils/mapMarkers';
+import { formatUSD, isPositiveNumber, operationLabel, pricePerArea, propertyUnit } from '../utils/propertyPresentation';
 
-const money = new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-const measurementLabelByUnit = {
-  varas: 'vara',
-  metros: 'metro',
-  manzanas: 'manzana',
-};
+const PropertyLocation = lazy(() => import('../components/PropertyLocation'));
 
 function PropertyDetailPage() {
   const { id } = useParams();
-  const { isAuthenticated, loginWithGoogle, loading: authLoading } = useAuth();
-  const [property, setProperty] = useState(null);
-  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const { state } = useLocation();
+  const { isAuthenticated, loginWithGoogle } = useAuth();
+  const [request, setRequest] = useState(null);
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [feedback, setFeedback] = useState('');
+  const [shareMessage, setShareMessage] = useState('');
+  const [showShareUrl, setShowShareUrl] = useState(false);
+
+  const cached = state?.property?.id === id ? state.property : null;
+  const currentRequest = request?.id === id ? request : null;
+  const property = currentRequest && !currentRequest.error ? currentRequest.property : cached;
+  const gallery = useMemo(() => normalizePropertyMedia(property || {}), [property]);
+  const mapRef = useRef(null);
+  const showMap = useInView(mapRef, { once: true, margin: '200px 0px' });
 
   const { comments, loading: commentsLoading, submitting: commentsSubmitting, error: commentsError, submitComment } = usePropertyComments(id);
-  const {
-    reviews,
-    averageRating,
-    loading: reviewsLoading,
-    submitting: reviewsSubmitting,
-    error: reviewsError,
-    submitReview,
-  } = usePropertyReviews(id);
+  const { reviews, averageRating, loading: reviewsLoading, submitting: reviewsSubmitting, error: reviewsError, submitReview } = usePropertyReviews(id);
   const { likesCount, hasLiked, loading: likesLoading, error: likesError, toggle } = usePropertyLikes(id);
   const { submitForm, submitting: formSubmitting, error: formError, success: formSuccess } = useProtectedPropertyForm(id);
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        setLoading(true);
-        const data = await getPropiedadById(id);
-        setProperty(data);
-        setCurrentMediaIndex(0);
-      } catch (error) {
-        console.error('Error al cargar la propiedad', { propertyId: id, error });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    load();
+    let active = true;
+    getPropiedadById(id)
+      .then((data) => { if (active) setRequest({ id, property: data }); })
+      .catch(() => { if (active) setRequest({ id, error: true }); });
+    return () => { active = false; };
   }, [id]);
 
   const handleLike = async () => {
     if (!isAuthenticated) {
-      setFeedbackMessage('Debes iniciar sesión para dar like.');
+      setFeedback('Inicia sesión para dar me gusta.');
       return;
     }
-
     try {
       await toggle();
-      setFeedbackMessage('Like actualizado correctamente.');
-    } catch (_) {
-      setFeedbackMessage('No se pudo actualizar el like.');
+      setFeedback('');
+    } catch {
+      setFeedback('No se pudo actualizar el me gusta.');
     }
   };
 
-  const gallery = useMemo(() => {
-    const media = normalizePropertyMedia(property || {});
-    if (media.length) return media;
+  if (!property) {
+    return (
+      <section className="ng-wrap ng-detail-state" aria-busy={!currentRequest}>
+        <Link to="/propiedades" className="ng-back"><ArrowLeft size={17} aria-hidden="true" /> Catálogo</Link>
+        {!currentRequest ? <div className="ng-detail-skeleton" role="status"><span className="sr-only">Cargando propiedad</span><div /><div /></div> : (
+          <div className="ng-empty">
+            <h1>{currentRequest.error ? 'No se pudo cargar la propiedad' : 'Propiedad no encontrada'}</h1>
+            <p>{currentRequest.error ? 'Puedes recargar la ficha o regresar al catálogo.' : 'Consulta las propiedades disponibles en el catálogo.'}</p>
+            <Link to="/propiedades" className="ng-button ng-button--line">Ir al catálogo</Link>
+          </div>
+        )}
+      </section>
+    );
+  }
 
-    return [{
-      type: 'image',
-      url: 'https://via.placeholder.com/1200x900?text=Propiedad',
-      path: '',
-      name: 'placeholder',
-      order: 0,
-      createdAt: Date.now(),
-    }];
-  }, [property]);
+  const title = property.titulo || property.title || property.name || 'Propiedad';
+  const price = formatUSD(property.precio);
+  const unit = propertyUnit(property.unidadMedida);
+  const perArea = pricePerArea(property);
+  const lat = Number(property.lat);
+  const lng = Number(property.lng);
+  const hasCoordinates = Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180 && (lat !== 0 || lng !== 0);
+  const whatsappMessage = `Hola Norvin, quiero información sobre ${title} (ID: ${property.id}).`;
+  const whatsappUrl = `${contact.whatsapp}?text=${encodeURIComponent(whatsappMessage)}`;
+  const shareUrl = new URL(`/propiedad/${encodeURIComponent(id)}`, window.location.origin).href;
 
-  if (loading || authLoading) return <section className="section-container">Cargando propiedad...</section>;
-  if (!property) return <section className="section-container">No se encontró esta propiedad.</section>;
-
-  const hasMultipleMedia = gallery.length > 1;
-  const activeMedia = gallery[currentMediaIndex] || gallery[0];
-  const operationLabel = property.tipoOperacion === 'alquiler' ? 'En Alquiler' : 'En Venta';
-  const showGalleryFallback = !normalizePropertyMedia(property).length;
-  const areaValue = property.area != null ? Number(property.area) : null;
-  const areaConstruidaValue = property.areaConstruida != null ? Number(property.areaConstruida) : null;
-  const unit = property.unidadMedida || 'varas';
-  const unitLabel = measurementLabelByUnit[unit] || 'unidad';
-  const calculatedPrecioPorArea = areaValue && areaValue > 0 ? Number(property.precio || 0) / areaValue : null;
-  const precioPorAreaValue = property.precioPorArea ?? calculatedPrecioPorArea;
-  const propertyName = property?.titulo || property?.title || property?.name || 'Propiedad';
-  const propertyId = property?.id || property?.propertyId || 'N/A';
-  const whatsappMessage = `Hola, quiero información sobre la propiedad: ${propertyName} (ID: ${propertyId})`;
-  const whatsappUrl = `https://wa.me/50587446657?text=${encodeURIComponent(whatsappMessage)}`;
-
-  const goToPrevious = () => {
-    setCurrentMediaIndex((prevIndex) => (prevIndex - 1 + gallery.length) % gallery.length);
+  const share = async () => {
+    setShareMessage('');
+    setShowShareUrl(false);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, url: shareUrl });
+        return;
+      }
+      await navigator.clipboard.writeText(shareUrl);
+      setShareMessage('Enlace copiado.');
+    } catch (error) {
+      if (error.name === 'AbortError') return;
+      setShowShareUrl(true);
+    }
   };
 
-  const goToNext = () => {
-    setCurrentMediaIndex((prevIndex) => (prevIndex + 1) % gallery.length);
-  };
-
-  const handleGalleryKeyDown = (event) => {
-    if (!hasMultipleMedia) return;
-    if (event.key === 'ArrowLeft') goToPrevious();
-    if (event.key === 'ArrowRight') goToNext();
-  };
+  const specs = [
+    ['Tipo', property.tipo],
+    ['Modalidad', operationLabel(property)],
+    ['Habitaciones', isPositiveNumber(property.habitaciones) ? property.habitaciones : null],
+    ['Baños', isPositiveNumber(property.banos) ? property.banos : null],
+    ['Área de terreno', isPositiveNumber(property.area) ? `${property.area} ${unit.short}` : null],
+    ['Área construida', isPositiveNumber(property.areaConstruida) ? `${property.areaConstruida} ${unit.short}` : null],
+    [`Precio por ${unit.long}`, perArea === null ? null : formatUSD(perArea)],
+  ].filter(([, value]) => value !== null && value !== undefined && value !== '');
 
   return (
-    <section className="section-container">
-      <Seo title={`${property.titulo} | Norvin García`} description={property.descripcion} />
-      <div className="grid gap-8 lg:grid-cols-2">
-        <div>
-          <div
-            className="relative"
-            onKeyDown={handleGalleryKeyDown}
-            tabIndex={hasMultipleMedia ? 0 : -1}
-            aria-label="Galería de imágenes y videos de la propiedad"
-          >
-            {activeMedia.type === 'video' ? (
-              <video src={activeMedia.url} controls className="h-96 w-full rounded-2xl bg-black object-contain shadow-premium" preload="metadata" />
-            ) : (
-              <img src={activeMedia.url} alt={property.titulo} className="h-96 w-full rounded-2xl object-cover shadow-premium" />
-            )}
-            {hasMultipleMedia && (
-              <>
-                <button
-                  type="button"
-                  onClick={goToPrevious}
-                  aria-label="Elemento anterior"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/45 p-2 text-white transition hover:bg-black/65 focus:outline-none focus:ring-2 focus:ring-white/80"
-                >
-                  <ChevronLeft size={24} />
-                </button>
-                <button
-                  type="button"
-                  onClick={goToNext}
-                  aria-label="Elemento siguiente"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/45 p-2 text-white transition hover:bg-black/65 focus:outline-none focus:ring-2 focus:ring-white/80"
-                >
-                  <ChevronRight size={24} />
-                </button>
-              </>
-            )}
-          </div>
-          <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
-            {gallery.map((item, index) => (
-              <button
-                type="button"
-                key={`${item.url}-${index}`}
-                onClick={() => setCurrentMediaIndex(index)}
-                className={`overflow-hidden rounded-lg border ${index === currentMediaIndex ? 'border-brand-500 ring-1 ring-brand-500' : 'border-slate-200'}`}
-              >
-                {item.type === 'video' ? (
-                  <div className="flex h-16 w-24 items-center justify-center bg-slate-900 text-xs text-white">Video</div>
-                ) : (
-                  <img src={item.url} alt={`Miniatura ${index + 1}`} className="h-16 w-24 object-cover" />
-                )}
-              </button>
-            ))}
-          </div>
-          {showGalleryFallback && <p className="mt-3 text-sm text-slate-500">Esta propiedad no tiene medios disponibles aún.</p>}
-        </div>
-        <div className="space-y-5">
-          <p className="text-4xl font-bold text-brand-500">{money.format(property.precio)}</p>
-          <h1 className="font-display text-4xl font-semibold">{property.titulo}</h1>
-          <p className="flex items-center gap-2 text-slate-500"><MapPin size={16} /> {property.ubicacion}</p>
-          <p className="text-slate-600 dark:text-slate-300">{property.descripcion}</p>
-          <ul className="grid grid-cols-2 gap-3 text-sm">
-            <li className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">Habitaciones: {property.habitaciones}</li>
-            <li className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">Baños: {property.banos}</li>
-            <li className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">Tipo: {property.tipo}</li>
-            <li className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">Operación: {operationLabel}</li>
-            <li className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">Premium: {property.premium ? 'Sí' : 'No'}</li>
-            {areaValue !== null && Number.isFinite(areaValue) && <li className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">Área del terreno: {areaValue} {unit}</li>}
-            {areaConstruidaValue !== null && Number.isFinite(areaConstruidaValue) && <li className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">Área construida: {areaConstruidaValue} {unit}</li>}
-            {precioPorAreaValue !== null && Number.isFinite(precioPorAreaValue) && (
-              <li className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">Precio por {unitLabel}: {money.format(precioPorAreaValue)}</li>
-            )}
-          </ul>
-          <div className="flex flex-wrap gap-3">
-            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"><Button>Contactar por WhatsApp</Button></a>
-            <Button variant="outline" onClick={() => setOpen(true)}>Solicitar visita</Button>
-            <PropertyLikeButton
-              likesCount={likesCount}
-              hasLiked={hasLiked}
-              loading={likesLoading}
-              onToggle={handleLike}
-              disabled={false}
-              message={feedbackMessage || likesError}
-            />
-          </div>
-          {!isAuthenticated && (
-            <div className="rounded-2xl border border-brand-500/30 bg-brand-500/5 p-4">
-              <p className="text-sm">Debes iniciar sesión para comentar, reseñar, dar like y enviar formularios.</p>
-              <Button className="mt-3" onClick={loginWithGoogle}>Iniciar sesión con Google</Button>
+    <article className="ng-detail">
+      <Seo title={`${title} | Norvin García`} description={property.descripcion} />
+      <div className="ng-detail-header">
+        <div className="ng-wrap">
+          <Link to="/propiedades" className="ng-back"><ArrowLeft size={17} aria-hidden="true" /> Catálogo</Link>
+          <div className="ng-detail-title">
+            <div>
+              <p className="ng-label">{[operationLabel(property), property.tipo, property.premium ? 'Destacada' : ''].filter(Boolean).join(' · ')}</p>
+              <h1 className="ng-display">{title}</h1>
+              {property.ubicacion && <p className="ng-detail-location"><MapPin size={17} aria-hidden="true" />{property.ubicacion}</p>}
             </div>
-          )}
+            <p className="ng-detail-price">{price}</p>
+          </div>
         </div>
       </div>
+      <div className="ng-wrap ng-detail-content">
+        <PropertyGallery key={id} media={gallery} title={title} />
 
-      <div className="mt-10 overflow-hidden rounded-2xl shadow-premium">
-        <MapContainer center={[property.lat, property.lng]} zoom={13} style={{ height: '360px', width: '100%' }}>
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          <Marker position={[property.lat, property.lng]} icon={propertyMarkerIcon}>
-            <Popup>{property.titulo}</Popup>
-          </Marker>
-        </MapContainer>
+        <div className="ng-detail-layout">
+          <aside className="ng-detail-contact">
+            <p className="ng-label">Asesoría y visitas</p>
+            <h2>Norvin García</h2>
+            <a href={whatsappUrl} target="_blank" rel="noreferrer" className="ng-button ng-button--wine"><MessageCircle size={18} aria-hidden="true" /> Escribir por WhatsApp</a>
+            <button type="button" className="ng-button ng-button--line" onClick={() => setOpen(true)}>Solicitar una visita</button>
+            <button type="button" className="ng-text-link" onClick={share}><Share2 size={16} aria-hidden="true" /> Compartir ficha</button>
+            {shareMessage && <p className="ng-meta" role="status">{shareMessage}</p>}
+            {showShareUrl && <label className="ng-share-field">Enlace de la propiedad<input readOnly value={shareUrl} onFocus={(event) => event.target.select()} /></label>}
+            <PropertyLikeButton likesCount={likesError ? null : likesCount} hasLiked={hasLiked} loading={likesLoading} onToggle={handleLike} message={feedback || likesError} />
+          </aside>
+          <div className="ng-detail-information">
+            <section>
+              <h2 className="ng-display">La propiedad</h2>
+              <dl className="ng-detail-specs">
+                {specs.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
+              </dl>
+              {property.descripcion && <p className="ng-detail-description">{property.descripcion}</p>}
+            </section>
+            {hasCoordinates && <section className="ng-detail-map">
+              <h2 className="ng-display">Ubicación</h2>
+              <div className="ng-map-frame" ref={mapRef}>
+                {showMap && <Suspense fallback={<div className="ng-leaflet" role="status">Cargando mapa…</div>}>
+                  <PropertyLocation coordinates={[lat, lng]} title={title} />
+                </Suspense>}
+              </div>
+            </section>}
+          </div>
+        </div>
+        <div className="ng-interaction-grid">
+          <PropertyCommentsSection comments={comments} loading={commentsLoading} error={commentsError} submitting={commentsSubmitting} isAuthenticated={isAuthenticated} onSubmit={submitComment} loginWithGoogle={loginWithGoogle} />
+          <PropertyReviewsSection reviews={reviews} averageRating={averageRating} loading={reviewsLoading} error={reviewsError} submitting={reviewsSubmitting} isAuthenticated={isAuthenticated} onSubmit={submitReview} loginWithGoogle={loginWithGoogle} />
+        </div>
       </div>
-
-      <a id="cta-whatsapp" href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="cta-property-banner">
-        <img src="/llamadoaccion.png" alt="Contáctanos" />
-      </a>
-
-      <div className="mt-10 grid gap-6 lg:grid-cols-2">
-        <PropertyCommentsSection
-          comments={comments}
-          loading={commentsLoading}
-          error={commentsError}
-          submitting={commentsSubmitting}
-          isAuthenticated={isAuthenticated}
-          onSubmit={submitComment}
-          loginWithGoogle={loginWithGoogle}
-        />
-        <PropertyReviewsSection
-          reviews={reviews}
-          averageRating={averageRating}
-          loading={reviewsLoading}
-          error={reviewsError}
-          submitting={reviewsSubmitting}
-          isAuthenticated={isAuthenticated}
-          onSubmit={submitReview}
-          loginWithGoogle={loginWithGoogle}
-        />
-      </div>
-
-      <Modal open={open} onClose={() => setOpen(false)}>
-        <PropertyContactForm
-          submitForm={submitForm}
-          submitting={formSubmitting}
-          error={formError}
-          success={formSuccess}
-          isAuthenticated={isAuthenticated}
-          loginWithGoogle={loginWithGoogle}
-        />
+      <Modal open={open} onClose={() => setOpen(false)} title="Solicitar una visita">
+        <PropertyContactForm submitForm={submitForm} submitting={formSubmitting} error={formError} success={formSuccess} isAuthenticated={isAuthenticated} loginWithGoogle={loginWithGoogle} />
       </Modal>
-    </section>
+    </article>
   );
 }
 

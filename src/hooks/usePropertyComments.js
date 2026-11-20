@@ -25,8 +25,8 @@ export function usePropertyComments(propertyId) {
         setComments(data);
         setLoading(false);
       },
-      (err) => {
-        setError(err.message || 'No se pudieron cargar los comentarios.');
+      () => {
+        setError('No se pudieron cargar los comentarios.');
         setLoading(false);
       },
     );

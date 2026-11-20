@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Button from './Button';
+import FormLogin from './FormLogin';
 
 function PropertyCommentsSection({ comments, loading, error, submitting, isAuthenticated, onSubmit, loginWithGoogle }) {
   const [content, setContent] = useState('');
@@ -29,10 +30,11 @@ function PropertyCommentsSection({ comments, loading, error, submitting, isAuthe
   };
 
   return (
-    <div className="rounded-2xl bg-white p-5 shadow-premium dark:bg-slate-900">
+    <section className="ng-community-panel">
       <h2 className="text-xl font-semibold">Comentarios</h2>
-      <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
+      {isAuthenticated && <form className="ng-form ng-community-form" onSubmit={handleSubmit}>
         <textarea
+          aria-label="Comentario"
           rows="3"
           value={content}
           onChange={(event) => setContent(event.target.value)}
@@ -40,16 +42,10 @@ function PropertyCommentsSection({ comments, loading, error, submitting, isAuthe
           className="w-full rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900"
         />
         <Button type="submit" disabled={submitting}>{submitting ? 'Publicando...' : 'Publicar comentario'}</Button>
-      </form>
+      </form>}
+      {!isAuthenticated && <FormLogin onLogin={loginWithGoogle}>Inicia sesión para escribir comentarios.</FormLogin>}
 
-      {!isAuthenticated && (
-        <div className="mt-3 rounded-xl border border-brand-500/30 bg-brand-500/5 p-3">
-          <p className="text-sm">Inicia sesión para escribir comentarios.</p>
-          <Button className="mt-2" type="button" onClick={loginWithGoogle}>Iniciar sesión con Google</Button>
-        </div>
-      )}
-
-      {(feedback || error) && <p className="mt-3 rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800">{error || feedback}</p>}
+      {(feedback || error) && <p className="ng-meta" role={error ? "alert" : "status"}>{error || feedback}</p>}
       <div className="mt-4 space-y-3">
         {comments.map((comment) => (
           <article key={comment.id} className="rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800">
@@ -61,9 +57,9 @@ function PropertyCommentsSection({ comments, loading, error, submitting, isAuthe
           </article>
         ))}
         {loading && <p className="text-sm text-slate-500">Cargando comentarios...</p>}
-        {!loading && !comments.length && <p className="text-sm text-slate-500">Aún no hay comentarios.</p>}
+        {!loading && !error && !comments.length && <p className="text-sm text-slate-500">Aún no hay comentarios.</p>}
       </div>
-    </div>
+    </section>
   );
 }
 

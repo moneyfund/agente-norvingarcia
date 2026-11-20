@@ -1,17 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 
 const THEME_KEY = 'norvin-theme-v2';
 
 export function useTheme() {
   const [theme, setTheme] = useState(() => {
-    const stored = localStorage.getItem(THEME_KEY);
-    if (stored) return stored;
-    return 'dark';
+    try {
+      return localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark';
+    } catch {
+      return 'dark';
+    }
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
-    localStorage.setItem(THEME_KEY, theme);
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch {
+      // The selected theme still works for this page when storage is unavailable.
+    }
   }, [theme]);
 
   const toggleTheme = () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));

@@ -12,9 +12,9 @@ function PropertyLikeButton({ likesCount, hasLiked, loading, onToggle, disabled,
         className="inline-flex items-center gap-2"
       >
         <Heart size={16} />
-        {loading ? 'Actualizando...' : hasLiked ? 'Te gusta' : 'Me gusta'} ({likesCount})
+        {loading ? 'Actualizando…' : hasLiked ? 'Te gusta' : 'Me gusta'}{likesCount !== null ? ` (${likesCount})` : ''}
       </Button>
-      {message && <p className="mt-2 text-sm text-slate-500">{message}</p>}
+      {message && <p className="ng-meta mt-2" role="status">{message}</p>}
     </div>
   );
 }

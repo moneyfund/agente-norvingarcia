@@ -1,235 +1,151 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { collection, onSnapshot, query } from 'firebase/firestore';
+import { Link, useNavigate } from 'react-router-dom';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { collection, onSnapshot, query } from 'firebase/firestore';
+import PageMasthead from '../components/PageMasthead';
 import Seo from '../components/Seo';
 import { db } from '../firebase/config';
+import { contact, nicaraguaCenter } from '../config/brand';
+import { applyImageFallback, formatUSD, propertyCover } from '../utils/propertyPresentation';
 
-const DEFAULT_CENTER_NICARAGUA = [12.8654, -85.2072];
-const FALLBACK_IMAGE = '/img/placeholder-property.svg';
-
-const hasValidCoordinates = (property) => {
-  const lat = Number(property?.lat);
-  const lng = Number(property?.lng);
-
-  return Number.isFinite(lat)
-    && Number.isFinite(lng)
-    && lat >= -90
-    && lat <= 90
-    && lng >= -180
-    && lng <= 180;
+const hasCoordinates = ({ lat, lng }) => {
+  const latitude = Number(lat);
+  const longitude = Number(lng);
+  return Number.isFinite(latitude) && Number.isFinite(longitude)
+    && Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180
+    && (latitude !== 0 || longitude !== 0);
 };
 
-const formatPrice = (price) => {
-  if (!Number.isFinite(Number(price))) return 'Consultar';
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
-    .format(Number(price));
-};
+function createPopup(property, navigate) {
+  const title = property.title || property.titulo || 'Propiedad disponible';
+  const address = property.address || property.ubicacion || '';
+  const path = `/propiedad/${encodeURIComponent(property.id)}`;
+  const card = document.createElement('article');
+  card.className = 'property-map-preview-card';
 
-const getPropertyImageUrl = (property) => property.image || property.imagenes?.[0] || FALLBACK_IMAGE;
+  const image = document.createElement('img');
+  image.src = propertyCover(property);
+  image.alt = '';
+  image.loading = 'lazy';
+  image.decoding = 'async';
+  image.className = 'property-map-preview__image';
+  image.addEventListener('error', applyImageFallback);
 
-const isPotentiallyFragileExternalImage = (url = '') => /(fbcdn|facebook|fbsbx|akamaihd)/i.test(url);
-
-const preloadImage = (url) => new Promise((resolve) => {
-  if (!url) {
-    resolve(FALLBACK_IMAGE);
-    return;
-  }
-
-  const img = new Image();
-  img.loading = 'eager';
-  img.referrerPolicy = 'no-referrer';
-
-  img.onload = () => resolve(url);
-  img.onerror = () => resolve(FALLBACK_IMAGE);
-  img.src = url;
-});
+  const body = document.createElement('div');
+  body.className = 'property-map-preview__body';
+  const heading = document.createElement('h3');
+  heading.className = 'property-map-preview__title';
+  heading.textContent = title;
+  const location = document.createElement('p');
+  location.className = 'property-map-preview__address';
+  location.textContent = address;
+  const actions = document.createElement('div');
+  actions.className = 'property-map-preview__actions';
+  const details = document.createElement('a');
+  details.href = path;
+  details.textContent = 'Ver propiedad';
+  details.onclick = (event) => {
+    if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
+    event.preventDefault();
+    navigate(path, { state: { property } });
+  };
+  const whatsapp = document.createElement('a');
+  whatsapp.href = `${contact.whatsapp}?text=${encodeURIComponent(`Hola Norvin, quiero información sobre ${title} (ID: ${property.id}).`)}`;
+  whatsapp.target = '_blank';
+  whatsapp.rel = 'noopener noreferrer';
+  whatsapp.textContent = 'WhatsApp';
+  actions.append(details, whatsapp);
+  body.append(heading, location, actions);
+  card.append(image, body);
+  return card;
+}
 
 function MapPage() {
-  const mapNodeRef = useRef(null);
-  const mapRef = useRef(null);
-  const tileLayerRef = useRef(null);
-  const markersLayerRef = useRef(null);
-  const markerClusterLayerRef = useRef(null);
-
-  const [propiedades, setPropiedades] = useState([]);
+  const mapNode = useRef(null);
+  const map = useRef(null);
+  const markers = useRef(null);
+  const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
+  const [error, setError] = useState(false);
   const navigate = useNavigate();
 
-  const propertiesWithCoordinates = useMemo(
-    () => propiedades.filter(hasValidCoordinates),
-    [propiedades],
-  );
+  const locations = useMemo(() => properties.filter(hasCoordinates), [properties]);
 
   useEffect(() => {
-    if (mapRef.current || !mapNodeRef.current) return;
-
-    const map = L.map(mapNodeRef.current, {
-      center: DEFAULT_CENTER_NICARAGUA,
+    const instance = L.map(mapNode.current, {
+      center: nicaraguaCenter,
       zoom: 7,
-      zoomControl: true,
       preferCanvas: true,
+      scrollWheelZoom: false,
     });
-
-    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors',
-    });
-
-    tileLayer.addTo(map);
-    mapRef.current = map;
-    tileLayerRef.current = tileLayer;
-    markersLayerRef.current = L.layerGroup().addTo(map);
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(instance);
+    map.current = instance;
+    markers.current = L.layerGroup().addTo(instance);
 
     return () => {
-      map.remove();
-      mapRef.current = null;
-      tileLayerRef.current = null;
-      markersLayerRef.current = null;
-      markerClusterLayerRef.current = null;
+      instance.remove();
+      map.current = null;
+      markers.current = null;
     };
   }, []);
 
   useEffect(() => {
-    const collectionRef = query(collection(db, 'propiedades'));
-    const unsubscribe = onSnapshot(collectionRef, (snapshot) => {
-      const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setPropiedades(docs);
+    return onSnapshot(query(collection(db, 'propiedades')), (snapshot) => {
+      setProperties(snapshot.docs.map((item) => ({ ...item.data(), id: item.id })));
       setLoading(false);
-      setError('');
-    }, (err) => {
-      setError(err.message || 'No se pudo cargar el mapa interactivo.');
+      setError(false);
+    }, () => {
+      setError(true);
       setLoading(false);
     });
-
-    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    const map = mapRef.current;
-    const markerLayer = markersLayerRef.current;
-    if (!map || !markerLayer) return;
+    const instance = map.current;
+    const layer = markers.current;
+    if (!instance || !layer) return;
 
-    markerLayer.clearLayers();
-
-    if (markerClusterLayerRef.current) {
-      markerClusterLayerRef.current.clearLayers();
-      map.removeLayer(markerClusterLayerRef.current);
-      markerClusterLayerRef.current = null;
-    }
-
+    layer.clearLayers();
     const bounds = L.latLngBounds([]);
-    const markerInstances = [];
+    for (const property of locations) {
+      const coordinates = [Number(property.lat), Number(property.lng)];
+      const label = document.createElement('span');
+      label.className = 'price-marker';
+      label.textContent = formatUSD(property.price ?? property.precio);
+      const marker = L.marker(coordinates, {
+        icon: L.divIcon({ html: label, className: 'property-map-marker-wrapper', iconSize: [110, 32], iconAnchor: [55, 30] }),
+        title: property.title || property.titulo || 'Propiedad',
+        keyboard: true,
+      });
 
-    const renderMarkers = async () => {
-      for (const property of propertiesWithCoordinates) {
-        const lat = Number(property.lat);
-        const lng = Number(property.lng);
-        const rawImage = getPropertyImageUrl(property);
-        const imageUrl = isPotentiallyFragileExternalImage(rawImage)
-          ? await preloadImage(rawImage)
-          : rawImage;
-
-        const markerHtml = `<button type="button" class="price-marker">${formatPrice(property.price ?? property.precio)}</button>`;
-        const markerIcon = L.divIcon({
-          html: markerHtml,
-          className: 'property-map-marker-wrapper',
-          iconSize: [100, 34],
-          iconAnchor: [50, 34],
-        });
-
-        const marker = L.marker([lat, lng], { icon: markerIcon, keyboard: true });
-
-        const propertyTitle = property.title || property.titulo || 'Propiedad disponible';
-        const propertyAddress = property.address || property.ubicacion || 'Ubicación no disponible';
-
-        const whatsappMessage = encodeURIComponent(`Hola, me interesa la propiedad: ${propertyTitle}`);
-        const propertyUrl = `/propiedad.html?id=${property.id}`;
-
-        const popupHtml = `
-          <article class="property-map-preview-card" data-property-id="${property.id}">
-            <img src="${imageUrl}" alt="${propertyTitle}" class="property-map-preview__image" />
-            <div class="property-map-preview__body">
-              <h4 class="property-map-preview__title">${propertyTitle}</h4>
-              <p class="property-map-preview__address">${propertyAddress}</p>
-              <div class="property-map-preview__actions">
-                <a href="https://wa.me/50587446657?text=${whatsappMessage}" target="_blank" rel="noopener noreferrer" class="property-map-preview__action">WhatsApp</a>
-                <a href="${propertyUrl}" class="property-map-preview__action">Ver propiedad</a>
-              </div>
-            </div>
-          </article>
-        `;
-
-        marker.bindPopup(popupHtml, {
-          closeButton: false,
-          autoClose: true,
-          className: 'property-map-preview-popup',
-          offset: [0, -30],
-        });
-
-        marker.on('mouseover', () => {
-          if (!window.matchMedia('(hover: hover)').matches) return;
-          marker.openPopup();
-        });
-
-        marker.on('mouseout', () => {
-          if (!window.matchMedia('(hover: hover)').matches) return;
-          marker.closePopup();
-        });
-
-        marker.on('click', () => {
-          if (window.matchMedia('(hover: hover)').matches) {
-            navigate(`/propiedad/${property.id}`);
-            return;
-          }
-
-          if (marker.isPopupOpen()) {
-            navigate(`/propiedad/${property.id}`);
-          } else {
-            marker.openPopup();
-          }
-        });
-
-        marker.on('popupopen', (event) => {
-          const imageElement = event.popup.getElement()?.querySelector('.property-map-preview__image');
-          if (!imageElement) return;
-          imageElement.onerror = () => {
-            imageElement.src = FALLBACK_IMAGE;
-          };
-        });
-
-        markerLayer.addLayer(marker);
-        markerInstances.push(marker);
-        bounds.extend([lat, lng]);
-      }
-
-      if (markerInstances.length > 1) {
-        map.fitBounds(bounds, { padding: [80, 80] });
-      } else if (markerInstances.length === 1) {
-        map.setView(markerInstances[0].getLatLng(), 13);
-      } else {
-        map.setView(DEFAULT_CENTER_NICARAGUA, 7);
-      }
-    };
-
-    renderMarkers();
-  }, [navigate, propertiesWithCoordinates]);
+      marker.bindPopup(() => createPopup(property, navigate), { className: 'property-map-preview-popup', offset: [0, -28] });
+      marker.addTo(layer);
+      bounds.extend(coordinates);
+    }
+    if (locations.length > 1) instance.fitBounds(bounds, { padding: [45, 45], maxZoom: 14 });
+    else if (locations.length === 1) instance.setView(bounds.getCenter(), 13);
+  }, [locations, navigate]);
 
   return (
-    <section className="section-container">
-      <Seo title="Mapa de propiedades | Norvin García" description="Explora en un mapa interactivo las propiedades disponibles con Norvin García." />
-      <h1 className="font-display text-4xl font-semibold">Mapa de propiedades</h1>
-      {loading && <p className="mt-4 text-slate-500">Cargando mapa...</p>}
-      {error && <p className="mt-4 rounded-xl bg-red-50 p-3 text-red-600">{error}</p>}
-      {!loading && !error && !propertiesWithCoordinates.length && (
-        <p className="mt-4 rounded-xl bg-amber-50 p-3 text-amber-700">No hay propiedades con coordenadas válidas para mostrar en el mapa.</p>
-      )}
-      <div className="mt-6 overflow-hidden rounded-2xl shadow-premium">
-        <div ref={mapNodeRef} style={{ height: '600px', width: '100%' }} />
-      </div>
-    </section>
+    <>
+      <Seo title="Mapa de propiedades | Norvin García" description="Explora en el mapa las propiedades disponibles en Nicaragua." />
+      <PageMasthead label="Portafolio inmobiliario · Nicaragua" title="Mapa de propiedades">
+        Selecciona un marcador para ver el precio y consultar su ficha.
+      </PageMasthead>
+      <section className="ng-wrap ng-map-page" aria-label="Mapa inmobiliario interactivo">
+        <div className="ng-map-toolbar">
+          <p className="ng-meta" role={error ? 'alert' : 'status'}>
+            {loading ? 'Cargando ubicaciones…' : error ? 'No se pudieron cargar las ubicaciones.' : locations.length ? `${locations.length} ${locations.length === 1 ? 'propiedad con ubicación' : 'propiedades con ubicación'}` : 'Aún no hay propiedades con ubicación disponible.'}
+          </p>
+          <Link to="/propiedades" className="ng-button ng-button--line">Ver catálogo</Link>
+        </div>
+        <div className="ng-map-frame"><div className="ng-map-canvas" ref={mapNode} /></div>
+      </section>
+    </>
   );
 }
 

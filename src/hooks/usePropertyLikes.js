@@ -26,8 +26,8 @@ export function usePropertyLikes(propertyId) {
         setLikesCount(count);
         setLoading(false);
       },
-      (err) => {
-        setError(err.message || 'No se pudieron cargar los likes.');
+      () => {
+        setError('No se pudieron cargar los me gusta.');
         setLoading(false);
       },
     );

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Star } from 'lucide-react';
 import Button from './Button';
+import FormLogin from './FormLogin';
 
 function PropertyReviewsSection({ reviews, averageRating, loading, error, submitting, isAuthenticated, onSubmit, loginWithGoogle }) {
   const [content, setContent] = useState('');
@@ -34,13 +35,14 @@ function PropertyReviewsSection({ reviews, averageRating, loading, error, submit
   };
 
   return (
-    <div className="rounded-2xl bg-white p-5 shadow-premium dark:bg-slate-900">
+    <section className="ng-community-panel">
       <h2 className="text-xl font-semibold">Reseñas</h2>
-      <p className="mt-2 text-sm text-slate-500">
+      {reviews.length > 0 && <p className="ng-meta">
         Valoración promedio: {averageLabel} <Star size={14} className="inline text-amber-400" fill="currentColor" />
-      </p>
-      <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
+      </p>}
+      {isAuthenticated && <form className="ng-form ng-community-form" onSubmit={handleSubmit}>
         <select
+          aria-label="Calificación de la propiedad"
           value={rating}
           onChange={(event) => setRating(event.target.value)}
           className="w-full rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900"
@@ -48,6 +50,7 @@ function PropertyReviewsSection({ reviews, averageRating, loading, error, submit
           {[5, 4, 3, 2, 1].map((rate) => <option key={rate} value={rate}>{rate} estrellas</option>)}
         </select>
         <textarea
+          aria-label="Reseña"
           rows="3"
           value={content}
           onChange={(event) => setContent(event.target.value)}
@@ -55,16 +58,10 @@ function PropertyReviewsSection({ reviews, averageRating, loading, error, submit
           className="w-full rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900"
         />
         <Button type="submit" disabled={submitting}>{submitting ? 'Publicando...' : 'Publicar reseña'}</Button>
-      </form>
+      </form>}
+      {!isAuthenticated && <FormLogin onLogin={loginWithGoogle}>Inicia sesión para publicar reseñas.</FormLogin>}
 
-      {!isAuthenticated && (
-        <div className="mt-3 rounded-xl border border-brand-500/30 bg-brand-500/5 p-3">
-          <p className="text-sm">Inicia sesión para publicar reseñas.</p>
-          <Button className="mt-2" type="button" onClick={loginWithGoogle}>Iniciar sesión con Google</Button>
-        </div>
-      )}
-
-      {(feedback || error) && <p className="mt-3 rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800">{error || feedback}</p>}
+      {(feedback || error) && <p className="ng-meta" role={error ? "alert" : "status"}>{error || feedback}</p>}
       <div className="mt-4 space-y-3">
         {reviews.map((review) => (
           <article key={review.id} className="rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800">
@@ -76,9 +73,9 @@ function PropertyReviewsSection({ reviews, averageRating, loading, error, submit
           </article>
         ))}
         {loading && <p className="text-sm text-slate-500">Cargando reseñas...</p>}
-        {!loading && !reviews.length && <p className="text-sm text-slate-500">Aún no hay reseñas.</p>}
+        {!loading && !error && !reviews.length && <p className="text-sm text-slate-500">Aún no hay reseñas.</p>}
       </div>
-    </div>
+    </section>
   );
 }
 
