@@ -1,6 +1,6 @@
 import {
   browserLocalPersistence,
-  onAuthStateChanged,
+  onIdTokenChanged,
   setPersistence,
   signInWithPopup,
   signOut,
@@ -25,7 +25,7 @@ export async function logoutUser() {
 }
 
 export function onAuthChange(callback) {
-  return onAuthStateChanged(auth, callback);
+  return onIdTokenChanged(auth, callback);
 }
 
 export async function initializeAuth() {

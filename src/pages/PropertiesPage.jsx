@@ -1,6 +1,7 @@
 import { useDeferredValue, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ChevronDown, LayoutGrid, List, Map, Search } from 'lucide-react';
+import PageMasthead from '../components/PageMasthead';
 import PropertyCard, { PropertySkeleton } from '../components/PropertyCard';
 import Seo from '../components/Seo';
 import { usePropiedades } from '../hooks/usePropiedades';
@@ -56,13 +57,9 @@ function PropertiesPage() {
   return (
     <>
       <Seo title={`${category ? 'Terrenos y fincas' : 'Propiedades en Nicaragua'} | Norvin García`} description="Explora casas, terrenos, fincas y propiedades comerciales con Norvin García." />
-      <header className="ng-masthead">
-        <div className="ng-wrap ng-masthead-inner">
-          <p className="ng-label">Catálogo inmobiliario · Nicaragua</p>
-          <h1 className="ng-display">{category ? 'Terrenos y fincas' : 'Propiedades'}</h1>
-          <p>Encuentra propiedades en venta o alquiler por tipo, zona y presupuesto.</p>
-        </div>
-      </header>
+      <PageMasthead variant="catalog" label="Portafolio · Nicaragua" title={category ? 'Terrenos y fincas' : 'Propiedades'}>
+        Encuentra casas, terrenos y fincas en venta o alquiler por ubicación y presupuesto.
+      </PageMasthead>
       <section className="ng-wrap ng-catalog" aria-label="Explorar catálogo">
         <form className="ng-filter-bar" onSubmit={(event) => event.preventDefault()} aria-label="Filtros">
           <label className="ng-filter-field">

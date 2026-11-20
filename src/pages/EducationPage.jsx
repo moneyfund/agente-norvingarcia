@@ -30,7 +30,7 @@ function EducationPage() {
   return (
     <>
       <Seo title="Educación inmobiliaria | Norvin García" description="Guías para preparar la compra o venta de una propiedad en Nicaragua." />
-      <PageMasthead label="Guías para compradores y propietarios" title="Educación inmobiliaria">
+      <PageMasthead variant="guide" label="Guías para compradores y propietarios" title="Educación inmobiliaria">
         Qué revisar al comprar, cómo preparar una venta y qué preguntas hacer antes de tomar una decisión.
       </PageMasthead>
       <nav className="ng-guide-nav" aria-label="Secciones de las guías">

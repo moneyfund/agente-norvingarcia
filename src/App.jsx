@@ -1,9 +1,8 @@
-import { Suspense, lazy, useCallback, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
 import { MotionConfig } from 'framer-motion';
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './admin/components/ProtectedRoute';
-import PrivateRoute from './components/PrivateRoute';
 import Preloader from './components/Preloader';
 import { useTheme } from './hooks/useTheme';
 
@@ -18,7 +17,6 @@ const AIPropertyDesignPage = lazy(() => import('./pages/AIPropertyDesignPage'));
 const ListadoPage = lazy(() => import('./pages/ListadoPage'));
 const EducationPage = lazy(() => import('./pages/EducationPage'));
 const AvaluosPage = lazy(() => import('./pages/AvaluosPage'));
-const AvaluoDetailPage = lazy(() => import('./pages/AvaluoDetailPage'));
 const AdminAvaluoDetailPage = lazy(() => import('./admin/pages/AdminAvaluoDetailPage'));
 
 const AdminLayout = lazy(() => import('./admin/layouts/AdminLayout'));
@@ -28,26 +26,39 @@ const AdminPropertiesPage = lazy(() => import('./admin/pages/AdminPropertiesPage
 const AdminProfilePage = lazy(() => import('./admin/pages/AdminProfilePage'));
 const AdminListadosPage = lazy(() => import('./admin/pages/AdminListadosPage'));
 
+function LegacyAvaluoRoute() {
+  const { id } = useParams();
+  const { search, hash } = useLocation();
+  return <Navigate replace to={{ pathname: id ? `/admin/avaluos/${encodeURIComponent(id)}` : '/admin/avaluos', search, hash }} />;
+}
+
 function App() {
   const { pathname } = useLocation();
   const theme = useTheme();
   const [showSignature, setShowSignature] = useState(() => {
-    if (pathname !== '/') return false;
+    if (pathname !== '/') return null;
     try {
-      return !sessionStorage.getItem('ng-signature-seen');
+      return sessionStorage.getItem('ng-signature-seen') ? null : 'loading';
     } catch {
-      return true;
+      return 'loading';
     }
   });
 
   const onSignatureReady = useCallback(() => {
-    setShowSignature(false);
+    setShowSignature((phase) => phase === 'loading' ? 'revealing' : phase);
     try {
       sessionStorage.setItem('ng-signature-seen', '1');
     } catch {
       // The in-memory flag still avoids repeating the signature.
     }
   }, []);
+
+  useEffect(() => {
+    if (showSignature !== 'revealing') return;
+    const timer = setTimeout(() => setShowSignature(null),
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 380);
+    return () => clearTimeout(timer);
+  }, [showSignature]);
 
   return (
     <MotionConfig reducedMotion="user">
@@ -60,17 +71,15 @@ function App() {
               <Route path="propiedades" element={<AdminPropertiesPage />} />
               <Route path="perfil" element={<AdminProfilePage />} />
               <Route path="listados" element={<AdminListadosPage />} />
+              <Route path="captaciones/nueva" element={<ListadoPage />} />
+              <Route path="avaluos" element={<AvaluosPage />} />
               <Route path="avaluos/:id" element={<AdminAvaluoDetailPage />} />
             </Route>
           </Route>
 
-          <Route element={<PrivateRoute />}>
-            <Route element={<MainLayout {...theme} showSignature={showSignature} onSignatureReady={onSignatureReady} />}>
-              <Route path="/listado" element={<ListadoPage />} />
-              <Route path="/avaluos" element={<AvaluosPage />} />
-              <Route path="/avaluos/:id" element={<AvaluoDetailPage />} />
-            </Route>
-          </Route>
+          <Route path="/listado" element={<Navigate to="/admin/captaciones/nueva" replace />} />
+          <Route path="/avaluos" element={<LegacyAvaluoRoute />} />
+          <Route path="/avaluos/:id" element={<LegacyAvaluoRoute />} />
 
           <Route element={<MainLayout {...theme} showSignature={showSignature} onSignatureReady={onSignatureReady} />}>
             <Route path="/" element={<HomePage />} />

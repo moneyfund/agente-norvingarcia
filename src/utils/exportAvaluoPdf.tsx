@@ -1,7 +1,8 @@
 import { createRoot } from 'react-dom/client';
 import AvaluoPdfTemplate from '../components/avaluos/AvaluoPdfTemplate';
 import HouseReportPDF from '../components/avaluos/HouseReportPDF';
-import { imageUrlToDataUrlViaProxy } from './imageProxy';
+import { readPrivateImage } from '../services/privateMedia';
+import { assertAllowedAdmin } from '../services/adminAuth';
 
 const IMAGE_TIMEOUT_MS = 8000;
 const HTML2CANVAS_TIMEOUT_MS = 30000;
@@ -68,10 +69,10 @@ const asBase64IfPossible = async (url?: string) => {
   try {
     const dataUrl = url.startsWith('data:')
       ? url
-      : await withTimeout(imageUrlToDataUrlViaProxy(url), IMAGE_TIMEOUT_MS, 'Tiempo agotado cargando imagen para PDF.');
+      : await withTimeout(readPrivateImage(url), IMAGE_TIMEOUT_MS, 'Tiempo agotado cargando imagen para PDF.');
     return await withTimeout(compressImageDataUrlForPdf(dataUrl), IMAGE_TIMEOUT_MS, 'Tiempo agotado comprimiendo imagen para PDF.');
   } catch (error) {
-    console.warn('No se pudo preparar una imagen para el PDF. Se usará placeholder.', { url, error });
+    console.warn('No se pudo preparar una imagen para el PDF. Se usará placeholder.', error);
     return '';
   }
 };
@@ -129,15 +130,8 @@ const renderTemplate = async (root: ReturnType<typeof createRoot>, host: HTMLEle
 };
 
 export async function exportAvaluoToPdf(avaluo: any) {
-  const load = async (pkg: string, cdn: string) => {
-    try { return await import(/* @vite-ignore */ pkg); }
-    catch { return import(/* @vite-ignore */ cdn); }
-  };
-  const [{ default: html2canvas }, jsPdfModule] = await Promise.all([
-    load('html2canvas', 'https://esm.sh/html2canvas@1.4.1'),
-    load('jspdf', 'https://esm.sh/jspdf@2.5.2'),
-  ]);
-  const jsPDF = jsPdfModule.default || jsPdfModule.jsPDF;
+  assertAllowedAdmin();
+  const [{ default: html2canvas }, { jsPDF }] = await Promise.all([import('html2canvas'), import('jspdf')]);
   const host = document.createElement('div');
   host.style.position = 'fixed';
   host.style.left = '-9999px';

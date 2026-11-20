@@ -19,13 +19,13 @@ export default function AvaluosWorkspace() {
   const [activeStep, setActiveStep] = useState(0);
   const formRef = useRef<HTMLDivElement>(null);
   const { loading, result, error, submit, save } = useAvaluoSubmission(user?.uid);
-  const { items, refresh, removeLocal } = useAvaluosHistory(user?.uid);
+  const { items, error: historyError, removeLocal } = useAvaluosHistory(user?.uid);
   const steps = propertyType === 'casa' ? casaSteps : terrenoSteps;
   const completed = useMemo(() => Object.entries(form).filter(([, value]) => value !== '' && value !== null && value !== false && value !== 0 && (!Array.isArray(value) || value.length)).length, [form]);
   const progress = propertyType ? Math.min(result ? 100 : 94, Math.round((completed / (propertyType === 'casa' ? 42 : 31)) * 100)) : 0;
 
   const handleCalculate = async () => { if (propertyType) await submit(form, propertyType); };
-  const handleSave = async () => { const saved = await save(); if (saved) await refresh(); };
+  const handleSave = save;
   const clear = () => { if (!window.confirm('¿Deseas limpiar los datos del avalúo actual?')) return; setForm(createInitialForm()); setActiveStep(0); };
   const goToStep = (index: number) => {
     const next = Math.max(0, Math.min(index, steps.length - 1)); setActiveStep(next);
@@ -48,6 +48,7 @@ export default function AvaluosWorkspace() {
       </div> : <div className="avaluo-welcome"><strong>Comienza seleccionando un tipo de propiedad</strong><p>La ficha técnica se organizará según la matriz de terreno o casa.</p></div>}
       {!!error && <p role="alert" className="avaluo-error">{error}</p>}
       <AvaluoTerrenoResultCard result={result} canSave={!!user} onSave={handleSave} />
+      {historyError && <p role="alert">{historyError}</p>}
       <AvaluoHistoryPanel items={items} onDeleted={removeLocal} />
     </div>
   </main>;

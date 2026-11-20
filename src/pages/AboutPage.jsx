@@ -29,7 +29,7 @@ function AboutPage() {
       <section className="ng-about-hero">
         <div className="ng-wrap ng-about-grid">
           <div className="ng-about-copy">
-            <p className="ng-label">Asesor inmobiliario · Nicaragua</p>
+            <p className="ng-label">El agente · Matagalpa, Nicaragua</p>
             <h1 className="ng-display">Norvin <em>García</em></h1>
             <p className="ng-about-affiliation"><Building2 size={18} aria-hidden="true" /> Diamantes Realty Group</p>
             <p>{agent?.biografia || 'Acompaño a propietarios, compradores e inversionistas en Nicaragua. Mi trabajo empieza por entender tus objetivos y ayudarte a evaluar tus opciones con información clara.'}</p>

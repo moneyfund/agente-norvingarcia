@@ -9,19 +9,18 @@ import ThemeToggle from './ThemeToggle';
 const services = [
   { to: '/quieres-vender', label: 'Vender mi propiedad' },
   { to: '/educacion', label: 'Educación inmobiliaria' },
-  { to: '/edicion-propiedades', label: 'Edición con IA' },
-  { to: '/avaluos', label: 'Avalúos inmobiliarios' },
-  { to: '/listado', label: 'Captación profesional' },
+  { to: '/edicion-propiedades', label: 'Estudio de remodelación' },
 ];
 
 const primary = [
+  { to: '/', label: 'Inicio' },
   { to: '/propiedades', label: 'Propiedades' },
   { to: '/mapa', label: 'Mapa' },
   { to: '/sobre-mi', label: 'Sobre mí' },
 ];
 
 function NavLinks({ items }) {
-  return items.map(({ to, label }) => <NavLink key={to} to={to}>{label}</NavLink>);
+  return items.map(({ to, label }) => <NavLink key={to} to={to} end={to === '/'}>{label}</NavLink>);
 }
 
 function Navbar({ theme, toggleTheme }) {
@@ -132,7 +131,7 @@ function Navbar({ theme, toggleTheme }) {
       </div>
       <Modal className="ng-mobile-menu" open={menuOpen} onClose={() => setMenuOpen(false)} title="Menú">
         <nav className="ng-mobile-links" aria-label="Navegación móvil">
-          <div className="ng-mobile-primary"><NavLinks items={[{ to: '/', label: 'Inicio' }, ...primary, { to: '/contacto', label: 'Contacto' }]} /></div>
+          <div className="ng-mobile-primary"><NavLinks items={[...primary, { to: '/contacto', label: 'Contacto' }]} /></div>
           <div className="ng-mobile-secondary">
             <p className="ng-label">Servicios</p>
             <NavLinks items={services} />

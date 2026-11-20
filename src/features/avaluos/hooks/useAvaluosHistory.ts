@@ -1,23 +1,15 @@
 import { useEffect, useState } from 'react';
-import { getAvaluosByUser, subscribeAvaluos } from '../../../services/avaluos.service';
-export const useAvaluosHistory = (uid?: string) => { const [items,setItems]=useState<any[]>([]);
-  const refresh = async () => {
-    if(!uid) return;
-    const history = await getAvaluosByUser(uid);
-    setItems(history);
-  };
-  useEffect(()=>{ refresh(); },[uid]);
+import { subscribeAvaluos } from '../../../services/avaluos.service';
 
+export function useAvaluosHistory(uid?: string) {
+  const [items, setItems] = useState<any[]>([]);
+  const [error, setError] = useState('');
   useEffect(() => {
-    if (!uid) {
-      setItems([]);
-      return;
-    }
-    const unsub = subscribeAvaluos(setItems, console.error, uid);
-    return () => unsub();
+    setItems([]);
+    setError('');
+    if (!uid) return;
+    return subscribeAvaluos(setItems, () => setError('No se pudo cargar el historial.'));
   }, [uid]);
-
   const removeLocal = (id: string) => setItems((current) => current.filter((item) => item.id !== id));
-
-  return { items, refresh, removeLocal };
-};
+  return { items, error, removeLocal };
+}

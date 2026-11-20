@@ -1,5 +1,4 @@
 import { useRef, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Maximize, Play } from 'lucide-react';
 import Modal from './Modal';
 import { applyImageFallback, optimizedPropertyPhoto, propertyThumbnail } from '../utils/propertyPresentation';
@@ -18,7 +17,6 @@ function GalleryMedia({ item, description, fullscreen, onOpen }) {
 export default function PropertyGallery({ media, title }) {
   const [index, setIndex] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
-  const motionReduced = useReducedMotion();
   const touchStart = useRef(null);
 
   if (!media.length) {
@@ -63,18 +61,9 @@ export default function PropertyGallery({ media, title }) {
         {item.type === 'video' ? (
           <GalleryMedia key={item.url} item={item} />
         ) : (
-          <AnimatePresence initial={false}>
-            <motion.div
-              key={`${item.url}-${active}`}
-              className="ng-gallery-slide"
-              initial={motionReduced ? false : { clipPath: 'inset(0 0 0 65%)', opacity: 0.45 }}
-              animate={{ clipPath: 'inset(0 0 0 0%)', opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: motionReduced ? 0 : 0.48, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <GalleryMedia item={item} description={description} fullscreen={inDialog} onOpen={() => setFullscreen(true)} />
-            </motion.div>
-          </AnimatePresence>
+          <div key={`${item.url}-${active}`} className="ng-gallery-slide">
+            <GalleryMedia item={item} description={description} fullscreen={inDialog} onOpen={() => setFullscreen(true)} />
+          </div>
         )}
         {media.length > 1 && <>
           <button type="button" className="ng-icon-button ng-gallery-prev" aria-label="Medio anterior" onClick={() => change(-1)}><ChevronLeft size={23} /></button>

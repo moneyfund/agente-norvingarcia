@@ -11,7 +11,6 @@ export default function AvaluoDetailPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    console.log('PARAM ID', id);
 
     let isMounted = true;
 
@@ -31,8 +30,6 @@ export default function AvaluoDetailPage() {
         }
 
         const avaluo = await getAvaluoById(id);
-        console.log('AVALUO CARGADO', avaluo);
-        console.log('IMAGEN PRINCIPAL', avaluo?.imagenPrincipalUrl);
 
         if (!isMounted) return;
 

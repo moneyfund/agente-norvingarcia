@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Download, Eye, FileSearch, Loader2, Pencil } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import PrivateImage from '../../components/PrivateImage';
+import { readPrivateImage } from '../../services/privateMedia';
 import { getCaptacionesAdmin } from '../../services/listadoService';
 
 const formatPrice = (value) => {
@@ -47,28 +50,27 @@ function AdminListadosPage() {
     return byType && byStatus && byZone;
   }), [items, filters]);
 
-  const ensureHtml2Pdf = async () => {
-    if (window.html2pdf) return window.html2pdf;
-    await new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-      script.onload = resolve;
-      script.onerror = reject;
-      document.body.appendChild(script);
-    });
-    return window.html2pdf;
-  };
-
   const downloadPdf = async (item) => {
-    const html2pdf = await ensureHtml2Pdf();
+    const { default: html2pdf } = await import('html2pdf.js');
     const content = document.createElement('div');
     content.className = 'p-8 text-slate-900';
-    content.innerHTML = `
-      <h1 style="font-size:22px;margin-bottom:8px;">Ficha de captación</h1>
-      <p style="color:#475569;margin-bottom:16px;">Código: ${item.codigoInterno || item.id}</p>
-      ${Object.entries(item).map(([key, value]) => `<p style="margin:4px 0;"><strong>${key}:</strong> ${Array.isArray(value) ? value.join(', ') : (value ?? '-')}</p>`).join('')}
-      ${(item.imagenes || []).map((img) => `<img src="${img}" style="width:100%;max-height:260px;object-fit:cover;margin-top:12px;border-radius:8px;" />`).join('')}
-    `;
+    const title = document.createElement('h1');
+    title.textContent = 'Ficha de captación';
+    content.append(title);
+    for (const [key, value] of Object.entries(item)) {
+      if (key === 'imagenes') continue;
+      const field = document.createElement('p');
+      field.textContent = `${key}: ${Array.isArray(value) ? value.join(', ') : (value ?? '—')}`;
+      content.append(field);
+    }
+    for (const source of item.imagenes || []) {
+      const data = await readPrivateImage(source).catch(() => '');
+      if (!data) continue;
+      const image = document.createElement('img');
+      image.src = data;
+      image.style.cssText = 'max-width:100%;max-height:260px;object-fit:contain;margin-top:12px;';
+      content.append(image);
+    }
 
     await html2pdf().set({
       filename: `captacion-${item.codigoInterno || item.id}.pdf`,
@@ -81,7 +83,8 @@ function AdminListadosPage() {
   return (
     <div className="space-y-6">
       <div className="rounded-2xl bg-white p-5 shadow-sm">
-        <h1 className="text-2xl font-bold">Listados internos</h1>
+        <h1 className="text-2xl font-bold">Captaciones</h1>
+        <Link className="ng-text-link" to="/admin/captaciones/nueva">Registrar captación</Link>
         <p className="text-sm text-slate-500">Panel CRM para revisar captaciones guardadas en Firestore.</p>
       </div>
 
@@ -124,11 +127,11 @@ function AdminListadosPage() {
           <div className="w-full max-w-4xl rounded-2xl bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between"><h3 className="text-xl font-bold">Detalle completo de captación</h3><button className="rounded-lg border px-3 py-2" onClick={() => setSelected(null)}>Cerrar</button></div>
             <div className="grid gap-3 md:grid-cols-2">
-              {Object.entries(selected).map(([key, value]) => (
+              {Object.entries(selected).filter(([key]) => key !== 'imagenes').map(([key, value]) => (
                 <div key={key} className="rounded-xl border border-slate-200 p-3"><p className="text-xs uppercase text-slate-500">{key}</p><p className="text-sm text-slate-800">{Array.isArray(value) ? value.join(', ') : String(value ?? '-')}</p></div>
               ))}
             </div>
-            {!!selected.imagenes?.length && <div className="mt-5 grid grid-cols-2 gap-2 md:grid-cols-4">{selected.imagenes.map((img) => <img key={img} src={img} alt="captación" className="h-28 w-full rounded-lg object-cover" />)}</div>}
+            {!!selected.imagenes?.length && <div className="mt-5 grid grid-cols-2 gap-2 md:grid-cols-4">{selected.imagenes.map((img) => <PrivateImage key={img} src={img} alt="captación" className="h-28 w-full rounded-lg object-cover" />)}</div>}
           </div>
         </div>
       )}

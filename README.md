@@ -39,45 +39,9 @@ npm install
 npm run dev
 ```
 
-## Reglas recomendadas de seguridad Firebase
+## Acceso administrativo
 
-### Firestore rules
-
-```txt
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /propiedades/{doc} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-
-    match /agentes/{doc} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-  }
-}
-```
-
-### Storage rules
-
-```txt
-rules_version = '2';
-service firebase.storage {
-  match /b/{bucket}/o {
-    match /propiedades/{allPaths=**} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-
-    match /agentes/{allPaths=**} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-  }
-}
-```
+Las políticas completas y el procedimiento de publicación están en [Privacidad en Firebase](./firestore-access.md). La sesión de clientes permite enviar formularios y participar en las fichas públicas. Captaciones, avalúos, documentos e historial requieren la cuenta administrativa verificada.
 
 ## Scripts
 

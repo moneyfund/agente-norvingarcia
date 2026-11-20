@@ -3,7 +3,7 @@ import { Download, Eye, EyeOff } from 'lucide-react';
 import { exportAvaluoToPdf } from '../../utils/exportAvaluoPdf';
 import AvaluoPdfTemplate from './AvaluoPdfTemplate';
 import HouseReportPDF from './HouseReportPDF';
-import { imageUrlToDataUrlViaProxy } from '../../utils/imageProxy';
+import { readPrivateImage } from '../../services/privateMedia';
 
 export default function DownloadAvaluoPdfButton({ avaluo, className = '' }: { avaluo: any, className?: string }) {
   const [loading, setLoading] = useState(false);
@@ -23,8 +23,8 @@ export default function DownloadAvaluoPdfButton({ avaluo, className = '' }: { av
 
       try {
         const [imagenPrincipalBase64, imagenesAdicionalesBase64] = await Promise.all([
-          imageUrlToDataUrlViaProxy(avaluo?.imagenPrincipalUrl || avaluo?.imagenPrincipal),
-          Promise.all((avaluo?.imagenesAdicionales || avaluo?.imagenes || []).slice(0, 5).map((url: string) => imageUrlToDataUrlViaProxy(url).catch(() => ''))),
+          readPrivateImage(avaluo?.imagenPrincipalUrl || avaluo?.imagenPrincipal),
+          Promise.all((avaluo?.imagenesAdicionales || avaluo?.imagenes || []).slice(0, 5).map((url: string) => readPrivateImage(url).catch(() => ''))),
         ]);
 
         if (!cancelled) {

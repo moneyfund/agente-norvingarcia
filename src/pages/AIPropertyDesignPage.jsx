@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { CalendarClock, CheckCircle2, LoaderCircle, Sparkles, Wand2 } from 'lucide-react';
+import { CalendarClock, CheckCircle2, Sparkles, Wand2 } from 'lucide-react';
+import { contact } from '../config/brand';
 import Seo from '../components/Seo';
 import Button from '../components/Button';
 import PageMasthead from '../components/PageMasthead';
@@ -43,13 +44,11 @@ function AIPropertyDesignPage() {
   const [changeLevel, setChangeLevel] = useState(changeLevels[1]);
   const [visualizationType, setVisualizationType] = useState(visualizationTypes[1]);
   const [selectedTools, setSelectedTools] = useState([]);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState(null);
 
   const handleSelectProperty = (property) => {
     setSelectedProperty(property);
     setResult(null);
-    setIsGenerating(false);
   };
 
   const toggleTool = (tool) => {
@@ -68,40 +67,30 @@ function AIPropertyDesignPage() {
   const handleGenerate = () => {
     if (!selectedProperty || !description.trim()) return;
 
-    setIsGenerating(true);
-    setResult(null);
-
-    window.setTimeout(() => {
-      setResult({
-        summary: description.trim(),
-        style: selectedStyle,
-        level: changeLevel,
-        visualizationType,
-        tools: selectedTools,
-        date: new Date().toLocaleString('es-DO', {
-          day: '2-digit',
-          month: 'long',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-      });
-      setIsGenerating(false);
-    }, 1500);
+    const summary = description.trim();
+    const notes = [
+      selectedProperty.titulo, new URL(`/propiedad/${encodeURIComponent(selectedProperty.id)}`, window.location.origin).href,
+      summary, `Estilo: ${selectedStyle}`, `Alcance: ${changeLevel}`,
+      `Visualización solicitada: ${visualizationType}`, selectedTools.join(', '),
+    ].filter(Boolean).join('\n');
+    setResult({
+      summary, style: selectedStyle, level: changeLevel, visualizationType,
+      tools: selectedTools, notes, date: new Date().toLocaleDateString('es-NI'),
+    });
   };
 
   return (
     <>
       <Seo title="Edición de propiedades | Norvin García" description="Organiza y visualiza ideas de remodelación para las propiedades habilitadas." />
-      <PageMasthead label="Herramientas inmobiliarias" title="Edición de propiedades">
-        Selecciona un inmueble habilitado y prepara una vista conceptual de los cambios que tienes en mente.
+      <PageMasthead variant="studio" label="Herramientas inmobiliarias" title="Edición de propiedades">
+        Selecciona un inmueble habilitado y prepara las indicaciones para una propuesta de remodelación.
       </PageMasthead>
       <section className="ng-wrap ng-ai-workspace">
         <div className="ng-ai-steps">
           {[
             { title: '1. Selecciona una propiedad', detail: 'Escoge una propiedad habilitada para edición visual.' },
             { title: '2. Describe los cambios', detail: 'Explica la transformación o usa herramientas rápidas.' },
-            { title: '3. Visualiza una propuesta', detail: 'Obtén una vista previa conceptual premium en segundos.' },
+            { title: '3. Guarda tu idea', detail: 'Descarga tus indicaciones o consúltalas con el agente.' },
           ].map((step) => (
             <div key={step.title} className="ng-ai-step">
               <p className="ng-ai-step-title">{step.title}</p>
@@ -224,36 +213,14 @@ function AIPropertyDesignPage() {
               <Button
                 className="w-full text-base"
                 onClick={handleGenerate}
-                disabled={isGenerating || !description.trim()}
+                disabled={!description.trim()}
               >
-                <span className="inline-flex items-center gap-2"><Wand2 size={16} /> Generar visualización</span>
+                <span className="inline-flex items-center gap-2"><Wand2 size={16} /> Preparar propuesta</span>
               </Button>
-
-              {isGenerating && (
-                <div className="rounded-2xl border border-brand-200 bg-brand-50 p-4 text-brand-700">
-                  <p className="inline-flex items-center gap-2 text-sm font-semibold">
-                    <LoaderCircle size={16} className="animate-spin" /> Procesando propuesta visual…
-                  </p>
-                </div>
-              )}
 
               {result && (
                 <div className="space-y-4 rounded-2xl border border-brand-100 bg-white p-4 shadow-md dark:border-brand-900/50 dark:bg-slate-900">
-                  <p className="font-semibold text-brand-600">Vista previa conceptual</p>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div>
-                      <p className="mb-2 text-xs uppercase tracking-wide text-slate-500">Imagen original</p>
-                      <img src={propertyCover(selectedProperty)} alt="Original" onError={applyImageFallback} className="h-36 w-full rounded-xl object-cover" />
-                    </div>
-                    <div>
-                      <p className="mb-2 text-xs uppercase tracking-wide text-slate-500">Imagen conceptual</p>
-                      <div className="relative">
-                        <img src={propertyCover(selectedProperty)} alt="Conceptual" onError={applyImageFallback} className="h-36 w-full rounded-xl object-cover" />
-                        <div className="absolute inset-0 rounded-xl bg-gradient-to-tr from-brand-500/35 via-transparent to-amber-300/35" />
-                      </div>
-                    </div>
-                  </div>
-
+                  <p className="font-semibold text-brand-600">Propuesta de remodelación</p>
                   <div className="space-y-2 text-sm">
                     <p><strong>Resumen:</strong> {result.summary}</p>
                     <p><strong>Estilo seleccionado:</strong> {result.style}</p>
@@ -264,8 +231,8 @@ function AIPropertyDesignPage() {
                   </div>
 
                   <div className="grid gap-2 sm:grid-cols-3">
-                    <Button variant="secondary" className="text-sm">Solicitar con asesor</Button>
-                    <Button variant="outline" className="text-sm">Guardar idea</Button>
+                    <a className="ng-button ng-button--wine text-sm" href={`${contact.whatsapp}?text=${encodeURIComponent(result.notes)}`} target="_blank" rel="noreferrer">Consultar al agente</a>
+                    <a className="ng-button ng-button--line text-sm" href={`data:text/plain;charset=utf-8,${encodeURIComponent(result.notes)}`} download="propuesta-de-remodelacion.txt">Guardar idea</a>
                     <Button variant="secondary" className="text-sm" onClick={() => setResult(null)}>Editar nuevamente</Button>
                   </div>
                 </div>

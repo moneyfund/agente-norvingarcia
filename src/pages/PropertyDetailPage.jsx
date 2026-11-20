@@ -128,7 +128,7 @@ function PropertyDetailPage() {
               <h1 className="ng-display">{title}</h1>
               {property.ubicacion && <p className="ng-detail-location"><MapPin size={17} aria-hidden="true" />{property.ubicacion}</p>}
             </div>
-            <p className="ng-detail-price">{price}</p>
+            <div className="ng-detail-offer"><p className="ng-detail-price">{price}</p><a href={whatsappUrl} target="_blank" rel="noreferrer">Consultar por WhatsApp</a></div>
           </div>
         </div>
       </div>
@@ -137,8 +137,7 @@ function PropertyDetailPage() {
 
         <div className="ng-detail-layout">
           <aside className="ng-detail-contact">
-            <p className="ng-label">Asesoría y visitas</p>
-            <h2>Norvin García</h2>
+            <div className="ng-agent-signature"><img src="/brand/ng-chrome.svg" alt="" width="60" height="35" /><div><p className="ng-label">Asesoría y visitas</p><h2>Norvin García</h2></div></div>
             <a href={whatsappUrl} target="_blank" rel="noreferrer" className="ng-button ng-button--wine"><MessageCircle size={18} aria-hidden="true" /> Escribir por WhatsApp</a>
             <button type="button" className="ng-button ng-button--line" onClick={() => setOpen(true)}>Solicitar una visita</button>
             <button type="button" className="ng-text-link" onClick={share}><Share2 size={16} aria-hidden="true" /> Compartir ficha</button>

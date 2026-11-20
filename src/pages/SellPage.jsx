@@ -49,12 +49,12 @@ function SellPage() {
   return (
     <>
       <Seo title="Vender una propiedad | Norvin García" description="Solicita asesoría para vender una propiedad en Nicaragua con Norvin García." />
-      <PageMasthead label="Asesoría para propietarios" title="Vender tu propiedad">
+      <PageMasthead variant="owners" label="Asesoría para propietarios" title="Vender tu propiedad">
         Cuéntame sobre el inmueble y qué buscas lograr con la venta.
       </PageMasthead>
       <div className="ng-wrap ng-service-layout">
         <aside className="ng-service-aside">
-          <h2 className="ng-display">Cómo empezamos.</h2>
+          <h2 className="ng-display">Cómo empezamos</h2>
           <ol className="ng-sell-steps">
             <li><strong>Conocemos el inmueble.</strong><p>Revisamos su ubicación, superficie, estado y documentación disponible.</p></li>
             <li><strong>Definimos la estrategia.</strong><p>Evaluamos propiedades comparables y acordamos un plan para presentar tu inmueble.</p></li>
@@ -63,7 +63,7 @@ function SellPage() {
           <a href={contact.whatsapp} target="_blank" rel="noreferrer" className="ng-button ng-button--line"><MessageCircle size={18} aria-hidden="true" /> Consultar por WhatsApp</a>
         </aside>
         <form onSubmit={handleSubmit} className="ng-form ng-form-panel">
-          <h2 className="ng-display">Solicitud de venta.</h2>
+          <h2 className="ng-display">Solicitud de venta</h2>
           {!isAuthenticated && <FormLogin onLogin={loginWithGoogle}>Inicia sesión para enviar tu solicitud.</FormLogin>}
           <div className="ng-form-row">
             <Input label="Nombre" autoComplete="name" value={form.name || user?.displayName || ''} onChange={handleChange('name')} />

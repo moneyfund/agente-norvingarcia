@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import {
-  createPublicProperty,
   createListadoPropiedad,
   getListadoPropiedades,
   updateListadoPropiedad,
@@ -103,8 +102,11 @@ function ListadoPage() {
   const sectionRefs = useRef({});
 
   const loadItems = async () => {
-    const data = await getListadoPropiedades({ zona: search.zona, tipoPropiedad: search.tipoPropiedad });
-    setItems(data);
+    try {
+      setItems(await getListadoPropiedades({ zona: search.zona, tipoPropiedad: search.tipoPropiedad }));
+    } catch {
+      setError('No se pudo cargar el listado interno.');
+    }
   };
 
   useEffect(() => { loadItems(); }, []);
@@ -116,12 +118,12 @@ function ListadoPage() {
   }, [files]);
 
   useEffect(() => {
-    if (!autoSave || !editingId) return undefined;
+    if (saving || !autoSave || !editingId) return undefined;
     const timeout = setTimeout(() => {
       updateListadoPropiedad(editingId, form).catch(() => {});
     }, 1200);
     return () => clearTimeout(timeout);
-  }, [form, editingId, autoSave]);
+  }, [form, editingId, autoSave, saving]);
 
   const visibleItems = useMemo(() => {
     const max = Number(search.precioMax || 0);
@@ -142,25 +144,9 @@ function ListadoPage() {
     setSaving(true);
     setError('');
     setSuccess('');
-    console.log('[Publicar propiedad] Iniciando guardado', {
-      hasFirebaseApiKey: Boolean(import.meta.env.VITE_FIREBASE_API_KEY),
-      hasProjectId: Boolean(import.meta.env.VITE_FIREBASE_PROJECT_ID),
-      userUid: user?.uid || null,
-    });
     try {
       validate();
       if (!user?.uid) throw new Error('No hay usuario autenticado. Inicia sesión para guardar.');
-
-      const payload = {
-        tipo: form.tipoPropiedad,
-        precio: Number(form.precioSolicitado),
-        descripcion: form.observacionesLegales || form.necesitaMejoras || 'Sin descripción adicional',
-        telefono: form.asesorResponsable || 'No especificado',
-        ubicacion: `${form.departamento}, ${form.municipio}, ${form.zona}`,
-      };
-      console.log('[Publicar propiedad] Payload para colección properties', payload);
-      const createdPublic = await createPublicProperty(payload);
-      console.log('[Publicar propiedad] Documento creado en properties', createdPublic);
 
       let propertyId = editingId;
       if (editingId) {
@@ -168,6 +154,7 @@ function ListadoPage() {
       } else {
         const created = await createListadoPropiedad({ ...form, fechaCaptacion: new Date().toISOString() }, user.uid);
         propertyId = created.id;
+        setEditingId(propertyId);
       }
 
       if (files.length && propertyId) {
@@ -176,13 +163,13 @@ function ListadoPage() {
       }
 
       setSuccess('Propiedad guardada correctamente');
-      alert('✅ Propiedad guardada correctamente en Firestore.');
+
       await loadItems();
       setForm(initialForm);
       setFiles([]);
       setEditingId(null);
     } catch (submitError) {
-      console.error('[Publicar propiedad] Error guardando en Firestore', submitError);
+      console.error('Error guardando la captación', submitError.code);
       setError(submitError.message || 'No se pudo guardar la propiedad en Firestore.');
     } finally {
       setSaving(false);
@@ -282,7 +269,7 @@ function ListadoPage() {
           <div key={item.id} className="rounded-xl border bg-white p-4 shadow-sm">
             <p className="text-sm text-gray-500">{item.codigoInterno} · {item.tipoPropiedad}</p>
             <h3 className="font-semibold">{item.zona} - Q{item.precioSolicitado}</h3>
-            <button className="ng-text-link" onClick={() => { setForm(item); setEditingId(item.id); }}>Editar</button>
+            <button className="ng-text-link" onClick={() => { setForm({ ...initialForm, ...item }); setEditingId(item.id); }}>Editar</button>
           </div>
         ))}
       </div>

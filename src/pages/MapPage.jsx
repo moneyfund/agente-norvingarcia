@@ -133,7 +133,7 @@ function MapPage() {
   return (
     <>
       <Seo title="Mapa de propiedades | Norvin García" description="Explora en el mapa las propiedades disponibles en Nicaragua." />
-      <PageMasthead label="Portafolio inmobiliario · Nicaragua" title="Mapa de propiedades">
+      <PageMasthead variant="map" label="Portafolio inmobiliario · Nicaragua" title="Mapa de propiedades">
         Selecciona un marcador para ver el precio y consultar su ficha.
       </PageMasthead>
       <section className="ng-wrap ng-map-page" aria-label="Mapa inmobiliario interactivo">

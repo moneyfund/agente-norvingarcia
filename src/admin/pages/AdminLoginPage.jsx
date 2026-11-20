@@ -9,11 +9,9 @@ function AdminLoginPage({ theme, toggleTheme }) {
   const { isAuthenticated, isAdmin, loading, loginWithGoogle, logout, user } = useAuth();
   const { state } = useLocation();
   const from = state?.from;
-  const privateTool = /^\/(listado|avaluos(?:\/[^/]+)?)$/.test(from?.pathname || '');
-  const adminPage = /^\/admin(?:\/(?!login(?:\/|$))[^/]*)?(?:\/[^/]+)?$/.test(from?.pathname || '');
+  const adminPage = /^\/admin(?:\/|$)/.test(from?.pathname || '') && from.pathname !== '/admin/login';
 
-  if (isAuthenticated && privateTool) return <Navigate to={from} replace />;
-  if (isAuthenticated && isAdmin) return <Navigate to={adminPage ? from : '/admin'} replace />;
+  if (!loading && isAuthenticated && isAdmin) return <Navigate to={adminPage ? from : '/admin'} replace />;
 
   return (
     <main className="ng-access">
@@ -27,7 +25,7 @@ function AdminLoginPage({ theme, toggleTheme }) {
         <section className="ng-access-content">
           {loading ? <p role="status">Verificando sesión…</p> : (
             <>
-              <p className="ng-label ng-section-label">{privateTool ? 'Herramientas inmobiliarias' : 'Administración'}</p>
+              <p className="ng-label ng-section-label">Administración</p>
               <h1 className="ng-display">{isAuthenticated ? 'Acceso restringido' : 'Iniciar sesión'}</h1>
               {isAuthenticated ? (
                 <>
@@ -37,7 +35,7 @@ function AdminLoginPage({ theme, toggleTheme }) {
                 </>
               ) : (
                 <FormLogin onLogin={loginWithGoogle}>
-                  {privateTool ? 'Usa tu cuenta de Google para acceder a esta herramienta.' : 'Usa tu cuenta de Google para acceder al panel.'}
+                  Usa la cuenta de Google autorizada para entrar al panel.
                 </FormLogin>
               )}
               <Link to="/" className="ng-text-link">Volver al inicio</Link>

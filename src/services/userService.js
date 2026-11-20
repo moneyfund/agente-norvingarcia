@@ -1,22 +1,19 @@
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
-export async function upsertUserProfile(firebaseUser) {
-  if (!firebaseUser) return;
-
-  const userRef = doc(db, 'users', firebaseUser.uid);
-  await setDoc(
-    userRef,
-    {
-      uid: firebaseUser.uid,
-      displayName: firebaseUser.displayName || '',
-      email: firebaseUser.email || '',
-      photoURL: firebaseUser.photoURL || '',
-      provider: firebaseUser.providerData?.[0]?.providerId || 'google.com',
-      role: 'tester',
-      createdAt: serverTimestamp(),
+export async function upsertUserProfile(user) {
+  if (!user) return;
+  const profile = doc(db, 'users', user.uid);
+  await runTransaction(db, async (transaction) => {
+    const previous = await transaction.get(profile);
+    transaction.set(profile, {
+      uid: user.uid,
+      displayName: user.displayName || '',
+      email: user.email || '',
+      photoURL: user.photoURL || '',
+      provider: user.providerData?.[0]?.providerId || 'google.com',
+      ...(!previous.exists() && { createdAt: serverTimestamp() }),
       lastLoginAt: serverTimestamp(),
-    },
-    { merge: true },
-  );
+    }, { merge: true });
+  });
 }

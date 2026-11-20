@@ -1,66 +1,57 @@
-import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
+import { createContext, useEffect, useMemo, useState } from 'react';
 import { initializeAuth, logoutUser, onAuthChange, signInWithGoogle } from '../services/authService';
 import { upsertUserProfile } from '../services/userService';
-import { isAllowedAdminEmail } from '../config/admin';
+import { hasAdminSession, isAllowedAdminEmail } from '../config/admin';
 
 export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  const handleGoogleLogin = useCallback(async () => {
-    const result = await signInWithGoogle();
-    if (result?.user) {
-      await upsertUserProfile(result.user);
-    }
-  }, []);
-
-  const handleLogout = useCallback(async () => {
-    await logoutUser();
-  }, []);
+  const [session, setSession] = useState({ user: null, isAdmin: false, loading: true });
 
   useEffect(() => {
-    let unsubscribe = () => {};
-
-    const setup = async () => {
+    let active = true;
+    let change = 0;
+    let unsubscribe;
+    let lastProfileUid;
+    async function start() {
       try {
         await initializeAuth();
-      } catch (error) {
-        console.error('Error al configurar persistencia de auth', error);
+      } catch {
+        // The Auth SDK can still restore an in-memory session.
       }
-
-      unsubscribe = onAuthChange(async (firebaseUser) => {
-        if (firebaseUser) {
-          try {
-            await upsertUserProfile(firebaseUser);
-          } catch (error) {
-            console.error('Error al sincronizar perfil de usuario', error);
-          }
+      if (!active) return;
+      unsubscribe = onAuthChange(async (user) => {
+        const version = ++change;
+        const candidate = Boolean(user?.emailVerified && isAllowedAdminEmail(user.email));
+        setSession((current) => candidate && current.user?.uid === user.uid
+          ? { ...current, user }
+          : { user, isAdmin: false, loading: candidate });
+        if (user && user.uid !== lastProfileUid) {
+          lastProfileUid = user.uid;
+          upsertUserProfile(user).catch(() => {});
         }
-
-        setUser(firebaseUser);
-        setLoading(false);
+        if (!user) lastProfileUid = undefined;
+        if (!candidate) return;
+        let isAdmin = false;
+        try {
+          isAdmin = hasAdminSession((await user.getIdTokenResult()).claims);
+        } catch {
+          // Private routes stay closed until a valid ID token is available.
+        }
+        if (active && version === change) setSession({ user, isAdmin, loading: false });
       });
-    };
-
-    setup();
-
-    return () => unsubscribe();
+    }
+    start();
+    return () => { active = false; unsubscribe?.(); };
   }, []);
 
-  const value = useMemo(
-    () => ({
-      user,
-      loading,
-      isAuthenticated: Boolean(user),
-      isAdmin: isAllowedAdminEmail(user?.email),
-      role: user ? 'tester' : null,
-      loginWithGoogle: handleGoogleLogin,
-      logout: handleLogout,
-    }),
-    [handleGoogleLogin, handleLogout, loading, user],
-  );
+  const value = useMemo(() => ({
+    ...session,
+    isAuthenticated: Boolean(session.user),
+    role: session.user ? (session.isAdmin ? 'admin' : 'cliente') : null,
+    loginWithGoogle: signInWithGoogle,
+    logout: logoutUser,
+  }), [session]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

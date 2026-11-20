@@ -1,4 +1,5 @@
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { ref, uploadBytes } from 'firebase/storage';
+import { assertAllowedAdmin } from './adminAuth';
 import { storage } from '../firebase/config.js';
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -9,7 +10,7 @@ const QUALITY = 0.82;
 
 export const isValidAvaluoImage = (file: File) => ALLOWED_IMAGE_TYPES.includes(file.type) && file.size <= MAX_IMAGE_SIZE_BYTES;
 
-const safeName = (name: string) => `${Date.now()}-${name.toLowerCase().replace(/[^a-z0-9.]+/g, '-')}`;
+const safeName = (file: File) => `${file.lastModified}-${file.size}-${file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-')}`;
 
 const validateAvaluoImage = (file: File) => {
   if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
@@ -52,20 +53,22 @@ const optimizeImage = async (file: File): Promise<Blob> => {
 };
 
 export const uploadAvaluoMainImage = async (file: File, avaluoId: string): Promise<string> => {
+  assertAllowedAdmin();
   validateAvaluoImage(file);
   const blob = await optimizeImage(file);
-  const imageRef = ref(storage, `avaluos/${avaluoId}/principal/${safeName(file.name)}`);
-  await uploadBytes(imageRef, blob, { contentType: file.type });
-  return getDownloadURL(imageRef);
+  const imageRef = ref(storage, `avaluos/${avaluoId}/principal/${safeName(file)}`);
+  await uploadBytes(imageRef, blob, { contentType: blob.type, cacheControl: 'private, no-store' });
+  return imageRef.fullPath;
 };
 
 export const uploadAvaluoGalleryImages = async (files: File[], avaluoId: string): Promise<string[]> => {
+  assertAllowedAdmin();
   validateAvaluoGallery(files);
   const results = await Promise.all(files.map(async (file) => {
     const blob = await optimizeImage(file);
-    const imageRef = ref(storage, `avaluos/${avaluoId}/galeria/${safeName(file.name)}`);
-    await uploadBytes(imageRef, blob, { contentType: file.type });
-    return getDownloadURL(imageRef);
+    const imageRef = ref(storage, `avaluos/${avaluoId}/galeria/${safeName(file)}`);
+    await uploadBytes(imageRef, blob, { contentType: blob.type, cacheControl: 'private, no-store' });
+    return imageRef.fullPath;
   }));
   return results;
 };

@@ -23,11 +23,11 @@ export function AvaluoHistoryPanel({ items, onDeleted }: AvaluoHistoryPanelProps
         {filtered.map((i) => (
           <article key={i.id} className="avaluo-history-card">
             <div className="avaluo-history-card__top"><span>{i.tipoPropiedad || 'Avalúo'}</span><strong>{i.titulo || 'Avalúo inmobiliario'}</strong><small>{i.ciudad || 'Ciudad no definida'} · {i.zona || 'Zona no definida'}</small></div>
-            <div className="avaluo-history-card__meta"><span><CalendarDays /> {new Date(i.createdAt).toLocaleDateString('es-NI')}</span><span>{i.agenteEvaluador || 'Agente no indicado'}</span></div>
+            <div className="avaluo-history-card__meta"><span><CalendarDays /> {(i.createdAt?.toDate?.() || new Date(i.createdAt)).toLocaleDateString('es-NI')}</span><span>{i.agenteEvaluador || 'Agente no indicado'}</span></div>
             <p className="avaluo-history-card__value"><small>Valor estimado</small>${Number(i.valorFinal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             {i.referenciaBase?.precioBaseFueEditado && <span className="mt-2 inline-flex rounded-full bg-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-100">Precio base ajustado</span>}
             <div className="avaluo-history-card__actions">
-              <Link to={`/avaluos/${i.id}`} className="avaluo-btn avaluo-btn--secondary"><ExternalLink /> Abrir</Link>
+              <Link to={`/admin/avaluos/${i.id}`} className="avaluo-btn avaluo-btn--secondary"><ExternalLink /> Abrir</Link>
               <DownloadAvaluoPdfButton avaluo={i} />
               <DeleteAvaluoButton avaluo={i} onDeleted={onDeleted} />
             </div>

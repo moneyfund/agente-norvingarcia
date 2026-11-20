@@ -1,11 +1,13 @@
-import { Building2, LayoutDashboard, ListChecks, LogOut, UserCircle } from 'lucide-react';
+import { Building2, Calculator, FilePlus2, LayoutDashboard, ListChecks, LogOut, UserCircle } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
 const links = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/admin/propiedades', label: 'Propiedades', icon: Building2 },
-  { to: '/admin/listados', label: 'Listados', icon: ListChecks },
+  { to: '/admin/listados', label: 'Captaciones', icon: ListChecks },
+  { to: '/admin/captaciones/nueva', label: 'Registrar captación', icon: FilePlus2 },
+  { to: '/admin/avaluos', label: 'Avalúos e historial', icon: Calculator },
   { to: '/admin/perfil', label: 'Perfil', icon: UserCircle },
 ];
 
@@ -32,7 +34,7 @@ function AdminLayout() {
           </nav>
         </aside>
 
-        <div>
+        <div className="min-w-0">
           <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
             <div>
               <p className="text-sm text-slate-500">Sesión activa</p>

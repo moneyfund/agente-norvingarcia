@@ -21,7 +21,8 @@ function MainLayout({ theme, toggleTheme, showSignature, onSignatureReady }) {
       <a className="ng-skip-link" href="#contenido">Saltar al contenido</a>
       <Navbar theme={theme} toggleTheme={toggleTheme} />
       <main id="contenido" className="ng-main" ref={main} tabIndex={-1}>
-        <Suspense fallback={<Preloader signature={showSignature && pathname === '/'} />}>
+        {showSignature && pathname === '/' && <Preloader signature={showSignature} />}
+        <Suspense fallback={showSignature && pathname === '/' ? null : <Preloader />}>
           <Outlet context={onSignatureReady} />
         </Suspense>
       </main>

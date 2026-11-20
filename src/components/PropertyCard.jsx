@@ -1,4 +1,4 @@
-import { ArrowUpRight, Bath, BedDouble, Heart, MapPin, Ruler } from 'lucide-react';
+import { Bath, BedDouble, Heart, MapPin, Ruler } from 'lucide-react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { applyImageFallback, formatUSD, isPositiveNumber, operationLabel, pricePerArea, propertyCover, propertyUnit } from '../utils/propertyPresentation';
@@ -63,15 +63,10 @@ function PropertyCard({ property, index = 0, variant = 'standard' }) {
             <span>{operationLabel(property)}</span>
             {property.premium && <span>Destacada</span>}
           </div>
-          <div className="ng-card-caption">
-            <div>
-              {property.tipo && <p className="ng-label">{property.tipo}</p>}
-              <h3>{title}</h3>
-            </div>
-            <span className="ng-card-arrow" aria-hidden="true"><ArrowUpRight size={22} /></span>
-          </div>
         </div>
         <div className="ng-card-body">
+          {property.tipo && <p className="ng-card-type">{property.tipo}</p>}
+          <h3>{title}</h3>
           <div className="ng-card-summary">
             <p className="ng-card-price">{formatUSD(property.precio)}</p>
             {property.ubicacion && <p className="ng-card-location"><MapPin size={14} aria-hidden="true" />{property.ubicacion}</p>}

@@ -50,12 +50,12 @@ function ContactPage() {
   return (
     <>
       <Seo title="Contacto | Norvin García" description="Contacta con Norvin García por WhatsApp, correo o redes sociales." />
-      <PageMasthead label="Norvin García · Bienes raíces" title="Contacto">
+      <PageMasthead variant="contact" label="Norvin García · Bienes raíces" title="Contacto">
         Cuéntame qué quieres comprar, vender o consultar en Nicaragua.
       </PageMasthead>
       <div className="ng-wrap ng-service-layout">
         <aside className="ng-service-aside">
-          <h2 className="ng-display">Hablemos.</h2>
+          <h2 className="ng-display">Contacto directo</h2>
           <a className="ng-button ng-button--wine" href={contact.whatsapp} target="_blank" rel="noreferrer"><MessageCircle size={18} aria-hidden="true" /> Escribir por WhatsApp</a>
           <div className="ng-contact-methods">
             <a href={contact.phoneHref}><Phone size={17} aria-hidden="true" /> {contact.phone}</a>
@@ -67,7 +67,7 @@ function ContactPage() {
           </div>
         </aside>
         <form onSubmit={handleSubmit} className="ng-form ng-form-panel">
-          <h2 className="ng-display">Envíame un mensaje.</h2>
+          <h2 className="ng-display">Envíame un mensaje</h2>
           {!isAuthenticated && <FormLogin onLogin={loginWithGoogle}>Inicia sesión para enviar tu mensaje.</FormLogin>}
           <div className="ng-form-row">
             <Input label="Nombre" autoComplete="name" value={form.name || user?.displayName || ''} onChange={handleChange('name')} />
