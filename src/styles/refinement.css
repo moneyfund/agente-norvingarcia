@@ -147,3 +147,52 @@
 @media(max-width:660px){
   .ng-residence h1.ng-hero-wordmark {width:min(100%, 355px);margin:.75rem 0 .95rem;}
 }
+
+/* Full-viewport opening scene. Navbar overlaps the hero by its own height,
+   so the finder begins only after the first visible screen. */
+.ng-residence {
+  min-height: 100vh;
+  min-height: 100svh;
+  box-sizing: border-box;
+  grid-template-columns: minmax(0,1fr);
+}
+.ng-residence-inner {
+  min-width: 0;
+  grid-template-rows: minmax(min-content,1fr) auto;
+  align-content: stretch;
+}
+.ng-residence-copy {
+  align-self: center;
+  padding-block: clamp(2rem,6svh,5rem);
+  min-width: 0;
+}
+.ng-residence-credit {
+  padding-bottom: max(1.15rem, env(safe-area-inset-bottom, 0px));
+}
+.ng-residence-credit .ng-discover {
+  justify-self: center;
+  min-width: 110px;
+  min-height: 48px;
+}
+#buscar-propiedad { scroll-margin-top: var(--ng-nav-height); }
+@media (max-width:760px) {
+  .ng-residence-copy {
+    align-self: end;
+    padding-block: clamp(1.25rem,4svh,2.7rem);
+  }
+  .ng-residence-credit {
+    display: grid;
+    grid-template-columns: minmax(0,1fr);
+    justify-items: center;
+    gap: .4rem;
+    padding-block: .65rem max(1rem,env(safe-area-inset-bottom,0px));
+    text-align: center;
+  }
+  .ng-residence-credit .ng-discover { grid-row: 1; }
+  .ng-residence-credit > span:first-child { grid-row: 2; }
+  .ng-residence-photo img { object-position: 50% 44%; }
+}
+@media (max-height:560px) and (orientation:landscape) {
+  .ng-residence-copy {padding-block: 1.25rem;}
+  .ng-residence-credit {padding-block:.6rem;}
+}
