@@ -1,7 +1,6 @@
-import { motion } from 'framer-motion';
-import { BedDouble, Bath, Heart, MapPin } from 'lucide-react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { BedDouble, Bath, Heart, MapPin, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import Button from './Button';
 import { getPrimaryImageUrl } from '../utils/propertyMedia';
 
 const currency = new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
@@ -12,7 +11,8 @@ const measurementLabelByUnit = {
 };
 
 function PropertyCard({ property, ctaLabel = 'Ver más' }) {
-  const image = getPrimaryImageUrl(property) || 'https://via.placeholder.com/800x600?text=Propiedad';
+  const reduceMotion = useReducedMotion();
+  const image = getPrimaryImageUrl(property) || '/img/placeholder-property.svg';
   const operationLabel = property.tipoOperacion === 'alquiler' ? 'En Alquiler' : 'En Venta';
   const unit = property.unidadMedida || 'varas';
   const unitLabel = measurementLabelByUnit[unit] || 'unidad';
@@ -20,31 +20,24 @@ function PropertyCard({ property, ctaLabel = 'Ver más' }) {
   const precioPorArea = property.precioPorArea ?? (hasValidArea ? Number(property.precio || 0) / Number(property.area) : null);
 
   return (
-    <motion.article whileHover={{ y: -6 }} className={`overflow-hidden rounded-2xl bg-white shadow-premium transition dark:bg-slate-900 ${property.premium ? 'ring-1 ring-brand-500/40 shadow-[0_12px_36px_rgba(225,29,72,0.2)]' : ''}`}>
-      <img src={image} alt={property.titulo} className="h-56 w-full object-cover" loading="lazy" />
-      <div className="space-y-4 p-5">
-        <div className="flex flex-wrap gap-2">
-          {property.premium && <span className="inline-flex rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-100">Premium</span>}
-          <span className="inline-flex rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700">{operationLabel}</span>
+    <motion.article whileHover={reduceMotion ? undefined : {y:-5}} transition={{duration:.28}} className={`ng-property-card ${property.premium?'is-premium':''}`}>
+      <Link className="ng-card-media" to={`/propiedad/${property.id}`} aria-label={`Ver ${property.titulo || 'propiedad'}`}>
+        <img src={image} alt={property.titulo || 'Propiedad'} loading="lazy" decoding="async" onError={event=>{const fallback='/img/placeholder-property.svg';if(!event.currentTarget.src.endsWith(fallback))event.currentTarget.src=fallback;}}/>
+        <div className="ng-card-badges"><span>{operationLabel}</span>{property.premium && <span>Premium</span>}</div>
+        <span className="ng-card-arrow"><ArrowUpRight size={19}/></span>
+      </Link>
+      <div className="ng-card-body">
+        <div className="ng-card-meta"><span>{property.tipo}</span><span><Heart size={13}/> {property.likes?.length || 0}</span></div>
+        <p className="ng-card-price">{currency.format(property.precio || 0)}</p>
+        <h3><Link to={`/propiedad/${property.id}`}>{property.titulo}</Link></h3>
+        <p className="ng-card-location"><MapPin size={14}/>{property.ubicacion}</p>
+        <div className="ng-card-specs">
+          {Number(property.habitaciones)>0 && <span><BedDouble size={15}/> {property.habitaciones} hab.</span>}
+          {Number(property.banos)>0 && <span><Bath size={15}/> {property.banos} baños</span>}
+          {hasValidArea && <span>{property.area} {unit}</span>}
         </div>
-        <div>
-          <p className="text-2xl font-bold text-brand-500">{currency.format(property.precio || 0)}</p>
-          <h3 className="mt-1 text-lg font-semibold">{property.titulo}</h3>
-          <p className="mt-1 flex items-center gap-2 text-sm text-slate-500"><MapPin size={14} />{property.ubicacion}</p>
-        </div>
-        <div className="flex gap-3 text-sm text-slate-600 dark:text-slate-300">
-          <span className="flex items-center gap-1"><BedDouble size={14} /> {property.habitaciones ?? 0}</span>
-          <span className="flex items-center gap-1"><Bath size={14} /> {property.banos ?? 0}</span>
-          <span className="rounded-full bg-slate-100 px-2 py-1 capitalize dark:bg-slate-800">{property.tipo}</span>
-        </div>
-        {hasValidArea && (
-          <p className="text-sm text-slate-500 dark:text-slate-300">
-            Área: {property.area} {unit}
-            {precioPorArea !== null && Number.isFinite(precioPorArea) && ` · Precio por ${unitLabel}: ${currency.format(precioPorArea)}`}
-          </p>
-        )}
-        <Link to={`/propiedad/${property.id}`}><Button className="w-full">{ctaLabel}</Button></Link>
-        <p className="flex items-center gap-1 text-sm text-slate-500 dark:text-slate-300"><Heart size={14} className="text-brand-500" /> {property.likes?.length || 0} me gusta</p>
+        {hasValidArea && precioPorArea !== null && Number.isFinite(precioPorArea) && <p className="ng-card-unit">Por {unitLabel}: {currency.format(precioPorArea)}</p>}
+        <Link to={`/propiedad/${property.id}`} className="ng-card-cta">{ctaLabel}<ArrowUpRight size={17}/></Link>
       </div>
     </motion.article>
   );

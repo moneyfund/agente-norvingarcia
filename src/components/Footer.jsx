@@ -9,16 +9,11 @@ const social = [
 
 function Footer() {
   return (
-    <footer className="mt-16 bg-slate-900 text-slate-200">
+    <footer className="ng-footer mt-16 text-slate-200">
       <div className="section-container grid gap-10 md:grid-cols-3">
         <div>
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white p-1 shadow-sm">
-            <img
-              src="/logo.png"
-              alt=""
-              className="block h-10 w-10 shrink-0 object-contain"
-            />
-          </div>
+          <div className="ng-brand"><span className="ng-monogram">NG</span><span className="ng-wordmark">NORVIN GARCÍA<small>REAL ESTATE / NICARAGUA</small></span></div>
+          <p className="mt-5 max-w-xs text-sm leading-relaxed text-slate-300">Asesoría inmobiliaria para decisiones con visión de futuro.</p>
         </div>
 
         <div className="space-y-3 text-sm text-slate-300">

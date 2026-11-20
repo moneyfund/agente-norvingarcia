@@ -27,7 +27,7 @@ function Preloader({ onFinish }) {
       aria-hidden="true"
     >
       <div className="preloader__content">
-        <img src="/logo.png" alt="Norvin García" className="preloader__logo" />
+        <span className="ng-monogram ng-preloader-mark">NG</span><span className="ng-preloader-name">NORVIN GARCÍA</span>
         <p className="preloader__text">¡VISITA, CONOCE E INVIERTE EN NICARAGUA!</p>
       </div>
     </div>

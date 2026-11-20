@@ -25,23 +25,14 @@ function Navbar({ theme, toggleTheme }) {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/20 bg-white/60 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/70">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
-        <Link
-          to="/"
-          className="flex items-center gap-3 font-display text-2xl font-bold tracking-wide"
-        >
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white p-1 shadow-sm">
-            <img
-              src="/logo.png"
-              alt=""
-              className="block h-10 w-10 shrink-0 object-contain"
-            />
-          </div>
-          <span>Norvin García</span>
+    <header className="ng-navbar sticky top-0 z-40">
+      <div className="ng-nav-shell">
+        <Link to="/" className="ng-brand" aria-label="Norvin García, inicio">
+          <span className="ng-monogram" aria-hidden="true">NG</span>
+          <span className="ng-wordmark">NORVIN GARCÍA<small>REAL ESTATE / NICARAGUA</small></span>
         </Link>
 
-        <nav className="hidden items-center gap-4 md:flex">
+        <nav className="ng-desktop-nav">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
@@ -79,16 +70,16 @@ function Navbar({ theme, toggleTheme }) {
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
         </nav>
 
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="ng-mobile-toggle">
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
-          <button onClick={() => setOpen((prev) => !prev)}>
+          <button type="button" aria-label={open ? "Cerrar menú" : "Abrir menú"} aria-expanded={open} onClick={() => setOpen((prev) => !prev)}>
             {open ? <X /> : <Menu />}
           </button>
         </div>
       </div>
 
       {open && (
-        <div className="space-y-2 border-t border-slate-200 px-4 py-3 md:hidden dark:border-slate-800">
+        <div className="ng-mobile-menu space-y-2 border-t border-slate-200 px-4 py-3 dark:border-slate-800">
           {navItems.map((item) => (
             <NavLink
               key={item.to}

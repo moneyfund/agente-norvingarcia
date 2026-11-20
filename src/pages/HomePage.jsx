@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, ChevronLeft, ChevronRight, Handshake, MapPinned, ShieldCheck, Star, Timer } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -47,6 +47,7 @@ const agentBenefits = [
 
 function HomePage() {
   const { propiedades, loading } = usePropiedades();
+  const reduceMotion = useReducedMotion();
   const featured = useMemo(() => {
     const premiumProperties = propiedades.filter((property) => property.premium);
     return premiumProperties.length ? premiumProperties : propiedades;
@@ -70,14 +71,15 @@ function HomePage() {
   }, []);
 
   useEffect(() => {
+    if (reduceMotion) return;
     const intervalId = window.setInterval(() => {
       setHeroIndex((current) => (current + 1) % heroImages.length);
-    }, 3000);
+    }, 6500);
 
     return () => {
       window.clearInterval(intervalId);
     };
-  }, []);
+  }, [reduceMotion]);
 
   const scrollProperties = (direction) => {
     if (!sliderRef.current) return;
@@ -128,60 +130,41 @@ function HomePage() {
   return (
     <>
       <Seo title="Norvin García | Agente de DIAMANTES REALTY GROUP" description="Agente de DIAMANTES REALTY GROUP operando en Nicaragua con propiedades exclusivas y asesoría premium." />
-      <section className="relative isolate overflow-hidden text-white">
-        <div className="absolute inset-0 -z-20">
-          {heroImages.map((image, index) => (
-            <div
-              key={image}
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ease-in-out will-change-transform"
-              style={{
-                backgroundImage: `url(${image})`,
-                opacity: index === heroIndex ? 1 : 0,
-                transform: index === heroIndex ? 'scale(1.04)' : 'scale(1)',
-                transitionProperty: 'opacity, transform',
-              }}
-              aria-hidden="true"
-            />
-          ))}
-        </div>
-        <div className="absolute inset-0 -z-10 bg-black/50" aria-hidden="true" />
-
-        <div className="section-container py-28">
-          <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl font-display text-4xl font-bold sm:text-6xl">Norvin García - Agente de DIAMANTES REALTY GROUP</motion.h1>
-          <p className="mt-6 max-w-2xl text-lg text-slate-200">Operando en Nicaragua, conectando personas con inversiones extraordinarias en el mercado inmobiliario.</p>
-          <span className="mt-5 inline-flex rounded-full border border-brand-100/50 bg-brand-500/20 px-4 py-1 text-sm font-semibold text-brand-50">Asesoría de alto impacto con identidad premium</span>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/propiedades"><Button>Ver Propiedades</Button></Link>
-            <a href="https://wa.me/50587446657" target="_blank" rel="noreferrer">
-              <Button
-                className="!bg-[#25D366] !text-white hover:!bg-[#1ebe5d] transition-all duration-300"
-              >
-                Contactar por WhatsApp
-              </Button>
-            </a>
+      <section className="ng-hero" aria-label="Presentación de Norvin García">
+        <div className="ng-hero-inner">
+          <div className="ng-hero-copy">
+            <div className="ng-kicker"><i /> Nicaragua / Bienes raíces</div>
+            <motion.h1 initial={reduceMotion ? false : {opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{duration:.7}}>Norvin<br/>García<span>.</span></motion.h1>
+            <p className="ng-hero-tag">Una visión distinta<br/>del valor inmobiliario.</p>
+            <p className="ng-hero-description">Encuentra oportunidades para vivir, invertir y construir patrimonio en Nicaragua, con asesoría inmobiliaria personalizada.</p>
+            <div className="ng-hero-actions">
+              <Link className="ng-action ng-action-primary" to="/propiedades">Explorar propiedades <ArrowUpRight size={19}/></Link>
+              <a className="ng-action ng-action-outline" href="https://wa.me/50587446657" target="_blank" rel="noreferrer">Conversemos <ArrowUpRight size={16}/></a>
+            </div>
+            <div className="ng-hero-credential"><span>Agente inmobiliario</span><span>Diamantes Realty Group</span></div>
           </div>
-
-          <div className="mt-10 flex items-center gap-2" role="tablist" aria-label="Seleccionar imagen del hero">
-            {heroImages.map((image, index) => (
-              <button
-                key={image}
-                type="button"
-                onClick={() => setHeroIndex(index)}
-                className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${index === heroIndex ? 'bg-white w-6' : 'bg-white/60 hover:bg-white/80'}`}
-                aria-label={`Mostrar imagen ${index + 1} del hero`}
-                aria-selected={index === heroIndex}
-                role="tab"
-              />
-            ))}
+          <div className="ng-hero-visual">
+            <div className="ng-hero-frame">
+              {heroImages.map((image,index)=><div className={'ng-hero-photo'+(index===heroIndex?' is-current':'')} key={image} style={{backgroundImage:`url(${image})`}} aria-hidden="true"/>)}
+              <div className="ng-hero-photo-shade"/>
+              <span className="ng-hero-frame-label">NG / REAL ESTATE</span>
+              <div className="ng-hero-frame-bottom"><span>Perspectivas inmobiliarias</span><strong>0{heroIndex+1}<small> / 0{heroImages.length}</small></strong></div>
+            </div>
+            <div className="ng-hero-controls" aria-label="Seleccionar imagen">
+              <button type="button" aria-label="Imagen anterior" onClick={()=>setHeroIndex(i=>(i+heroImages.length-1)%heroImages.length)}><ChevronLeft size={18}/></button>
+              <div className="ng-hero-dots">{heroImages.map((image,index)=><button key={image} type="button" className={index===heroIndex?'is-current':''} aria-label={`Imagen ${index+1}`} aria-pressed={index===heroIndex} onClick={()=>setHeroIndex(index)}/>)}</div>
+              <button type="button" aria-label="Imagen siguiente" onClick={()=>setHeroIndex(i=>(i+1)%heroImages.length)}><ChevronRight size={18}/></button>
+            </div>
           </div>
         </div>
+        <div className="ng-hero-index"><span>01 / IDENTIDAD</span><span>ESTRATEGIA · PATRIMONIO · CONFIANZA</span></div>
       </section>
 
       <AnnouncementTicker />
 
-      <section className="section-container">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <h2 className="font-display text-3xl font-semibold">Propiedades destacadas</h2>
+      <section className="section-container ng-collection">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div><p className="ng-kicker"><i/> 02 / Portafolio</p><h2 className="font-display text-3xl font-semibold">Propiedades destacadas</h2><p className="mt-3 text-slate-500">Oportunidades seleccionadas para tu próxima decisión.</p></div>
           {featured.length > 1 && (
             <div className="flex items-center gap-2">
               <button
@@ -218,11 +201,12 @@ function HomePage() {
             </div>
           ))}
         </div>
+        <Link to="/propiedades" className="ng-text-link">Explorar todo el portafolio <ArrowUpRight size={18}/></Link>
       </section>
 
       {featuredLandProperties.length > 0 && (
         <section className="section-container pt-0">
-          <div className="terrenos-fincas-highlight rounded-[2rem] border border-emerald-200/70 p-6 shadow-premium dark:border-emerald-900/70 md:p-8">
+          <div className="terrenos-fincas-highlight rounded-[2rem] border border-brand-300/40 p-6 shadow-premium dark:border-brand-900/70 md:p-8">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <span className="inline-flex rounded-full border border-white/50 bg-white/20 px-4 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white">
@@ -242,7 +226,7 @@ function HomePage() {
                       const scrollAmount = landSliderRef.current.clientWidth * 0.85;
                       landSliderRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
                     }}
-                    className="rounded-full border border-emerald-200 bg-white/95 p-2 text-slate-700 transition hover:border-emerald-500 hover:text-emerald-600 dark:border-emerald-900 dark:bg-slate-900 dark:text-slate-200"
+                    className="rounded-full border border-brand-200 bg-white/95 p-2 text-slate-700 transition hover:border-brand-500 hover:text-brand-600 dark:border-brand-900 dark:bg-slate-900 dark:text-slate-200"
                     aria-label="Ver terrenos anteriores"
                   >
                     <ChevronLeft size={18} />
@@ -254,7 +238,7 @@ function HomePage() {
                       const scrollAmount = landSliderRef.current.clientWidth * 0.85;
                       landSliderRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
                     }}
-                    className="rounded-full border border-emerald-200 bg-white/95 p-2 text-slate-700 transition hover:border-emerald-500 hover:text-emerald-600 dark:border-emerald-900 dark:bg-slate-900 dark:text-slate-200"
+                    className="rounded-full border border-brand-200 bg-white/95 p-2 text-slate-700 transition hover:border-brand-500 hover:text-brand-600 dark:border-brand-900 dark:bg-slate-900 dark:text-slate-200"
                     aria-label="Ver terrenos siguientes"
                   >
                     <ChevronRight size={18} />
@@ -274,7 +258,7 @@ function HomePage() {
               {featuredLandProperties.map((property) => (
                 <div key={property.id} className="w-[85%] shrink-0 snap-start sm:w-[70%] md:w-[48%] lg:w-[32%]">
                   <div className="mb-3 flex flex-wrap gap-2">
-                    <span className="inline-flex rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-200">
+                    <span className="inline-flex rounded-full bg-brand-500/15 px-3 py-1 text-xs font-semibold text-brand-700 dark:text-brand-200">
                       {property.tipo}
                     </span>
                     <span className="inline-flex rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-600 dark:text-brand-200">
@@ -367,7 +351,7 @@ function HomePage() {
               <a href="https://wa.me/50587446657" target="_blank" rel="noreferrer">
                 <Button
                   variant="secondary"
-                  className="bg-[#25D366] text-white hover:bg-[#1ebe5d] dark:bg-[#25D366] dark:text-white dark:hover:bg-[#1ebe5d]"
+                  className="ng-action-outline"
                 >
                   Contactar por WhatsApp
                 </Button>

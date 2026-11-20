@@ -7,9 +7,9 @@ function MainLayout() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className="min-h-screen">
+    <div className="ng-site min-h-screen">
       <Navbar theme={theme} toggleTheme={toggleTheme} />
-      <main>
+      <main className="ng-main">
         <Outlet />
       </main>
       <Footer />

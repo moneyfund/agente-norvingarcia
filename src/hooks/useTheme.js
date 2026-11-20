@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 
-const THEME_KEY = 'norvin-theme';
+const THEME_KEY = 'norvin-theme-v2';
 
 export function useTheme() {
   const [theme, setTheme] = useState(() => {
     const stored = localStorage.getItem(THEME_KEY);
     if (stored) return stored;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return 'dark';
   });
 
   useEffect(() => {
