@@ -1,5 +1,7 @@
 import {
   browserLocalPersistence,
+  browserSessionPersistence,
+  inMemoryPersistence,
   onIdTokenChanged,
   setPersistence,
   signInWithPopup,
@@ -7,27 +9,37 @@ import {
 } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase/config';
 
-let persistenceInitialized = false;
+let persistencePromise;
 
-async function ensureAuthPersistence() {
-  if (persistenceInitialized) return;
-  await setPersistence(auth, browserLocalPersistence);
-  persistenceInitialized = true;
+function ensureAuthPersistence() {
+  if (!persistencePromise) {
+    persistencePromise = (async () => {
+      for (const persistence of [browserLocalPersistence, browserSessionPersistence, inMemoryPersistence]) {
+        try {
+          await setPersistence(auth, persistence);
+          return;
+        } catch {
+          // Try another supported persistence without blocking Google login.
+        }
+      }
+    })();
+  }
+  return persistencePromise;
 }
 
-export async function signInWithGoogle() {
-  await ensureAuthPersistence();
+export function signInWithGoogle() {
+  // Call the popup directly from the user's click; Auth queues initialization.
   return signInWithPopup(auth, googleProvider);
 }
 
-export async function logoutUser() {
+export function logoutUser() {
   return signOut(auth);
 }
 
-export function onAuthChange(callback) {
-  return onIdTokenChanged(auth, callback);
+export function onAuthChange(callback, onError) {
+  return onIdTokenChanged(auth, callback, onError);
 }
 
-export async function initializeAuth() {
-  await ensureAuthPersistence();
+export function initializeAuth() {
+  return ensureAuthPersistence();
 }
