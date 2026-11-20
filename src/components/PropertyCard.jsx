@@ -77,7 +77,10 @@ function PropertyCard({ property, index = 0, variant = 'standard' }) {
             {isPositiveNumber(property.banos) && <span><Bath size={15} aria-hidden="true" />{property.banos} baños</span>}
             {Boolean(property.likes?.length) && <span className="ng-card-likes" aria-label={`${property.likes.length} me gusta`}><Heart size={14} aria-hidden="true" />{property.likes.length}</span>}
           </div>
-          {perArea !== null && <p className="ng-card-unit">{formatUSD(perArea)} / {unit.long}</p>}
+          <div className="ng-card-action-row">
+            {perArea !== null && <p className="ng-card-unit">{formatUSD(perArea)} / {unit.long}</p>}
+            <span className="ng-card-view" aria-hidden="true">VER</span>
+          </div>
         </div>
       </Link>
     </motion.article>

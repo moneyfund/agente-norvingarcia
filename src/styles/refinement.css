@@ -84,3 +84,31 @@
 .ng-finder--premium .ng-premium-search-form label:has(select) svg {right:.62rem;}
 .ng-finder--premium .ng-premium-search-form label > span {color:var(--ng-muted);}
 @media(max-width:760px){.ng-premium-search-form label:nth-child(4){grid-column:1/-1;}}
+
+/* Chrome pinstripe and a visible property CTA, shared by all showroom cards. */
+.ng-site .ng-card-link {
+  border: 1px solid transparent;
+  background: linear-gradient(var(--ng-surface),var(--ng-surface)) padding-box,
+    linear-gradient(132deg,#eef3f6 0%,#929ca3 15%,#586269 30%,#d9e1e6 47%,#f8fcff 51%,#9ca7ae 56%,#636d75 75%,#cbd2d7 100%) border-box;
+}
+.ng-site .ng-card-link:hover,.ng-site .ng-card-link:focus-visible {
+  background: linear-gradient(var(--ng-surface),var(--ng-surface)) padding-box,
+    var(--ng-chrome) border-box;
+}
+.ng-card-action-row {
+  width:100%;display:flex;align-items:flex-end;justify-content:space-between;
+  gap:.8rem;padding-top:.65rem;margin-top:auto;
+}
+.ng-card-action-row .ng-card-unit {min-width:0;margin:0;overflow-wrap:anywhere;align-self:center;}
+.ng-card-view {
+  display:inline-flex;align-items:center;justify-content:center;flex:none;
+  margin-left:auto;min-width:72px;min-height:36px;padding:.48rem .9rem;
+  border:1px solid #a52c49;border-radius:4px;color:#fff;background:var(--ng-enamel);
+  font:650 .8rem/1.25 var(--ng-sans);letter-spacing:.035em;
+  box-shadow:inset 0 1px 0 #ffffff18;
+  transition:filter .22s ease,transform .22s var(--ng-ease);
+}
+.ng-card-link:hover .ng-card-view,.ng-card-link:focus-visible .ng-card-view {filter:brightness(1.13);}
+.ng-card-link:active .ng-card-view {transform:scale(.97);}
+@media(max-width:480px){.ng-card-view{min-height:44px;min-width:74px;}}
+@media(prefers-reduced-motion:reduce){.ng-card-view{transition:none;}}
