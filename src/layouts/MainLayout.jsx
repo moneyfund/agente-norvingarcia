@@ -3,8 +3,9 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
 import Preloader from '../components/Preloader';
+import CursorGlow from '../components/CursorGlow';
 
-function MainLayout({ theme, toggleTheme, showSignature, onSignatureReady }) {
+function MainLayout({ theme, toggleTheme }) {
   const { pathname, hash } = useLocation();
   const previousPath = useRef(pathname);
   const main = useRef(null);
@@ -20,10 +21,10 @@ function MainLayout({ theme, toggleTheme, showSignature, onSignatureReady }) {
     <div className="ng-site">
       <a className="ng-skip-link" href="#contenido">Saltar al contenido</a>
       <Navbar theme={theme} toggleTheme={toggleTheme} />
+      <CursorGlow />
       <main id="contenido" className="ng-main" ref={main} tabIndex={-1}>
-        {showSignature && pathname === '/' && <Preloader signature={showSignature} />}
-        <Suspense fallback={showSignature && pathname === '/' ? null : <Preloader />}>
-          <Outlet context={onSignatureReady} />
+        <Suspense fallback={<Preloader />}>
+          <Outlet />
         </Suspense>
       </main>
       <Footer />

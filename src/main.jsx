@@ -7,6 +7,7 @@ import './styles/index.css';
 import './styles/brand.css';
 import './styles/showroom.css';
 import './styles/interior.css';
+import './styles/refinement.css';
 import { AuthProvider } from './context/AuthContext';
 
 ReactDOM.createRoot(document.getElementById('root')).render(

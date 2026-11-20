@@ -1,16 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin } from 'lucide-react';
+import { MapPin, ChevronDown } from 'lucide-react';
 
-export default function PropertyHero({ onReady }) {
+export default function PropertyHero() {
   const hero = useRef(null);
-  const photo = useRef(null);
-  useEffect(() => {
-    if (photo.current?.complete) { onReady?.(); return; }
-    // Slow connections keep the navigation usable while the image finishes.
-    const maxWait = setTimeout(() => onReady?.(), 1100);
-    return () => clearTimeout(maxWait);
-  }, [onReady]);
 
   useEffect(() => {
     const el = hero.current;
@@ -54,7 +47,7 @@ export default function PropertyHero({ onReady }) {
       <picture className="ng-residence-photo">
         <source media="(max-width: 660px)" srcSet="/brand/hero-mobile.webp" />
         <img src="/brand/hero-wide.webp" srcSet="/brand/hero-medium.webp 1280w, /brand/hero-wide.webp 1920w" sizes="100vw"
-          ref={photo} width="1920" height="685" fetchPriority="high" onLoad={onReady} onError={onReady} alt="" />
+          width="1920" height="685" fetchPriority="high" alt="" />
       </picture>
       <div className="ng-wrap ng-residence-inner">
         <div className="ng-residence-copy">
@@ -68,6 +61,7 @@ export default function PropertyHero({ onReady }) {
         </div>
         <div className="ng-residence-credit">
           <span>Agente de <strong>Diamantes Realty Group</strong></span>
+          <button type="button" className="ng-discover" onClick={() => { const target = document.getElementById("buscar-propiedad"); target?.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",block:"start"}); target?.querySelector("button")?.focus({preventScroll:true}); }}><span>Descubre</span><span className="ng-discover-arrows" aria-hidden="true"><ChevronDown size={17}/><ChevronDown size={17}/></span></button>
           <span><MapPin size={15} aria-hidden="true" /> Matagalpa, Nicaragua</span>
         </div>
       </div>

@@ -1,13 +1,13 @@
 import { useDeferredValue, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ChevronDown, LayoutGrid, List, Map, Search } from 'lucide-react';
+import { ChevronDown, LayoutGrid, List, Map } from 'lucide-react';
 import PageMasthead from '../components/PageMasthead';
+import PremiumSearch from '../components/PremiumSearch';
 import PropertyCard, { PropertySkeleton } from '../components/PropertyCard';
 import Seo from '../components/Seo';
 import { usePropiedades } from '../hooks/usePropiedades';
 import { isLandOrFarmProperty, normalizeText } from '../utils/propertyTypeFilters';
 
-const propertyTypes = ['casa', 'apartamento', 'terreno', 'finca', 'quinta', 'lote', 'bodega', 'hotel', 'propiedad comercial', 'edificio'];
 const filterKeys = ['tipo', 'ubicacion', 'precio', 'operacion', 'categoria'];
 
 function PropertiesPage() {
@@ -61,37 +61,15 @@ function PropertiesPage() {
         Encuentra casas, terrenos y fincas en venta o alquiler por ubicación y presupuesto.
       </PageMasthead>
       <section className="ng-wrap ng-catalog" aria-label="Explorar catálogo">
-        <form className="ng-filter-bar" onSubmit={(event) => event.preventDefault()} aria-label="Filtros">
-          <label className="ng-filter-field">
-            <span>Ubicación</span>
-            <div className="ng-search"><Search size={17} aria-hidden="true" /><input type="search" value={location} placeholder="Municipio o departamento" onChange={(event) => setFilter('ubicacion', event.target.value)} /></div>
-          </label>
-          <label className="ng-filter-field">
-            <span>Tipo de propiedad</span>
-            <div className="ng-select">
-              <select value={type} onChange={(event) => setFilter('tipo', event.target.value)}>
-                <option value="">Todos los tipos</option>
-                {propertyTypes.map((item) => <option key={item} value={item}>{item.charAt(0).toUpperCase() + item.slice(1)}</option>)}
-              </select>
-              <ChevronDown size={15} aria-hidden="true" />
-            </div>
-          </label>
-          <label className="ng-filter-field">
-            <span>Modalidad</span>
-            <div className="ng-select">
-              <select value={operation} onChange={(event) => setFilter('operacion', event.target.value)}>
-                <option value="">Venta y alquiler</option>
-                <option value="venta">Venta</option>
-                <option value="alquiler">Alquiler</option>
-              </select>
-              <ChevronDown size={15} aria-hidden="true" />
-            </div>
-          </label>
-          <label className="ng-filter-field">
-            <span>Precio máximo (USD)</span>
-            <input type="number" min="0" value={maxPrice} placeholder="Sin límite" onChange={(event) => setFilter('precio', event.target.value)} />
-          </label>
-        </form>
+        <PremiumSearch values={{ubicacion:location,tipo:type,operacion:operation,precio:maxPrice}} onSearch={values => {
+          setParams(current => {
+            const next = new URLSearchParams(current);
+            for (const [key,value] of Object.entries(values)) {
+              if (value) next.set(key,value); else next.delete(key);
+            }
+            return next;
+          }, {replace:true});
+        }} />
         <div className="ng-catalog-toolbar">
           <div className="ng-catalog-count">
             <p role="status">{loading ? 'Cargando propiedades…' : error ? 'Catálogo no disponible' : `${filtered.length} ${filtered.length === 1 ? 'propiedad' : 'propiedades'}`}</p>

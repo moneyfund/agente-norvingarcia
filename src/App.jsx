@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { MotionConfig } from 'framer-motion';
 import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
@@ -36,32 +36,26 @@ function App() {
   const { pathname } = useLocation();
   const theme = useTheme();
   const [showSignature, setShowSignature] = useState(() => {
-    if (pathname !== '/') return null;
-    try {
-      return sessionStorage.getItem('ng-signature-seen') ? null : 'loading';
-    } catch {
-      return 'loading';
-    }
+    const internal = /^\/(admin|avaluos|listado)(\/|$)/.test(pathname);
+    return internal ? null : 'loading';
   });
 
-  const onSignatureReady = useCallback(() => {
-    setShowSignature((phase) => phase === 'loading' ? 'revealing' : phase);
-    try {
-      sessionStorage.setItem('ng-signature-seen', '1');
-    } catch {
-      // The in-memory flag still avoids repeating the signature.
-    }
-  }, []);
+  useEffect(() => {
+    if (showSignature !== 'loading') return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const timer = setTimeout(() => setShowSignature(reduced ? null : 'revealing'), reduced ? 400 : 2540);
+    return () => clearTimeout(timer);
+  }, [showSignature]);
 
   useEffect(() => {
     if (showSignature !== 'revealing') return;
-    const timer = setTimeout(() => setShowSignature(null),
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 380);
+    const timer = setTimeout(() => setShowSignature(null), 460);
     return () => clearTimeout(timer);
   }, [showSignature]);
 
   return (
     <MotionConfig reducedMotion="user">
+      {showSignature && <Preloader signature={showSignature} />}
       <Suspense fallback={<Preloader />}>
         <Routes>
           <Route path="/admin/login" element={<AdminLoginPage {...theme} />} />
@@ -81,7 +75,7 @@ function App() {
           <Route path="/avaluos" element={<LegacyAvaluoRoute />} />
           <Route path="/avaluos/:id" element={<LegacyAvaluoRoute />} />
 
-          <Route element={<MainLayout {...theme} showSignature={showSignature} onSignatureReady={onSignatureReady} />}>
+          <Route element={<MainLayout {...theme} />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/propiedades" element={<PropertiesPage />} />
             <Route path="/propiedad/:id" element={<PropertyDetailPage />} />

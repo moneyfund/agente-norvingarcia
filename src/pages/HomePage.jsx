@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useOutletContext } from 'react-router-dom';
-import { ChevronDown, MapPin, Search } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import PremiumSearch from '../components/PremiumSearch';
 import Seo from '../components/Seo';
 import PropertyHero from '../components/PropertyHero';
 import PropertyRail from '../components/PropertyRail';
@@ -9,24 +9,15 @@ import { isLandOrFarmProperty } from '../utils/propertyTypeFilters';
 
 function HomeSearch() {
   const navigate = useNavigate();
-  function search(event) {
-    event.preventDefault();
-    const fields = new FormData(event.currentTarget);
+  function search(values) {
     const params = new URLSearchParams();
-    for (const [key, value] of fields) {
-      if (value.trim()) params.set(key, value.trim());
-    }
+    for (const [key, value] of Object.entries(values)) if (value) params.set(key, value);
     navigate({ pathname: '/propiedades', search: params.toString() });
   }
   return (
-    <div className="ng-finder">
-      <form className="ng-wrap ng-finder-inner" role="search" aria-label="Buscar propiedades" onSubmit={search}>
-        <label className="ng-finder-location"><span>Ubicación</span><div><MapPin size={18} aria-hidden="true" /><input type="search" name="ubicacion" placeholder="Ej. Matagalpa" /></div></label>
-        <label><span>Operación</span><div><select name="operacion" defaultValue=""><option value="">Todas</option><option value="venta">Comprar</option><option value="alquiler">Alquilar</option></select><ChevronDown size={15} aria-hidden="true" /></div></label>
-        <button className="ng-button ng-search-submit" type="submit"><Search size={18} aria-hidden="true" /> Buscar</button>
-        <Link to="/mapa" className="ng-finder-map">Ver en el mapa</Link>
-      </form>
-    </div>
+    <section id="buscar-propiedad" className="ng-finder ng-finder--premium" aria-label="Buscar propiedades">
+      <div className="ng-wrap"><PremiumSearch home onSearch={search} /></div>
+    </section>
   );
 }
 
@@ -53,7 +44,6 @@ function HomeShowroom() {
 }
 
 export default function HomePage() {
-  const onSignatureReady = useOutletContext();
   const shelf = useRef(null);
   const [showInventory, setShowInventory] = useState(false);
   useEffect(() => {
@@ -67,7 +57,7 @@ export default function HomePage() {
   return (
     <>
       <Seo title="Norvin García | Real Estate en Nicaragua" description="Explora casas, terrenos y fincas en Nicaragua y recibe asesoría personal de Norvin García, agente de Diamantes Realty Group." />
-      <PropertyHero onReady={onSignatureReady} />
+      <PropertyHero />
       <HomeSearch />
       <section className="ng-wrap ng-showroom" ref={shelf} aria-label="Propiedades del portafolio">
         {showInventory ? <HomeShowroom /> : <h2 className="ng-display">Explora el portafolio</h2>}
